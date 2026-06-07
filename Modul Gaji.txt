@@ -130,12 +130,9 @@ Field:
 
 ### Tunjangan
 
-* Transport
+* Kinerja
 * Makan
-* Shift
-* On Call
-* Internet
-* Pulsa
+* Transport
 * Lembur
 * Insentif KPI
 

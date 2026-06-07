@@ -20,7 +20,7 @@ const MENU: Item[] = [
   { key: "karyawan", label: "Karyawan", Icon: Users, group: "Utama", built: true,
     roles: ["Direksi", "HR", "Manager", "Karyawan"], sub: [
       { label: "Data Karyawan", roles: ["Direksi", "HR", "Manager"], built: true },
-      { label: "Kehadiran & Absensi", roles: ["HR", "Manager", "Karyawan"] },
+      { label: "Kehadiran & Absensi", roles: ["HR", "Manager", "Karyawan"], built: true },
       { label: "Cuti & Izin", roles: ["HR", "Manager", "Karyawan"] },
       { label: "KPI Karyawan", roles: ["Direksi", "HR", "Manager", "Karyawan"], built: true },
       { label: "Rekrutmen", roles: ["HR"] },
@@ -76,7 +76,7 @@ const MENU: Item[] = [
     roles: ["Direksi", "Finance"], sub: [
       { label: "Struktur Gaji", roles: ["Direksi", "Finance"] },
       { label: "Tunjangan & Potongan", roles: ["Direksi", "Finance"] },
-      { label: "Slip Gaji", roles: ["Direksi", "Finance"] },
+      { label: "Slip Gaji", roles: ["Direksi", "Finance"], built: true },
       { label: "Approval Payroll", roles: ["Direksi", "Finance"] },
       { label: "Laporan Payroll", roles: ["Direksi", "Finance"] },
     ] },
@@ -147,6 +147,8 @@ function routeFor(moduleKey: string, sub?: Sub): string {
   if (moduleKey === "dashboard") return "dashboard";
   if (moduleKey === "karyawan" && sub && sub.label === "Data Karyawan") return "karyawan.data";
   if (moduleKey === "karyawan" && sub && sub.label === "KPI Karyawan") return "kpi.karyawan";
+  if (moduleKey === "karyawan" && sub && sub.label === "Kehadiran & Absensi") return "kehadiran.absensi";
+  if (moduleKey === "keuangan" && sub && sub.label === "Slip Gaji") return "payroll.slip";
   return "soon:" + (sub ? sub.label : moduleKey);
 }
 

@@ -13,6 +13,8 @@ import ModemStockSection from "./components/sections/ModemStockSection";
 import QuickActionSection from "./components/sections/QuickActionSection";
 import DataKaryawanPage from "./pages/DataKaryawanPage";
 import KpiKaryawanPage from "./pages/KpiKaryawanPage";
+import KehadiranPage from "./pages/KehadiranPage";
+import SlipGajiPage from "./pages/SlipGajiPage";
 
 const GRID_ORDER: WidgetKey[] = [
   "kpi", "project", "meeting", "marketing", "modemCustomer", "modemStock",
@@ -89,6 +91,10 @@ export default function App() {
           {route === "karyawan.data" && <DataKaryawanPage role={role} />}
 
           {route === "kpi.karyawan" && <KpiKaryawanPage />}
+
+          {route === "kehadiran.absensi" && <KehadiranPage />}
+
+          {route === "payroll.slip" && <SlipGajiPage />}
 
           {route.startsWith("soon:") && <ComingSoon name={route.slice(5)} />}
         </main>

@@ -1,0 +1,14 @@
+2 perintah harian yang akan kamu pakai
+Selalu jalankan dari folder induk: cd C:\Users\angsm\OneDrive\Documents\HRIS
+1) Simpan snapshot baru — lakukan tiap kali kita selesai satu fitur dan kamu sudah tes lancar:
+powershellgit add .
+git commit -m "tulis singkat apa yang berubah, mis: Selesai modul Kehadiran"
+2) Kembalikan file yang rusak/ketimpa ke snapshot terakhir:
+powershell# balikkan SATU file (paling sering dipakai saat satu file kacau)
+git restore hris-dashboard/src/pages/DataKaryawanPage.tsx
+
+# atau balikkan SEMUA perubahan yang belum di-commit
+git restore .
+Dan untuk melihat apa saja yang berubah sejak snapshot terakhir:
+powershellgit status
+Itu saja inti yang perlu kamu hafal. Mengembalikan ke snapshot lama tertentu (bukan yang terakhir) sedikit lebih teknis — itu nanti kita lakukan bareng kalau perlu, jadi tidak usah dipikirkan sekarang.
