@@ -1,0 +1,471 @@
+# Modul KPI & Performance
+
+## Tujuan
+
+Mengukur performa karyawan secara objektif, terukur, dan terintegrasi langsung ke Assessment Engine serta Payroll Engine.
+
+---
+
+# Hak Akses
+
+## Superadmin
+
+* Full Access
+
+## Direksi
+
+* Melihat seluruh KPI perusahaan
+* Approval KPI
+* Melihat ranking performa
+
+## Manager
+
+* Membuat KPI bawahan
+* Melakukan penilaian
+* Monitoring progress tim
+
+## HR
+
+* Mengelola template KPI
+* Monitoring seluruh divisi
+* Kalibrasi penilaian
+
+## Karyawan
+
+* Melihat KPI pribadi
+* Update progress
+* Melihat histori penilaian
+
+---
+
+# KPI Dashboard
+
+Widget:
+
+* Total KPI Aktif
+* Target Tercapai
+* Target Tidak Tercapai
+* Top Performer
+* Bottom Performer
+* Rata-rata Nilai KPI
+
+Grafik:
+
+* KPI Trend Bulanan
+* Performance per Divisi
+* Performance per Jabatan
+
+---
+
+# Master KPI
+
+Field:
+
+* Nama KPI
+* Kategori
+* Bobot
+* Target
+* Satuan
+* Periode
+* Divisi
+* Jabatan
+
+Contoh:
+
+| KPI                   | Target | Bobot |
+| --------------------- | ------ | ----- |
+| Ticket Closed         | 500    | 30%   |
+| SLA Compliance        | 95%    | 40%   |
+| Customer Satisfaction | 90%    | 30%   |
+
+---
+
+# KPI Assignment
+
+Assign KPI berdasarkan:
+
+* Individu
+* Jabatan
+* Divisi
+* Departemen
+
+---
+
+# KPI Monitoring
+
+Status:
+
+* Belum Dimulai
+* On Progress
+* Hampir Tercapai
+* Tercapai
+* Tidak Tercapai
+
+---
+
+# Performance Review
+
+Periode:
+
+* Bulanan
+* Kuartalan
+* Semester
+* Tahunan
+
+Penilaian:
+
+* KPI Score
+* Kompetensi
+* Disiplin
+* Sikap Kerja
+* Leadership
+
+Output:
+
+* Final Score
+* Grade
+* Rekomendasi
+
+---
+
+# Performance Grade
+
+| Nilai  | Grade |
+| ------ | ----- |
+| 95-100 | A+    |
+| 90-94  | A     |
+| 80-89  | B     |
+| 70-79  | C     |
+| <70    | D     |
+
+---
+
+# Integrasi Payroll
+
+Grade A+
+→ Bonus 20%
+
+Grade A
+→ Bonus 15%
+
+Grade B
+→ Bonus 10%
+
+Grade C
+→ Tidak ada bonus
+
+Grade D
+→ Coaching Program
+
+---
+
+# Modul Assessment Engine
+
+## Tujuan
+
+Menjadi pusat penilaian seluruh fungsi perusahaan.
+
+Assessment Engine terhubung ke KPI, Payroll, Promosi, Reward, dan Training.
+
+---
+
+# Hak Akses
+
+## Superadmin
+
+Full Access
+
+## Direksi
+
+Melihat seluruh hasil assessment
+
+## HR
+
+Membuat assessment
+
+## Manager
+
+Menilai tim
+
+## Karyawan
+
+Melihat hasil assessment pribadi
+
+---
+
+# Struktur Assessment Engine
+
+Assessment Engine
+├── DIV NOC Helpdesk Assessment
+├── DIV Production Assessment
+├── DIV Network Assessment
+├── DIV Marketing Assessment
+├── DIV Developer Assessment
+├── DIV Finance Assessment
+├── DIV HR & GA Assessment
+├── Supervisor Assessment
+├── Manager Assessment
+
+---
+
+# NOC Assessment
+
+Indikator:
+
+* SLA Monitoring
+* Incident Handling
+* Escalation Accuracy
+* Shift Compliance
+* Documentation
+
+---
+
+# Helpdesk Assessment
+
+Indikator:
+
+* Ticket Resolution
+* Response Time
+* Customer Satisfaction
+* Escalation Accuracy
+
+---
+
+# Teknisi Assessment
+
+Indikator:
+
+* Installation Success Rate
+* MTTR
+* Attendance
+* Customer Feedback
+
+---
+
+# Marketing Assessment
+
+Indikator:
+
+* Leads Generated
+* Campaign Performance
+* Content Productivity
+* Conversion Rate
+
+---
+
+# Finance Assessment
+
+Indikator:
+
+* Accuracy
+* Reporting Timeliness
+* Audit Compliance
+* Collection Performance
+
+---
+
+# HR Assessment
+
+Indikator:
+
+* Recruitment Success
+* Training Completion
+* Employee Engagement
+* Turnover Control
+
+---
+
+# Manager Assessment
+
+Indikator:
+
+* Team Performance
+* Leadership
+* Budget Control
+* KPI Achievement
+* Strategic Execution
+
+---
+
+# Assessment Result
+
+Output:
+
+* Score
+* Grade
+* Ranking
+* Strength
+* Weakness
+* Development Plan
+
+---
+
+# AI Recommendation (Future)
+
+AI akan memberikan:
+
+* Analisis performa
+* Penyebab penurunan kinerja
+* Rekomendasi pelatihan
+* Prediksi turnover
+* Kandidat promosi
+
+---
+
+# Modul Employee Self Service (ESS)
+
+## Tujuan
+
+Portal mandiri karyawan tanpa harus meminta HR.
+
+---
+
+# Hak Akses
+
+## Karyawan
+
+Hanya data milik sendiri.
+
+## HR
+
+Melihat seluruh data.
+
+## Direksi
+
+Monitoring seluruh data.
+
+---
+
+# Dashboard ESS
+
+Widget:
+
+* Kehadiran Hari Ini
+* Sisa Cuti
+* Slip Gaji Terbaru
+* KPI Saya
+* Pengumuman
+* Approval Pending
+
+---
+
+# Profil Saya
+
+Data:
+
+* Foto
+* NIK
+* Nama
+* Jabatan
+* Divisi
+* Kontak
+* Alamat
+* Dokumen
+
+---
+
+# Kehadiran Saya
+
+* Check In
+* Check Out
+* Riwayat Kehadiran
+* Keterlambatan
+* Lembur
+
+---
+
+# Cuti & Izin
+
+Pengajuan:
+
+* Cuti Tahunan
+* Cuti Sakit
+* Cuti Khusus
+* Izin
+
+Status:
+
+* Pending
+* Approved
+* Rejected
+
+---
+
+# Slip Gaji Saya
+
+* Slip Gaji Bulanan
+* Download PDF
+
+Retensi:
+
+* Riwayat 12 bulan terakhir
+
+---
+
+# KPI Saya
+
+* Target
+* Progress
+* Nilai KPI
+* Histori KPI
+
+---
+
+# Assessment Saya
+
+* Hasil Assessment
+* Histori Assessment
+* Development Plan
+
+---
+
+# Reimbursement Saya
+
+* Pengajuan
+* Status Approval
+* Histori
+
+---
+
+# Kasbon & Pinjaman Saya
+
+* Saldo Pinjaman
+* Cicilan Berjalan
+* Histori Pembayaran
+
+---
+
+# Dokumen Saya
+
+* Kontrak Kerja
+* Paklaring
+* Surat Tugas
+* Sertifikat Training
+* Dokumen HR Lainnya
+
+---
+
+# Pengumuman Perusahaan
+
+* Announcement
+* Event
+* Kebijakan Baru
+* Jadwal Training
+
+---
+
+# Integrasi Utama Apikasi HRIS
+
+Absensi
+↓
+KPI & Performance
+↓
+Assessment Engine
+↓
+Payroll Engine
+↓
+ESS
+↓
+Tunjangan Kinerja
+↓
+Promosi & Talent Management

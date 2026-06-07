@@ -1,0 +1,374 @@
+# Modul Keuangan & Payroll - Apikasi HRIS
+
+## Hak Akses (Role Based Access)
+
+### Superadmin
+
+Akses penuh ke seluruh modul Payroll dan Keuangan.
+
+Hak akses:
+
+* Payroll Dashboard
+* Struktur Gaji
+* Tunjangan & Potongan
+* Lembur
+* Payroll Process
+* Slip Gaji
+* Approval Payroll
+* Reimbursement
+* Kasbon & Pinjaman
+* BPJS & Pajak
+* Laporan Payroll
+* Export Excel/PDF
+* Pengaturan Payroll
+
+---
+
+### Direksi
+
+Akses penuh untuk monitoring dan approval.
+
+Hak akses:
+
+* Payroll Dashboard
+* Struktur Gaji
+* Tunjangan & Potongan
+* Lembur
+* Slip Gaji
+* Approval Payroll
+* Laporan Payroll
+* BPJS & Pajak
+
+Tidak dapat:
+
+* Menghapus data payroll
+* Mengubah konfigurasi sistem
+
+---
+
+### Finance
+
+Akses operasional payroll.
+
+Hak akses:
+
+* Payroll Dashboard
+* Struktur Gaji
+* Tunjangan & Potongan
+* Lembur
+* Payroll Process
+* Slip Gaji
+* Approval Payroll
+* Reimbursement
+* Kasbon & Pinjaman
+* BPJS & Pajak
+* Laporan Payroll
+
+---
+
+### Karyawan
+
+Akses terbatas.
+
+Hak akses:
+
+* Slip Gaji pribadi
+
+Tidak dapat melihat:
+
+* Data karyawan lain
+* Struktur gaji perusahaan
+* Payroll dashboard
+* Approval payroll
+* Laporan payroll
+
+---
+
+# Struktur Menu
+
+## 1. Payroll Dashboard
+
+Ringkasan payroll bulan berjalan.
+
+Widget:
+
+* Total Karyawan Digaji
+* Total Payroll Bulan Ini
+* Total Lembur
+* Total Tunjangan
+* Total Potongan
+* Payroll Menunggu Approval
+* Payroll Sudah Dibayar
+
+Grafik:
+
+* Payroll Trend 12 Bulan
+* Cost SDM per Divisi
+* Komposisi Payroll
+
+---
+
+## 2. Struktur Gaji
+
+Master struktur gaji berdasarkan jabatan dan grade.
+
+Field:
+
+* Jabatan
+* Grade
+* Gaji Pokok
+* Tunjangan Jabatan
+* Tunjangan Transport
+* Tunjangan Makan
+* BPJS
+* Pajak
+* Status Aktif
+
+---
+
+## 3. Tunjangan & Potongan
+
+### Tunjangan
+
+* Transport
+* Makan
+* Shift
+* On Call
+* Internet
+* Pulsa
+* Lembur
+* Insentif KPI
+
+### Potongan
+
+* BPJS
+* Pajak
+* Alpha
+* Terlambat
+* Kasbon
+* Pinjaman
+* Potongan Lainnya
+
+---
+
+## 4. Lembur
+
+Master dan perhitungan lembur.
+
+Field:
+
+* Nama Karyawan
+* Tanggal
+* Jam Mulai
+* Jam Selesai
+* Total Jam
+* Jenis Lembur
+* Tarif Lembur
+* Nominal
+* Status Approval
+
+Workflow:
+
+Draft
+→ Approval Atasan
+→ Approval HR
+→ Approval Finance
+→ Masuk Payroll
+
+Dashboard:
+
+* Total Jam Lembur Bulan Ini
+* Total Biaya Lembur
+* Top Divisi Lembur
+* Top Karyawan Lembur
+
+---
+
+## 5. Payroll Process
+
+Proses generate payroll otomatis.
+
+Alur:
+
+Absensi
+↓
+Perhitungan Keterlambatan
+↓
+Perhitungan Lembur
+↓
+Perhitungan Tunjangan
+↓
+Perhitungan Potongan
+↓
+Perhitungan BPJS
+↓
+Perhitungan Pajak
+↓
+Generate Payroll
+
+Output:
+
+* Draft Payroll Bulanan
+
+---
+
+## 6. Slip Gaji
+
+Slip gaji elektronik.
+
+Isi Slip:
+
+* Nama
+* NIK
+* Jabatan
+* Divisi
+* Periode
+
+Pendapatan:
+
+* Gaji Pokok
+* Tunjangan
+* Lembur
+* Insentif KPI
+
+Potongan:
+
+* BPJS
+* Pajak
+* Kasbon
+* Pinjaman
+* Potongan Lainnya
+
+Ringkasan:
+
+* Total Pendapatan
+* Total Potongan
+* Take Home Pay
+
+Fitur:
+
+* Preview PDF
+* Download PDF
+* Cetak PDF
+
+### Retensi Data Slip Gaji
+
+* Slip gaji disimpan per bulan.
+* Riwayat slip gaji tersedia selama 12 bulan terakhir.
+* Karyawan dapat melihat dan mengunduh slip gaji miliknya sendiri selama periode tersebut.
+* Superadmin, Direksi dan Finance dapat mengakses seluruh riwayat slip gaji.
+
+---
+
+## 7. Approval Payroll
+
+Workflow Approval:
+
+Draft
+↓
+HR Review
+↓
+Finance Review
+↓
+Direksi Approval
+↓
+Paid
+
+Status:
+
+* Draft
+* Pending HR
+* Pending Finance
+* Pending Direksi
+* Approved
+* Rejected
+* Paid
+
+---
+
+## 8. Reimbursement
+
+Penggantian biaya karyawan.
+
+Jenis:
+
+* Transport
+* Operasional
+* Medical
+* Internet
+* Lainnya
+
+Workflow:
+Submit
+→ Approval Atasan
+→ Finance
+→ Paid
+
+---
+
+## 9. Kasbon & Pinjaman
+
+Data:
+
+* Nominal
+* Tenor
+* Cicilan Bulanan
+* Sisa Saldo
+
+Integrasi:
+
+* Otomatis menjadi potongan payroll.
+
+---
+
+## 10. BPJS & Pajak
+
+BPJS:
+
+* BPJS Kesehatan
+* BPJS Ketenagakerjaan
+
+Pajak:
+
+* PPh21
+* Status PTKP
+* NPWP
+
+---
+
+## 11. Laporan Payroll
+
+Laporan:
+
+* Payroll Summary
+* Payroll Trend
+* Payroll Per Divisi
+* Payroll Per Jabatan
+* Laporan Lembur
+* Laporan Tunjangan
+* Laporan Potongan
+* Laporan BPJS
+* Laporan Pajak
+
+Export:
+
+* Excel
+* PDF
+
+---
+
+## Integrasi dengan Modul Lain
+
+Absensi
+↓
+Lembur
+↓
+KPI Assessment Engine
+↓
+Core Assessment Engine
+↓
+Payroll Engine
+↓
+Tunjangan Kinerja
+↓
+Slip Gaji

@@ -1,0 +1,793 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: system-ui,-apple-system,sans-serif; background: #f0f4f8; color: #1e293b; font-size: 13px; }
+::-webkit-scrollbar { width: 3px; height: 3px; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
+.card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+.card-header { display: flex; justify-content: space-between; align-items: center; padding: 11px 14px 9px; border-bottom: 1px solid #f1f5f9; }
+.card-title { font-size: 12px; font-weight: 600; color: #1e293b; }
+.card-sub { font-size: 10px; color: #94a3b8; margin-top:1px; }
+.badge { border-radius: 5px; padding: 2px 8px; font-size: 10px; font-weight: 600; display:inline-block; }
+.ntab { padding: 4px 9px; border-radius: 5px; font-size: 10.5px; cursor: pointer; border: none; background: transparent; color: #94a3b8; }
+.ntab.active { background: #eff6ff; color: #2563eb; font-weight: 600; }
+.page-tab { padding: 10px 18px; font-size: 12px; font-weight: 500; cursor: pointer; border: none; background: transparent; color: #64748b; border-bottom: 2px solid transparent; transition: all 0.15s; white-space:nowrap; display:flex; align-items:center; gap:6px; }
+.page-tab.active { color: #2563eb; border-bottom-color: #2563eb; font-weight: 600; }
+.page-tab:hover:not(.active) { color: #475569; background: #f8fafc; }
+.prog-bar { height: 5px; background: #f1f5f9; border-radius: 3px; overflow: hidden; }
+.prog-fill { height: 100%; border-radius: 3px; }
+.ri { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid #f8fafc; }
+.ri:last-child { border-bottom: none; }
+.fb { padding: 4px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; border: 1px solid #e2e8f0; background: #fff; color: #64748b; }
+.fb.active { border-color: #bfdbfe; background: #eff6ff; color: #2563eb; font-weight: 600; }
+.tr-h:hover td { background: #f8fafc; }
+th { position: sticky; top: 0; z-index: 1; }
+</style>
+</head>
+<body>
+<div style="display:flex;height:720px;background:#f0f4f8;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;box-shadow:0 4px 24px rgba(37,99,235,0.08);">
+
+  <!-- SIDEBAR -->
+  <div style="width:44px;background:#1e293b;display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:5px;flex-shrink:0;">
+    <div style="width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,#2563eb,#06b6d4);display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+    </div>
+    ${[
+      {p:`<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>`,a:true,tip:"Dashboard"},
+      {p:`<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>`,a:false,tip:"Karyawan"},
+      {p:`<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>`,a:false,tip:"Payroll"},
+      {p:`<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>`,a:false,tip:"Jadwal"},
+      {p:`<path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/>`,a:false,tip:"AI"},
+      {p:`<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>`,a:false,tip:"Laporan"},
+      {p:`<circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>`,a:false,tip:"Pengaturan"},
+    ].map(({p,a,tip})=>`
+    <div title="${tip}" style="width:32px;height:32px;border-radius:7px;${a?'background:#2563eb;':''}display:flex;align-items:center;justify-content:center;cursor:pointer;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="${a?'white':'#64748b'}" stroke-width="1.8">${p}</svg>
+    </div>`).join("")}
+    <div style="flex:1;"></div>
+    <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#818cf8,#6366f1);display:flex;align-items:center;justify-content:center;font-size:8.5px;font-weight:700;color:#fff;cursor:pointer;border:2px solid #334155;">SA</div>
+  </div>
+
+  <!-- MAIN -->
+  <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;">
+
+    <!-- TOPBAR -->
+    <div style="height:46px;background:#fff;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+      <div style="display:flex;align-items:center;gap:8px;flex:1;">
+        <span style="font-size:14px;font-weight:700;color:#1e293b;letter-spacing:-0.02em;">TechCorp HRIS</span>
+        <span style="background:#f1f5f9;color:#64748b;border-radius:4px;padding:1px 7px;font-size:10px;font-weight:500;">Enterprise</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;padding:5px 11px;width:170px;">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <span style="font-size:11px;color:#94a3b8;">Cari karyawan, proyek...</span>
+      </div>
+      <div style="position:relative;cursor:pointer;">
+        <div style="width:30px;height:30px;border-radius:7px;background:#f8fafc;border:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </div>
+        <div style="position:absolute;top:4px;right:4px;width:7px;height:7px;border-radius:50%;background:#ef4444;border:2px solid #fff;"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,#2563eb,#0891b2);border-radius:7px;padding:5px 11px;cursor:pointer;box-shadow:0 2px 6px rgba(37,99,235,0.25);">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>
+        <span style="font-size:11px;color:#fff;font-weight:500;">AI Assistant</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:7px;padding:0 8px;border-left:1px solid #f1f5f9;">
+        <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#818cf8,#6366f1);display:flex;align-items:center;justify-content:center;font-size:8.5px;font-weight:700;color:#fff;">SA</div>
+        <div><div style="font-size:11px;font-weight:600;color:#1e293b;">Super Admin</div><div style="font-size:9px;color:#94a3b8;">CEO · PT TechCorp</div></div>
+      </div>
+    </div>
+
+    <!-- PAGE TABS -->
+    <div style="background:#fff;border-bottom:2px solid #f1f5f9;display:flex;align-items:flex-end;padding:0 16px;flex-shrink:0;overflow-x:auto;">
+      <button class="page-tab active" onclick="sp('workspace',this)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Workspace
+      </button>
+      <button class="page-tab" onclick="sp('kpi',this)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        KPI & Performa
+      </button>
+      <button class="page-tab" onclick="sp('analysis',this)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>
+        AI Analysis
+      </button>
+      <button class="page-tab" onclick="sp('karyawan',this)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Data Karyawan
+      </button>
+    </div>
+
+    <!-- CONTENT -->
+    <div style="flex:1;overflow:auto;" id="pg">
+
+      <!-- ═══════════════════════════════════════ -->
+      <!-- PAGE 1: WORKSPACE                       -->
+      <!-- ═══════════════════════════════════════ -->
+      <div id="pg-workspace" style="padding:12px 14px;display:flex;flex-direction:column;gap:10px;">
+
+        <!-- STAT STRIP -->
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;">
+          ${[
+            {l:"Total Karyawan",v:"2,847",s:"↑ 47 bulan ini",c:"#2563eb",t:"#dbeafe",i:`<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>`},
+            {l:"Proyek Aktif",v:"18",s:"4 mendekati deadline",c:"#7c3aed",t:"#ede9fe",i:`<rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/>`},
+            {l:"Surat & Kontrak",v:"34",s:"7 dokumen baru",c:"#0891b2",t:"#cffafe",i:`<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>`},
+            {l:"Target Marketing",v:"82%",s:"Rp 4.2M / 5.1M",c:"#d97706",t:"#fef3c7",i:`<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>`},
+            {l:"Meeting Hari Ini",v:"3",s:"MOM pending: 2",c:"#16a34a",t:"#dcfce7",i:`<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>`},
+          ].map(s=>`
+          <div style="background:#fff;border:1px solid #e2e8f0;border-top:3px solid ${s.c};border-radius:9px;padding:10px 12px;box-shadow:0 1px 4px rgba(0,0,0,0.04);">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div>
+                <div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">${s.l}</div>
+                <div style="font-size:20px;font-weight:700;color:#1e293b;margin-bottom:2px;">${s.v}</div>
+                <div style="font-size:9.5px;color:${s.c};font-weight:500;">${s.s}</div>
+              </div>
+              <div style="width:30px;height:30px;border-radius:7px;background:${s.t};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${s.c}" stroke-width="2">${s.i}</svg>
+              </div>
+            </div>
+          </div>`).join("")}
+        </div>
+
+        <!-- 3-COL GRID -->
+        <div style="display:grid;grid-template-columns:1.9fr 1.15fr 1fr;gap:10px;min-height:0;">
+
+          <!-- COL A: Proyek + MOM -->
+          <div style="display:flex;flex-direction:column;gap:10px;min-height:0;">
+
+            <!-- Proyek Aktif -->
+            <div class="card" style="flex:1.5;overflow:hidden;display:flex;flex-direction:column;min-height:0;">
+              <div class="card-header">
+                <div><div class="card-title">📁 Proyek Aktif</div><div class="card-sub">18 proyek · Q1–Q2 2026</div></div>
+                <div style="display:flex;gap:4px;align-items:center;">
+                  <button class="ntab active">Semua</button>
+                  <button class="ntab">On Track</button>
+                  <button class="ntab">Late</button>
+                  <button style="padding:3px 9px;border-radius:5px;font-size:10px;background:linear-gradient(135deg,#2563eb,#0891b2);color:#fff;border:none;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px;">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Proyek
+                  </button>
+                </div>
+              </div>
+              <div style="overflow:auto;flex:1;">
+                <table style="width:100%;border-collapse:collapse;">
+                  <thead><tr style="background:#f8fafc;">
+                    ${["Proyek / Divisi","PIC","Deadline","Progress","Status",""].map(h=>`<th style="padding:7px 10px;text-align:left;font-size:9px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid #e2e8f0;white-space:nowrap;">${h}</th>`).join("")}
+                  </tr></thead>
+                  <tbody>
+                  ${[
+                    {n:"Website Redesign PT ABC",dept:"Engineering",pic:"AR",d:"28 Mei",p:78,s:"On Track",sc:"#16a34a",sb:"#dcfce7"},
+                    {n:"Sistem ERP Modul HR",dept:"HR & IT",pic:"DK",d:"15 Jun",p:45,s:"On Track",sc:"#16a34a",sb:"#dcfce7"},
+                    {n:"Kampanye Digital Q2",dept:"Marketing",pic:"MA",d:"31 Mei",p:91,s:"Review",sc:"#2563eb",sb:"#dbeafe"},
+                    {n:"Audit ISO 27001",dept:"IT & Finance",pic:"SR",d:"10 Mei",p:33,s:"Late ⚠️",sc:"#dc2626",sb:"#fee2e2"},
+                    {n:"Onboarding App Mobile",dept:"Engineering",pic:"RS",d:"20 Jun",p:60,s:"On Track",sc:"#16a34a",sb:"#dcfce7"},
+                    {n:"Kontrak Vendor Baru",dept:"Legal",pic:"NH",d:"25 Mei",p:85,s:"Review",sc:"#2563eb",sb:"#dbeafe"},
+                    {n:"Training Leadership Q2",dept:"HR",pic:"BW",d:"5 Jun",p:20,s:"Planning",sc:"#d97706",sb:"#fef3c7"},
+                    {n:"Integrasi Payment Gateway",dept:"Engineering",pic:"AS",d:"30 Jun",p:15,s:"Planning",sc:"#d97706",sb:"#fef3c7"},
+                  ].map((pr,i,a)=>`
+                  <tr class="tr-h" style="cursor:pointer;">
+                    <td style="padding:7px 10px;border-bottom:${i<a.length-1?'1px solid #f8fafc':'none'};">
+                      <div style="font-size:11px;font-weight:500;color:#1e293b;">${pr.n}</div>
+                      <div style="font-size:9.5px;color:#94a3b8;">${pr.dept}</div>
+                    </td>
+                    <td style="padding:7px 10px;border-bottom:${i<a.length-1?'1px solid #f8fafc':'none'};">
+                      <div style="width:24px;height:24px;border-radius:50%;background:#eff6ff;border:1px solid #bfdbfe;display:flex;align-items:center;justify-content:center;font-size:8.5px;font-weight:700;color:#2563eb;">${pr.pic}</div>
+                    </td>
+                    <td style="padding:7px 10px;border-bottom:${i<a.length-1?'1px solid #f8fafc':'none'};font-size:10.5px;color:#64748b;white-space:nowrap;">${pr.d}</td>
+                    <td style="padding:7px 10px;border-bottom:${i<a.length-1?'1px solid #f8fafc':'none'};min-width:90px;">
+                      <div style="display:flex;align-items:center;gap:4px;">
+                        <div class="prog-bar" style="flex:1;"><div class="prog-fill" style="width:${pr.p}%;background:${pr.p>=80?'#16a34a':pr.p>=50?'#2563eb':'#d97706'};"></div></div>
+                        <span style="font-size:9.5px;color:#64748b;min-width:24px;">${pr.p}%</span>
+                      </div>
+                    </td>
+                    <td style="padding:7px 10px;border-bottom:${i<a.length-1?'1px solid #f8fafc':'none'};"><span class="badge" style="background:${pr.sb};color:${pr.sc};">${pr.s}</span></td>
+                    <td style="padding:7px 10px;border-bottom:${i<a.length-1?'1px solid #f8fafc':'none'};">
+                      <div style="width:22px;height:22px;border-radius:5px;background:#f8fafc;border:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+                      </div>
+                    </td>
+                  </tr>`).join("")}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- MOM -->
+            <div class="card" style="flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0;">
+              <div class="card-header">
+                <div><div class="card-title">📋 Minutes of Meeting</div><div class="card-sub">4 MOM terbaru</div></div>
+                <div style="display:flex;gap:6px;align-items:center;">
+                  <span class="badge" style="background:#fee2e2;color:#dc2626;">2 Draft</span>
+                  <button style="padding:3px 9px;border-radius:5px;font-size:10px;background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;font-weight:600;cursor:pointer;">+ Buat MOM</button>
+                </div>
+              </div>
+              <div style="overflow:auto;flex:1;padding:0 14px;">
+                ${[
+                  {t:"Weekly Sync Engineering",d:"Senin 19 Mei · 09:00",jml:4,s:"Draft",sc:"#d97706",sb:"#fef3c7",poin:"Finalisasi API spec; deploy staging Rabu 21 Mei"},
+                  {t:"Review Kampanye Digital Q2",d:"Jumat 16 Mei · 14:00",jml:6,s:"Final",sc:"#16a34a",sb:"#dcfce7",poin:"Budget Rp 120jt disetujui; launch kampanye 1 Jun"},
+                  {t:"Koordinasi Kontrak Vendor",d:"Kamis 15 Mei · 10:00",jml:3,s:"Final",sc:"#16a34a",sb:"#dcfce7",poin:"Revisi pasal 7 & 12; TTD dijadwalkan 22 Mei"},
+                  {t:"Board Meeting Q2 Planning",d:"Senin 12 Mei · 08:30",jml:8,s:"Final",sc:"#16a34a",sb:"#dcfce7",poin:"Target revenue Q2: Rp 2.4M; 3 proyek baru masuk pipeline"},
+                ].map((m,i,a)=>`
+                <div style="padding:9px 0;${i<a.length-1?'border-bottom:1px solid #f8fafc':''}">
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3px;">
+                    <div style="font-size:11.5px;font-weight:600;color:#1e293b;">${m.t}</div>
+                    <span class="badge" style="background:${m.sb};color:${m.sc};flex-shrink:0;margin-left:8px;">${m.s}</span>
+                  </div>
+                  <div style="font-size:9.5px;color:#94a3b8;margin-bottom:4px;">📅 ${m.d} &nbsp;·&nbsp; 👥 ${m.jml} peserta</div>
+                  <div style="font-size:10.5px;color:#475569;background:#f8fafc;padding:5px 8px;border-radius:5px;border-left:2px solid #cbd5e1;line-height:1.4;">📌 ${m.poin}</div>
+                </div>`).join("")}
+              </div>
+            </div>
+          </div>
+
+          <!-- COL B: Aktivitas + Jadwal -->
+          <div style="display:flex;flex-direction:column;gap:10px;min-height:0;">
+
+            <!-- Record Aktivitas -->
+            <div class="card" style="flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0;">
+              <div class="card-header">
+                <div><div class="card-title">📝 Record Aktivitas</div><div class="card-sub">Real-time log hari ini</div></div>
+                <div style="display:flex;gap:2px;">
+                  <button class="ntab active" onclick="filterA(this,'all')">Semua</button>
+                  <button class="ntab" onclick="filterA(this,'surat')">Surat</button>
+                  <button class="ntab" onclick="filterA(this,'kontrak')">Kontrak</button>
+                </div>
+              </div>
+              <div style="overflow:auto;flex:1;padding:0 12px;" id="akt">
+                ${[
+                  {tp:"Surat Keluar",cat:"surat",ic:"✉️",c:"#0891b2",bg:"#ecfeff",t:"SK-089 · Surat Penawaran ke PT Maju Bersama",tm:"10:23",u:"MA"},
+                  {tp:"Kontrak",cat:"kontrak",ic:"📜",c:"#7c3aed",bg:"#f5f3ff",t:"KTR-021 · Kontrak Jasa IT · CV Digital Pro",tm:"09:45",u:"NH"},
+                  {tp:"Aktivitas Marketing",cat:"mkt",ic:"📣",c:"#d97706",bg:"#fffbeb",t:"Campaign IG Promo Q2 · Reach 12.4K CTR 3.2%",tm:"09:12",u:"MA"},
+                  {tp:"Aktivitas Proyek",cat:"proyek",ic:"🔧",c:"#16a34a",bg:"#f0fdf4",t:"Deploy Staging ERP Modul HR berhasil",tm:"08:55",u:"RS"},
+                  {tp:"Surat Keluar",cat:"surat",ic:"✉️",c:"#0891b2",bg:"#ecfeff",t:"SK-088 · Undangan Rapat Kepala Divisi",tm:"08:30",u:"DK"},
+                  {tp:"Kontrak",cat:"kontrak",ic:"📜",c:"#7c3aed",bg:"#f5f3ff",t:"KTR-020 · Adendum Kontrak PT Sukses Jaya",tm:"Kemarin",u:"SR"},
+                  {tp:"Aktivitas Marketing",cat:"mkt",ic:"📣",c:"#d97706",bg:"#fffbeb",t:"Email Blast Newsletter Mei 2026 · Open 28.4%",tm:"Kemarin",u:"MA"},
+                  {tp:"Aktivitas Proyek",cat:"proyek",ic:"🔧",c:"#16a34a",bg:"#f0fdf4",t:"Review Sprint 12 · Frontend Team selesai",tm:"Kemarin",u:"AS"},
+                ].map(a=>`
+                <div class="ri ai-item" data-cat="${a.cat}">
+                  <div style="width:28px;height:28px;border-radius:7px;background:${a.bg};display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">${a.ic}</div>
+                  <div style="flex:1;min-width:0;">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:4px;">
+                      <span style="font-size:11px;font-weight:500;color:#1e293b;line-height:1.3;">${a.t}</span>
+                      <span style="font-size:9px;color:#94a3b8;flex-shrink:0;margin-top:1px;">${a.tm}</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:5px;margin-top:2px;">
+                      <span class="badge" style="background:${a.bg};color:${a.c};">${a.tp}</span>
+                      <span style="font-size:9.5px;color:#94a3b8;">${a.u}</span>
+                    </div>
+                  </div>
+                </div>`).join("")}
+              </div>
+            </div>
+
+            <!-- Jadwal -->
+            <div class="card" style="flex-shrink:0;">
+              <div class="card-header">
+                <div><div class="card-title">📅 Jadwal Hari Ini</div><div class="card-sub">Senin, 19 Mei 2026</div></div>
+                <span class="badge" style="background:#dbeafe;color:#2563eb;">3 agenda</span>
+              </div>
+              <div style="padding:8px 12px;">
+                ${[
+                  {t:"09:00",e:"10:00",n:"Weekly Sync Engineering",l:"Meeting Room A",c:"#2563eb",bg:"#eff6ff"},
+                  {t:"13:00",e:"14:00",n:"Review Proposal Marketing Q2",l:"Zoom · link dikirim",c:"#7c3aed",bg:"#f5f3ff"},
+                  {t:"15:30",e:"16:30",n:"1-on-1 HR · Rendika Saputra",l:"HR Office Lt. 2",c:"#d97706",bg:"#fffbeb"},
+                ].map((j,i,a)=>`
+                <div style="display:flex;gap:8px;padding:6px 0;${i<a.length-1?'border-bottom:1px solid #f8fafc':''}">
+                  <div style="flex-shrink:0;text-align:right;width:34px;"><div style="font-size:10.5px;font-weight:700;color:${j.c};">${j.t}</div><div style="font-size:9px;color:#94a3b8;">${j.e}</div></div>
+                  <div style="width:3px;border-radius:2px;background:${j.c};flex-shrink:0;margin:2px 0;"></div>
+                  <div style="flex:1;background:${j.bg};border-radius:7px;padding:5px 9px;">
+                    <div style="font-size:11.5px;font-weight:500;color:#1e293b;">${j.n}</div>
+                    <div style="font-size:9.5px;color:#64748b;margin-top:1px;">📍 ${j.l}</div>
+                  </div>
+                </div>`).join("")}
+              </div>
+            </div>
+          </div>
+
+          <!-- COL C: Marketing + KPI + Kegiatan -->
+          <div style="display:flex;flex-direction:column;gap:10px;min-height:0;">
+
+            <!-- Target Marketing -->
+            <div class="card" style="flex-shrink:0;">
+              <div class="card-header">
+                <div><div class="card-title">🎯 Target Marketing</div><div class="card-sub">Mei 2026 · Real-time</div></div>
+                <span class="badge" style="background:#dcfce7;color:#16a34a;">82% On Track</span>
+              </div>
+              <div style="padding:10px 12px;">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px;background:linear-gradient(135deg,#f0fdf4,#dcfce780);border-radius:8px;border:1px solid #bbf7d0;">
+                  <div style="position:relative;width:54px;height:54px;flex-shrink:0;"><canvas id="mktChart" role="img" aria-label="82% target marketing">82%</canvas></div>
+                  <div>
+                    <div style="font-size:19px;font-weight:700;color:#1e293b;">Rp 4.2M</div>
+                    <div style="font-size:9.5px;color:#64748b;">dari target Rp 5.1M</div>
+                    <div style="font-size:10px;color:#16a34a;font-weight:600;margin-top:2px;">▲ 82% tercapai</div>
+                  </div>
+                </div>
+                ${[
+                  {l:"Leads Baru",v:124,t:150,c:"#2563eb"},
+                  {l:"Konversi",v:38,t:50,c:"#7c3aed"},
+                  {l:"Revenue Deal",v:82,t:100,c:"#16a34a"},
+                  {l:"Email Campaign",v:3,t:4,c:"#d97706"},
+                ].map(m=>`
+                <div style="margin-bottom:8px;">
+                  <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+                    <span style="font-size:10.5px;color:#475569;">${m.l}</span>
+                    <span style="font-size:10px;font-weight:600;color:#1e293b;">${m.v}<span style="color:#94a3b8;font-weight:400;">/${m.t}</span></span>
+                  </div>
+                  <div class="prog-bar"><div class="prog-fill" style="width:${Math.round(m.v/m.t*100)}%;background:${m.c};"></div></div>
+                </div>`).join("")}
+              </div>
+            </div>
+
+            <!-- KPI Divisi -->
+            <div class="card" style="flex:1;overflow:hidden;display:flex;flex-direction:column;">
+              <div class="card-header">
+                <div><div class="card-title">📊 KPI Divisi</div><div class="card-sub">Score Mei 2026</div></div>
+                <span class="badge" style="background:#eff6ff;color:#2563eb;">Avg 84.2</span>
+              </div>
+              <div style="overflow:auto;flex:1;padding:6px 12px;">
+                ${[
+                  {d:"Sales & Marketing",s:91,delta:"+7",c:"#16a34a",bg:"#dcfce7",i:"SAL",n:312},
+                  {d:"HR & Admin",s:88,delta:"+2",c:"#7c3aed",bg:"#ede9fe",i:"HR",n:145},
+                  {d:"Engineering",s:84,delta:"+3",c:"#2563eb",bg:"#eff6ff",i:"ENG",n:876},
+                  {d:"Operations",s:79,delta:"+4",c:"#0891b2",bg:"#cffafe",i:"OPS",n:423},
+                  {d:"Finance",s:76,delta:"-1",c:"#d97706",bg:"#fef3c7",i:"FIN",n:198},
+                ].map((k,i,a)=>`
+                <div style="display:flex;align-items:center;gap:7px;padding:7px 0;${i<a.length-1?'border-bottom:1px solid #f8fafc':''}">
+                  <div style="width:28px;height:28px;border-radius:7px;background:${k.bg};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:${k.c};flex-shrink:0;">${k.i}</div>
+                  <div style="flex:1;min-width:0;">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span style="font-size:10.5px;font-weight:500;color:#1e293b;">${k.d}</span><span style="font-size:9.5px;color:#94a3b8;">${k.n}</span></div>
+                    <div class="prog-bar"><div class="prog-fill" style="width:${k.s}%;background:${k.c};"></div></div>
+                  </div>
+                  <div style="text-align:right;flex-shrink:0;min-width:30px;">
+                    <div style="font-size:13px;font-weight:700;color:${k.c};">${k.s}</div>
+                    <div style="font-size:9px;color:${k.delta.startsWith('+')?'#16a34a':'#dc2626'};font-weight:600;">${k.delta}</div>
+                  </div>
+                </div>`).join("")}
+              </div>
+            </div>
+
+            <!-- Kegiatan Mendatang -->
+            <div class="card" style="flex-shrink:0;">
+              <div class="card-header"><div class="card-title">🔔 Kegiatan Mendatang</div></div>
+              <div style="padding:6px 12px;">
+                ${[
+                  {t:"Deadline Audit ISO 27001",d:"10 Mei · TERLAMBAT",c:"#dc2626",bg:"#fef2f2",ic:"⚠️"},
+                  {t:"TTD Kontrak KTR-021",d:"22 Mei · 3 hari lagi",c:"#d97706",bg:"#fffbeb",ic:"📌"},
+                  {t:"Launch Kampanye Juni",d:"1 Jun · 13 hari lagi",c:"#7c3aed",bg:"#f5f3ff",ic:"🚀"},
+                  {t:"Performance Review Q2",d:"30 Jun · 42 hari lagi",c:"#2563eb",bg:"#eff6ff",ic:"📋"},
+                ].map((e,i,a)=>`
+                <div style="display:flex;gap:7px;align-items:center;padding:5px 0;${i<a.length-1?'border-bottom:1px solid #f8fafc':''}">
+                  <div style="width:26px;height:26px;border-radius:6px;background:${e.bg};display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;">${e.ic}</div>
+                  <div style="flex:1;min-width:0;"><div style="font-size:11px;font-weight:500;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${e.t}</div><div style="font-size:9.5px;color:${e.c};font-weight:500;">${e.d}</div></div>
+                </div>`).join("")}
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════ -->
+      <!-- PAGE 2: KPI & PERFORMA                  -->
+      <!-- ═══════════════════════════════════════ -->
+      <div id="pg-kpi" style="display:none;padding:12px 14px;display:none;flex-direction:column;gap:10px;">
+        <!-- Stat -->
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;">
+          ${[
+            {l:"Avg KPI Perusahaan",v:"84.2",s:"↑ 3.1 dari bulan lalu",c:"#2563eb",t:"#dbeafe"},
+            {l:"Excellent (≥90)",v:"312",s:"11% dari total",c:"#16a34a",t:"#dcfce7"},
+            {l:"Good (80–89)",v:"1,203",s:"42% dari total",c:"#0891b2",t:"#cffafe"},
+            {l:"Below (<75)",v:"67",s:"perlu coaching segera",c:"#dc2626",t:"#fee2e2"},
+            {l:"Review Selesai",v:"78%",s:"1,846 dari 2,367",c:"#7c3aed",t:"#ede9fe"},
+          ].map(s=>`
+          <div style="background:#fff;border:1px solid #e2e8f0;border-top:3px solid ${s.c};border-radius:9px;padding:10px 12px;box-shadow:0 1px 4px rgba(0,0,0,0.04);">
+            <div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">${s.l}</div>
+            <div style="font-size:20px;font-weight:700;color:#1e293b;margin-bottom:2px;">${s.v}</div>
+            <div style="font-size:9.5px;color:${s.c};font-weight:500;">${s.s}</div>
+          </div>`).join("")}
+        </div>
+        <!-- Grid -->
+        <div style="display:grid;grid-template-columns:1.8fr 1fr 1fr;gap:10px;min-height:0;">
+          <!-- Tabel KPI -->
+          <div class="card" style="overflow:hidden;display:flex;flex-direction:column;">
+            <div class="card-header">
+              <div><div class="card-title">📊 KPI Individual Karyawan</div><div class="card-sub">Periode Mei 2026</div></div>
+              <div style="display:flex;gap:3px;align-items:center;">
+                <button class="ntab active">Semua</button>
+                <button class="ntab" style="color:#dc2626;background:#fef2f2;">Below</button>
+                <button class="ntab" style="color:#16a34a;background:#f0fdf4;">Excellent</button>
+              </div>
+            </div>
+            <div style="overflow:auto;flex:1;">
+              <table style="width:100%;border-collapse:collapse;">
+                <thead><tr style="background:#f8fafc;">
+                  ${["Karyawan","Divisi","KPI Score","Target","Δ","Status","Coaching"].map(h=>`<th style="padding:7px 10px;text-align:left;font-size:9px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid #e2e8f0;white-space:nowrap;">${h}</th>`).join("")}
+                </tr></thead>
+                <tbody>
+                ${[
+                  {n:"Maya Anggraini",i:"MA",dept:"Sales",kpi:95,tgt:90,delta:"+5",sc:"#16a34a",sb:"#dcfce7",s:"Excellent",coach:false},
+                  {n:"Ahmad Rizki",i:"AR",dept:"Engineering",kpi:92,tgt:85,delta:"+7",sc:"#16a34a",sb:"#dcfce7",s:"Excellent",coach:false},
+                  {n:"Nurul Hidayah",i:"NH",dept:"Operations",kpi:90,tgt:85,delta:"+5",sc:"#16a34a",sb:"#dcfce7",s:"Excellent",coach:false},
+                  {n:"Dewi Kusuma",i:"DK",dept:"HR",kpi:88,tgt:85,delta:"+3",sc:"#2563eb",sb:"#dbeafe",s:"Good",coach:false},
+                  {n:"Siti Rahayu",i:"SR",dept:"Finance",kpi:85,tgt:85,delta:"0",sc:"#2563eb",sb:"#dbeafe",s:"Good",coach:false},
+                  {n:"Lestari W.",i:"LW",dept:"Sales",kpi:81,tgt:80,delta:"+1",sc:"#2563eb",sb:"#dbeafe",s:"Good",coach:false},
+                  {n:"Reza Firmansyah",i:"RF",dept:"Finance",kpi:72,tgt:80,delta:"-8",sc:"#d97706",sb:"#fef3c7",s:"Below",coach:true},
+                  {n:"Budi Wiyono",i:"BW",dept:"Operations",kpi:70,tgt:85,delta:"-15",sc:"#d97706",sb:"#fef3c7",s:"Below",coach:true},
+                  {n:"Rendika Saputra",i:"RS",dept:"Engineering",kpi:75,tgt:85,delta:"-10",sc:"#d97706",sb:"#fef3c7",s:"Below",coach:true},
+                  {n:"Andi Surya",i:"AS",dept:"Engineering",kpi:67,tgt:80,delta:"-13",sc:"#dc2626",sb:"#fee2e2",s:"Poor",coach:true},
+                ].map((k,i,a)=>`
+                <tr class="tr-h" style="cursor:pointer;">
+                  <td style="padding:7px 10px;border-bottom:${i<a.length-1?'1px solid #f8fafc':'none'};">
+                    <div style="display:flex;align-items:center;gap:7px;">
+                      <div style="width:24px;height:24px;border-radius:50%;background:#eff6ff;border:1px solid #bfdbfe;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#2563eb;flex-shrink:0;">${k.i}</div>
+                      <span style="font-size:11px;font-weight:500;color:#1e293b;white-space:nowrap;">${k.n}</span>
+                    </div>
+                  </td>
+                  <td style="padding:7px 10px;border-bottom:${i<a.length-1?'1px solid #f8fafc':'none'};font-size:10.5px;color:#64748b;">${k.dept}</td>
+                  <td style="padding:7px 10px;border-bottom:${i<a.length-1?'1px solid #f8fafc':'none'};">
+                    <div style="display:flex;align-items:center;gap:5px;">
+                      <div class="prog-bar" style="width:52px;"><div class="prog-fill" style="width:${k.kpi}%;background:${k.kpi>=88?'#16a34a':k.kpi>=80?'#2563eb':k.kpi>=70?'#d97706':'#dc2626'};"></div></div>
+                      <span style="font-size:11px;font-weight:700;color:${k.kpi>=88?'#16a34a':k.kpi>=80?'#2563eb':k.kpi>=70?'#d97706':'#dc2626'};">${k.kpi}</span>
+                    </div>
+                  </td>
+                  <td style="padding:7px 10px;border-bottom:${i<a.length-1?'1px solid #f8fafc':'none'};font-size:10.5px;color:#64748b;">${k.tgt}</td>
+                  <td style="padding:7px 10px;border-bottom:${i<a.length-1?'1px solid #f8fafc':'none'};font-size:11px;font-weight:700;color:${k.delta.startsWith('+')?'#16a34a':k.delta==='0'?'#64748b':'#dc2626'};">${k.delta}</td>
+                  <td style="padding:7px 10px;border-bottom:${i<a.length-1?'1px solid #f8fafc':'none'};"><span class="badge" style="background:${k.sb};color:${k.sc};">${k.s}</span></td>
+                  <td style="padding:7px 10px;border-bottom:${i<a.length-1?'1px solid #f8fafc':'none'};">
+                    ${k.coach?`<span class="badge" style="background:#fef3c7;color:#d97706;">⚡ Perlu</span>`:
+                    `<span style="font-size:10px;color:#94a3b8;">—</span>`}
+                  </td>
+                </tr>`).join("")}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <!-- Kol tengah -->
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div class="card" style="flex-shrink:0;">
+              <div class="card-header"><div><div class="card-title">🏢 KPI per Divisi</div><div class="card-sub">Avg score Mei 2026</div></div></div>
+              <div style="padding:10px 14px;">
+                ${[
+                  {d:"Sales & Marketing",s:91,c:"#16a34a",bg:"#dcfce7",i:"SAL",n:312},
+                  {d:"HR & Admin",s:88,c:"#7c3aed",bg:"#ede9fe",i:"HR",n:145},
+                  {d:"Engineering",s:84,c:"#2563eb",bg:"#eff6ff",i:"ENG",n:876},
+                  {d:"Operations",s:79,c:"#0891b2",bg:"#cffafe",i:"OPS",n:423},
+                  {d:"Finance",s:76,c:"#d97706",bg:"#fef3c7",i:"FIN",n:198},
+                ].map((k,i,a)=>`
+                <div style="display:flex;align-items:center;gap:8px;padding:7px 0;${i<a.length-1?'border-bottom:1px solid #f8fafc':''}">
+                  <div style="width:28px;height:28px;border-radius:7px;background:${k.bg};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:${k.c};flex-shrink:0;">${k.i}</div>
+                  <div style="flex:1;">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span style="font-size:11px;font-weight:500;color:#1e293b;">${k.d}</span><span style="font-size:13px;font-weight:700;color:${k.c};">${k.s}</span></div>
+                    <div class="prog-bar"><div class="prog-fill" style="width:${k.s}%;background:${k.c};"></div></div>
+                  </div>
+                </div>`).join("")}
+              </div>
+            </div>
+            <div class="card" style="flex-shrink:0;">
+              <div class="card-header"><div class="card-title">📈 Trend KPI 6 Bulan</div></div>
+              <div style="padding:10px 14px;height:130px;position:relative;"><canvas id="kpiTrend" role="img" aria-label="Trend KPI naik 79-84">Tren naik.</canvas></div>
+            </div>
+            <div class="card" style="flex:1;overflow:hidden;display:flex;flex-direction:column;">
+              <div class="card-header"><div><div class="card-title">🏆 Top Performers</div><div class="card-sub">Score tertinggi bulan ini</div></div></div>
+              <div style="padding:8px 12px;overflow:auto;flex:1;">
+                ${[
+                  {n:"Maya Anggraini",dept:"Sales",s:95,i:"MA",rank:1},
+                  {n:"Ahmad Rizki",dept:"Engineering",s:92,i:"AR",rank:2},
+                  {n:"Nurul Hidayah",dept:"Operations",s:90,i:"NH",rank:3},
+                ].map((t,i)=>`
+                <div style="display:flex;align-items:center;gap:8px;padding:7px 0;${i<2?'border-bottom:1px solid #f8fafc':''}">
+                  <div style="width:20px;font-size:14px;text-align:center;flex-shrink:0;">${['🥇','🥈','🥉'][i]}</div>
+                  <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#dbeafe,#eff6ff);border:1.5px solid #bfdbfe;display:flex;align-items:center;justify-content:center;font-size:8.5px;font-weight:700;color:#2563eb;flex-shrink:0;">${t.i}</div>
+                  <div style="flex:1;"><div style="font-size:11.5px;font-weight:500;color:#1e293b;">${t.n}</div><div style="font-size:9.5px;color:#94a3b8;">${t.dept}</div></div>
+                  <span style="font-size:14px;font-weight:700;color:#16a34a;">${t.s}</span>
+                </div>`).join("")}
+              </div>
+            </div>
+          </div>
+          <!-- Kol kanan -->
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div class="card">
+              <div class="card-header"><div><div class="card-title">⚠️ Burnout Risk</div><div class="card-sub">Deteksi AI — Mei 2026</div></div><span class="badge" style="background:#fee2e2;color:#dc2626;">4 high</span></div>
+              <div style="padding:8px 14px;">
+                ${[
+                  {n:"Rendika S.",dept:"Engineering",r:87,c:"#dc2626",i:"RS"},
+                  {n:"Maya Putri",dept:"Operations",r:74,c:"#d97706",i:"MP"},
+                  {n:"Andi Surya",dept:"Engineering",r:68,c:"#d97706",i:"AS"},
+                  {n:"Sari Laila",dept:"Finance",r:61,c:"#16a34a",i:"SL"},
+                ].map((e,i,a)=>`
+                <div style="display:flex;align-items:center;gap:8px;padding:7px 0;${i<a.length-1?'border-bottom:1px solid #f8fafc':''}">
+                  <div style="width:28px;height:28px;border-radius:50%;background:${e.r>=80?'#fee2e2':e.r>=70?'#fef3c7':'#f0fdf4'};border:1.5px solid ${e.c}40;display:flex;align-items:center;justify-content:center;font-size:8.5px;font-weight:700;color:${e.c};flex-shrink:0;">${e.i}</div>
+                  <div style="flex:1;min-width:0;"><div style="font-size:11.5px;font-weight:500;color:#1e293b;">${e.n}</div><div style="font-size:9.5px;color:#94a3b8;">${e.dept}</div></div>
+                  <div style="display:flex;align-items:center;gap:5px;width:65px;"><div class="prog-bar" style="flex:1;"><div class="prog-fill" style="width:${e.r}%;background:${e.c};"></div></div><span style="font-size:10.5px;font-weight:700;color:${e.c};">${e.r}</span></div>
+                </div>`).join("")}
+              </div>
+            </div>
+            <div class="card" style="flex:1;overflow:hidden;display:flex;flex-direction:column;">
+              <div class="card-header"><div><div class="card-title">🎯 Target KPI Q2</div><div class="card-sub">Progress per divisi</div></div></div>
+              <div style="padding:8px 14px;overflow:auto;flex:1;">
+                ${[
+                  {d:"Engineering",curr:84,tgt:88,c:"#2563eb"},
+                  {d:"Sales & Mkt",curr:91,tgt:90,c:"#16a34a"},
+                  {d:"HR & Admin",curr:88,tgt:87,c:"#7c3aed"},
+                  {d:"Operations",curr:79,tgt:85,c:"#d97706"},
+                  {d:"Finance",curr:76,tgt:82,c:"#dc2626"},
+                ].map((t,i,a)=>`
+                <div style="padding:7px 0;${i<a.length-1?'border-bottom:1px solid #f8fafc':''}">
+                  <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                    <span style="font-size:11px;font-weight:500;color:#1e293b;">${t.d}</span>
+                    <span style="font-size:10.5px;color:${t.curr>=t.tgt?'#16a34a':'#d97706'};font-weight:600;">${t.curr}/${t.tgt}</span>
+                  </div>
+                  <div style="height:7px;background:#f1f5f9;border-radius:4px;overflow:visible;position:relative;">
+                    <div style="height:100%;width:${Math.min(t.curr,t.tgt)/t.tgt*100}%;background:${t.curr>=t.tgt?'#16a34a':t.c};border-radius:4px;"></div>
+                    <div style="position:absolute;top:-2px;left:${t.tgt/t.tgt*100}%;width:2px;height:11px;background:#64748b;border-radius:1px;"></div>
+                  </div>
+                </div>`).join("")}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════ -->
+      <!-- PAGE 3: AI ANALYSIS                     -->
+      <!-- ═══════════════════════════════════════ -->
+      <div id="pg-analysis" style="display:none;padding:12px 14px;flex-direction:column;gap:10px;">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+          ${[
+            {l:"AI Confidence",v:"94.2%",s:"Model accuracy",c:"#2563eb",t:"#dbeafe"},
+            {l:"Profil Dianalisis",v:"2,847",s:"semua karyawan",c:"#7c3aed",t:"#ede9fe"},
+            {l:"Insights Bulan Ini",v:"164",s:"↑ 28 dari April",c:"#16a34a",t:"#dcfce7"},
+            {l:"Aksi Diperlukan",v:"9",s:"4 urgent · 5 medium",c:"#dc2626",t:"#fee2e2"},
+          ].map(s=>`
+          <div style="background:#fff;border:1px solid #e2e8f0;border-top:3px solid ${s.c};border-radius:9px;padding:10px 12px;box-shadow:0 1px 4px rgba(0,0,0,0.04);">
+            <div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">${s.l}</div>
+            <div style="font-size:20px;font-weight:700;color:#1e293b;margin-bottom:2px;">${s.v}</div>
+            <div style="font-size:9.5px;color:${s.c};font-weight:500;">${s.s}</div>
+          </div>`).join("")}
+        </div>
+        <div style="display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:10px;">
+          <!-- Insights -->
+          <div class="card" style="overflow:hidden;display:flex;flex-direction:column;">
+            <div class="card-header"><div><div class="card-title">🧠 AI Workforce Insights</div><div class="card-sub">Rekomendasi otomatis Claude AI</div></div>
+              <div style="display:flex;gap:2px;"><button class="ntab active">Semua</button><button class="ntab">Urgent</button></div>
+            </div>
+            <div style="overflow:auto;flex:1;padding:0 14px;">
+              ${[
+                {ic:"⚠️",txt:"3 karyawan Engineering menunjukkan pola burnout tinggi. Rekomendasikan sesi 1-on-1 segera dengan manajer.",c:"#dc2626",bg:"#fef2f2",tag:"Urgent",tc:"#dc2626",tb:"#fee2e2"},
+                {ic:"📉",txt:"Prediksi 5 karyawan berpotensi resign dalam 90 hari tanpa intervensi retensi. Identifikasi: RS, BW, AS, LW, RF.",c:"#d97706",bg:"#fffbeb",tag:"Urgent",tc:"#d97706",tb:"#fef3c7"},
+                {ic:"🌟",txt:"Tim Sales performa terbaik bulan ini (91 avg KPI). Rekomendasikan program recognition dan bonus Q2.",c:"#16a34a",bg:"#f0fdf4",tag:"Informasi",tc:"#16a34a",tb:"#dcfce7"},
+                {ic:"📚",txt:"Skill gap terdeteksi di tim Backend: Cloud Architecture perlu diperkuat untuk mendukung proyek Q2.",c:"#2563eb",bg:"#eff6ff",tag:"Medium",tc:"#2563eb",tb:"#dbeafe"},
+                {ic:"📋",txt:"Reza Firmansyah (EMP-009) — kontrak habis 30 hari lagi, KPI 72. Perlu review perpanjangan segera.",c:"#7c3aed",bg:"#f5f3ff",tag:"Medium",tc:"#7c3aed",tb:"#ede9fe"},
+                {ic:"📊",txt:"Divisi Finance mengalami penurunan KPI -1. Monitor selama 2 minggu sebelum intervensi.",c:"#d97706",bg:"#fffbeb",tag:"Monitor",tc:"#d97706",tb:"#fef3c7"},
+              ].map((item,i,a)=>`
+              <div style="padding:10px 0;${i<a.length-1?'border-bottom:1px solid #f8fafc':''}">
+                <div style="display:flex;gap:9px;align-items:flex-start;">
+                  <span style="font-size:16px;flex-shrink:0;margin-top:1px;">${item.ic}</span>
+                  <div style="flex:1;">
+                    <p style="font-size:11.5px;color:#475569;line-height:1.5;margin-bottom:5px;">${item.txt}</p>
+                    <div style="display:flex;gap:5px;align-items:center;">
+                      <span class="badge" style="background:${item.tb};color:${item.tc};">${item.tag}</span>
+                      <button style="padding:2px 8px;border-radius:4px;font-size:9.5px;background:#f8fafc;color:#64748b;border:1px solid #e2e8f0;cursor:pointer;">Ambil Aksi →</button>
+                    </div>
+                  </div>
+                </div>
+              </div>`).join("")}
+            </div>
+          </div>
+          <!-- Profil AI -->
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div class="card">
+              <div class="card-header">
+                <div><div class="card-title">🤖 AI Profil Karyawan</div><div class="card-sub">Analisis 6 dimensi</div></div>
+                <select style="font-size:10px;border:1px solid #e2e8f0;border-radius:5px;padding:3px 6px;color:#475569;background:#fff;cursor:pointer;">
+                  <option>Ahmad Rizki</option><option>Dewi Kusuma</option><option>Maya Anggraini</option><option>Rendika Saputra</option>
+                </select>
+              </div>
+              <div style="padding:12px 14px;">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px;background:linear-gradient(135deg,#f0fdf4,#dcfce780);border-radius:8px;border:1px solid #bbf7d0;">
+                  <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#dbeafe,#eff6ff);border:2px solid #bfdbfe;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#2563eb;flex-shrink:0;">AR</div>
+                  <div style="flex:1;"><div style="font-size:12.5px;font-weight:600;color:#1e293b;">Ahmad Rizki</div><div style="font-size:9.5px;color:#94a3b8;">Senior Backend Dev · Engineering</div></div>
+                  <div style="text-align:right;"><div style="font-size:22px;font-weight:700;color:#16a34a;line-height:1;">92</div><div style="font-size:9px;color:#94a3b8;">KPI Score</div></div>
+                </div>
+                ${[
+                  {l:"Leadership",s:78,c:"#2563eb"},
+                  {l:"Communication",s:85,c:"#0891b2"},
+                  {l:"Discipline",s:92,c:"#16a34a"},
+                  {l:"Teamwork",s:80,c:"#7c3aed"},
+                  {l:"Learning Speed",s:88,c:"#d97706"},
+                  {l:"Burnout Risk",s:22,c:"#dc2626"},
+                ].map(item=>`
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                  <span style="font-size:10.5px;color:#64748b;width:105px;flex-shrink:0;">${item.l}</span>
+                  <div class="prog-bar" style="flex:1;"><div class="prog-fill" style="width:${item.s}%;background:${item.c};"></div></div>
+                  <span style="font-size:10.5px;font-weight:700;color:${item.c};min-width:20px;">${item.s}</span>
+                </div>`).join("")}
+                <div style="margin-top:10px;padding:8px 10px;background:#f0fdf4;border-radius:7px;border:1px solid #bbf7d0;">
+                  <div style="font-size:10px;font-weight:600;color:#16a34a;margin-bottom:3px;">✅ Rekomendasi AI</div>
+                  <div style="font-size:10.5px;color:#475569;line-height:1.4;">Kandidat kuat untuk promosi ke Tech Lead. Pertimbangkan fast-track Q3 2026.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Prediksi & Screening -->
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div class="card" style="flex-shrink:0;">
+              <div class="card-header"><div><div class="card-title">🔮 Prediksi AI</div><div class="card-sub">3 bulan ke depan</div></div></div>
+              <div style="padding:10px 12px;">
+                ${[
+                  {l:"Prediksi Turnover",v:"4.1%",s:"↑ dari 3.2% saat ini",c:"#dc2626",bg:"#fef2f2",ic:"📉"},
+                  {l:"Kebutuhan Rekrut",v:"18 posisi",s:"Engineering 8, Sales 5, Ops 5",c:"#2563eb",bg:"#eff6ff",ic:"🧩"},
+                  {l:"Burnout Potential",v:"~28 org",s:"jika tidak diintervensi",c:"#d97706",bg:"#fffbeb",ic:"🔥"},
+                  {l:"Produktivitas Avg",v:"87%",s:"proyeksi Q3 2026",c:"#16a34a",bg:"#dcfce7",ic:"⚡"},
+                ].map((p,i,a)=>`
+                <div style="display:flex;gap:8px;align-items:center;padding:7px 0;${i<a.length-1?'border-bottom:1px solid #f8fafc':''}">
+                  <div style="width:30px;height:30px;border-radius:7px;background:${p.bg};display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">${p.ic}</div>
+                  <div style="flex:1;min-width:0;"><div style="font-size:10px;color:#94a3b8;">${p.l}</div><div style="font-size:13px;font-weight:700;color:${p.c};">${p.v}</div><div style="font-size:9.5px;color:#64748b;">${p.s}</div></div>
+                </div>`).join("")}
+              </div>
+            </div>
+            <div class="card" style="flex:1;overflow:hidden;display:flex;flex-direction:column;">
+              <div class="card-header"><div><div class="card-title">🎯 AI Screening Pipeline</div><div class="card-sub">Kandidat bulan ini</div></div></div>
+              <div style="padding:8px 12px;overflow:auto;flex:1;">
+                ${[
+                  {n:"Bima Saputra",role:"Backend Dev",score:92,s:"Rekomendasi",sc:"#16a34a",sb:"#dcfce7"},
+                  {n:"Ratna Dewi",role:"Data Analyst",score:87,s:"Review",sc:"#2563eb",sb:"#dbeafe"},
+                  {n:"Hendra K.",role:"DevOps",score:79,s:"Interview",sc:"#7c3aed",sb:"#f5f3ff"},
+                  {n:"Sari Indah",role:"UI/UX Design",score:74,s:"Pending",sc:"#d97706",sb:"#fef3c7"},
+                  {n:"Doni Pratama",role:"Sales Exec",score:68,s:"Screening",sc:"#94a3b8",sb:"#f8fafc"},
+                ].map((c,i,a)=>`
+                <div style="display:flex;align-items:center;gap:8px;padding:7px 0;${i<a.length-1?'border-bottom:1px solid #f8fafc':''}">
+                  <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#f1f5f9,#e2e8f0);display:flex;align-items:center;justify-content:center;font-size:8.5px;font-weight:700;color:#64748b;flex-shrink:0;">${c.n.split(' ').map(x=>x[0]).join('')}</div>
+                  <div style="flex:1;min-width:0;"><div style="font-size:11px;font-weight:500;color:#1e293b;">${c.n}</div><div style="font-size:9.5px;color:#94a3b8;">${c.role}</div></div>
+                  <div style="text-align:right;"><div style="font-size:12px;font-weight:700;color:${c.score>=85?'#16a34a':c.score>=75?'#2563eb':'#d97706'};">${c.score}</div></div>
+                  <span class="badge" style="background:${c.sb};color:${c.sc};">${c.s}</span>
+                </div>`).join("")}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════ -->
+      <!-- PAGE 4: DATA KARYAWAN                   -->
+      <!-- ═══════════════════════════════════════ -->
+      <div id="pg-karyawan" style="display:none;padding:12px 14px;flex-direction:column;gap:10px;">
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;">
+          ${[
+            {l:"Total Karyawan",v:"2,847",s:"Aktif: 2,614",c:"#2563eb",t:"#dbeafe"},
+            {l:"Karyawan Baru",v:"47",s:"masuk bulan ini",c:"#16a34a",t:"#dcfce7"},
+            {l:"Sedang Cuti",v:"89",s:"dari 12 tipe cuti",c:"#d97706",t:"#fef3c7"},
+            {l:"Kontrak Habis",v:"12",s:"dalam 30 hari ke depan",c:"#dc2626",t:"#fee2e2"},
+            {l:"Avg Masa Kerja",v:"3.4 th",s:"median: 2.8 tahun",c:"#7c3aed",t:"#ede9fe"},
+          ].map(s=>`
+          <div style="background:#fff;border:1px solid #e2e8f0;border-top:3px solid ${s.c};border-radius:9px;padding:10px 12px;box-shadow:0 1px 4px rgba(0,0,0,0.04);">
+            <div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">${s.l}</div>
+            <div style="font-size:20px;font-weight:700;color:#1e293b;margin-bottom:2px;">${s.v}</div>
+            <div style="font-size:9.5px;color:${s.c};font-weight:500;">${s.s}</div>
+          </div>`).join("")}
+        </div>
+        <!-- Filter + Search -->
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+          <div style="display:flex;gap:5px;flex-wrap:wrap;">
+            ${["Semua","Aktif","Cuti","Engineering","Sales","HR & Admin","Finance","Operations"].map((f,i)=>`<button class="fb ${i===0?'active':''}" onclick="fkr(this)">${f}</button>`).join("")}
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <div style="display:flex;align-items:center;gap:6px;background:#fff;border:1px solid #e2e8f0;border-radius:7px;padding:5px 11px;">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <span style="font-size:11px;color:#94a3b8;">Cari nama / ID...</span>
+            </div>
+            <div style="display:flex;gap:5px;">
+              <button style="padding:5px 10px;border-radius:6px;font-size:10.5px;background:#fff;color:#64748b;border:1px solid #e2e8f0;cursor:pointer;">📥 Import</button>
+              <button style="padding:5px 10px;border-radius:6px;font-size:10.5px;background:#fff;color:#64748b;border:1px solid #e2e8f0;cursor:pointer;">📤 Export</button>
+              <button style="padding:5px 13px;border-radius:6px;font-size:11px;background:linear-gradient(135deg,#2563eb,#0891b2);color:#fff;border:none;font-weight:600;cursor:pointer;">+ Tambah Karyawan</button>
+            </div>
+          </div>
+        </div>
+        <!-- Tabel -->
+        <div class="card" style="overflow:hidden;">
+          <table style="width:100%;border-collapse:collapse;">
+            <thead><tr style="background:#f8fafc;">
+              ${["","ID","Nama Karyawan","Divisi","Jabatan","Status","Masa Kerja","Tipe Kontrak","KPI","AI Risk","Kontak"].map(h=>`<th style="padding:8px 10px;text-align:left;font-size:9px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid #e2e8f0;white-space:nowrap;">${h}</th>`).join("")}
+            </tr></thead>
+            <tbody>
+            ${[
+              {id:"EMP-001",n:"Ahmad Rizki",i:"AR",d:"Engineering",r:"Sr. Backend Dev",s:"Aktif",sc:"#16a34a",sb:"#dcfce7",lm:"3 th 2 bl",kt:"Tetap",ktc:"#16a34a",ktb:"#dcfce7",kpi:92,risk:"Low",rc:"#16a34a",rb:"#f0fdf4",t:"0812-xxxx"},
+              {id:"EMP-002",n:"Dewi Kusuma",i:"DK",d:"HR & Admin",r:"HR Manager",s:"Aktif",sc:"#16a34a",sb:"#dcfce7",lm:"4 th 10 bl",kt:"Tetap",ktc:"#16a34a",ktb:"#dcfce7",kpi:88,risk:"Low",rc:"#16a34a",rb:"#f0fdf4",t:"0813-xxxx"},
+              {id:"EMP-003",n:"Rendika Saputra",i:"RS",d:"Engineering",r:"DevOps Engineer",s:"Aktif",sc:"#16a34a",sb:"#dcfce7",lm:"2 th 4 bl",kt:"Tetap",ktc:"#16a34a",ktb:"#dcfce7",kpi:75,risk:"High",rc:"#dc2626",rb:"#fee2e2",t:"0857-xxxx"},
+              {id:"EMP-004",n:"Siti Rahayu",i:"SR",d:"Finance",r:"Finance Analyst",s:"Aktif",sc:"#16a34a",sb:"#dcfce7",lm:"2 th 9 bl",kt:"Tetap",ktc:"#16a34a",ktb:"#dcfce7",kpi:85,risk:"Low",rc:"#16a34a",rb:"#f0fdf4",t:"0878-xxxx"},
+              {id:"EMP-005",n:"Budi Wiyono",i:"BW",d:"Operations",r:"NOC Engineer",s:"Cuti",sc:"#d97706",sb:"#fef3c7",lm:"4 th 6 bl",kt:"Kontrak",ktc:"#d97706",ktb:"#fef3c7",kpi:70,risk:"Medium",rc:"#d97706",rb:"#fffbeb",t:"0821-xxxx"},
+              {id:"EMP-006",n:"Maya Anggraini",i:"MA",d:"Sales",r:"Account Executive",s:"Aktif",sc:"#16a34a",sb:"#dcfce7",lm:"2 th 1 bl",kt:"Tetap",ktc:"#16a34a",ktb:"#dcfce7",kpi:95,risk:"Low",rc:"#16a34a",rb:"#f0fdf4",t:"0856-xxxx"},
+              {id:"EMP-007",n:"Andi Surya",i:"AS",d:"Engineering",r:"Frontend Dev",s:"Aktif",sc:"#16a34a",sb:"#dcfce7",lm:"1 th 8 bl",kt:"Kontrak",ktc:"#d97706",ktb:"#fef3c7",kpi:67,risk:"High",rc:"#dc2626",rb:"#fee2e2",t:"0819-xxxx"},
+              {id:"EMP-008",n:"Nurul Hidayah",i:"NH",d:"Operations",r:"Project Manager",s:"Aktif",sc:"#16a34a",sb:"#dcfce7",lm:"5 th 11 bl",kt:"Tetap",ktc:"#16a34a",ktb:"#dcfce7",kpi:90,risk:"Low",rc:"#16a34a",rb:"#f0fdf4",t:"0881-xxxx"},
+              {id:"EMP-009",n:"Reza Firmansyah",i:"RF",d:"Finance",r:"Tax Specialist",s:"Aktif",sc:"#16a34a",sb:"#dcfce7",lm:"1 th 3 bl",kt:"Kontrak",ktc:"#dc2626",ktb:"#fee2e2",kpi:72,risk:"Medium",rc:"#d97706",rb:"#fffbeb",t:"0822-xxxx"},
+              {id:"EMP-010",n:"Lestari Wulandari",i:"LW",d:"Sales",r:"Digital Marketing",s:"Aktif",sc:"#16a34a",sb:"#dcfce7",lm:"0 th 8 bl",kt:"Probasi",ktc:"#7c3aed",ktb:"#ede9fe",kpi:81,risk:"Low",rc:"#16a34a",rb:"#f0fdf4",t:"0895-xxxx"},
+            ].map((e,i,a)=>`
+            <tr class="tr-h" style="cursor:pointer;">
+              <td style="padding:8px 10px;border-bottom:${i<a.length-1?'1px solid #f8fafc':'none'};"><input type="checkbox" style="accent-color:#2563eb;"></td>
+              <td style="padding:8px 10px;border-bottom:${i<a.length-1?'1px solid #f8fafc':'none'};font-size:9.5px;color:#94a3b8;white-space:nowrap;">${e.id}</td>
+              <td style="padding:8px 10px;border-bottom:${i<a.length-1?'1px solid #f8fafc':'none'};">
+                <div style="display:flex;align-items:center;gap:7px;">
+                  <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#dbeafe,#eff6ff);border:1.5px solid #bfdbfe;display:flex;align-items:center;justify-content:center;font-size:8.5px;font-weight:700;color:#2563eb;flex-shrink:0;">${e.i}</div>
+                  <span style="font-size:12px;font-weight:500;color:#1e293b;white-space:nowrap;">${e.n}</span>
+                </div>
+              </td>
+              <td style="padding:8px 10px;border-bottom:${i<a.length-1?'1px solid #f8fafc':'none'};font-size:11px;color:#64748b;white-space:nowrap;">${e.d}</td>
+              <td style="padding:8px 10px;border-bottom:${i<a.length-1?'1px solid #f8fafc':'none'};font-size:11px;color:#64748b;white-space:nowrap;">${e.r}</td>
+              <td style="padding:8px 10px;border-bottom:${i<a.length-1?'1px solid #f8fafc':'none'};"><span class="badge" style="background:${e.sb};color:${e.sc};">${e.s}</span></td>
+              <td style="padding:8px 10px;border-bottom:${i<a.length-1?'1px solid #f8fafc':'none'};font-size:11px;color:#64748b;white-space:nowrap;">${e.lm}</td>
+              <td style="padding:8px 10px;border-bottom:${i<a.length-1?'1px solid #f8fafc':'none'};"><span class="badge" style="background:${e.ktb};color:${e.ktc};">${e.kt}</span></td>
+              <td style="padding:8px 10px;border-bottom:${i<a.length-1?'1px solid #f8fafc':'none'};">
+                <div style="display:flex;align-items:center;gap:4px;">
+                  <div class="prog-bar" style="width:40px;"><div class="prog-fill" style="width:${e.kpi}%;background:${e.kpi>=88?'#16a34a':e.kpi>=80?'#2563eb':e.kpi>=70?'#d97706':'#dc2626'};"></div></div>
+                  <span style="font-size:11px;font-weight:700;color:${e.kpi>=88?'#16a34a':e.kpi>=80?'#2563eb':e.kpi>=70?'#d97706':'#dc2626'};">${e.kpi}</span>
+                </div>
+              </td>
+              <td style="padding:8px 10px;border-bottom:${i<a.length-1?'1px solid #f8fafc':'none'};"><span class="badge" style="background:${e.rb};color:${e.rc};">${e.risk}</span></td>
+              <td style="padding:8px 10px;border-bottom:${i<a.length-1?'1px solid #f8fafc':'none'};font-size:10px;color:#94a3b8;white-space:nowrap;">${e.t}</td>
+            </tr>`).join("")}
+            </tbody>
+          </table>
+          <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:11px;color:#94a3b8;">Menampilkan 10 dari 2,847 karyawan</span>
+            <div style="display:flex;gap:3px;">
+              ${["«","1","2","3","...","285","»"].map((p,i)=>`<button style="width:26px;height:26px;border-radius:5px;border:1px solid ${i===1?'#bfdbfe':'#e2e8f0'};background:${i===1?'#eff6ff':'#fff'};color:${i===1?'#2563eb':'#64748b'};font-size:10.5px;cursor:pointer;font-weight:${i===1?'600':'400'};">${p}</button>`).join("")}
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end pg -->
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const pages = ['workspace','kpi','analysis','karyawan'];
+let chartsInited = false;
+
+function sp(id, el) {
+  pages.forEach(p => {
+    const el2 = document.getElementById('pg-'+p);
+    if(el2) el2.style.display = 'none';
+  });
+  const t = document.getElementById('pg-'+id);
+  if(t) t.style.display = 'flex';
+  document.querySelectorAll('.page-tab').forEach(b => b.classList.remove('active'));
+  if(el) el.classList.add('active');
+  if(!chartsInited) { initCharts(); chartsInited = true; }
+}
+
+function filterA(el, type) {
+  el.closest('.card-header').querySelectorAll('.ntab').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.ai-item').forEach(item => {
+    item.style.display = (type==='all' || item.dataset.cat===type) ? 'flex' : 'none';
+  });
+}
+
+function fkr(el) {
+  document.querySelectorAll('.fb').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function initCharts() {
+  const mc = document.getElementById('mktChart');
+  if(mc) new Chart(mc, {
+    type:'doughnut', data:{datasets:[{data:[82,18],backgroundColor:['#16a34a','#f0fdf4'],borderWidth:0}]},
+    options:{responsive:false,cutout:'72%',plugins:{legend:{display:false},tooltip:{enabled:false}}}
+  });
+  const kt = document.getElementById('kpiTrend');
+  if(kt) new Chart(kt, {
+    type:'line', data:{labels:['Des','Jan','Feb','Mar','Apr','Mei'],datasets:[{label:'KPI',data:[79,80,81,82,83,84],borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,0.06)',borderWidth:2,pointBackgroundColor:'#2563eb',pointRadius:3,fill:true,tension:0.4}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'#f1f5f9'},ticks:{color:'#94a3b8',font:{size:9}}},y:{grid:{color:'#f1f5f9'},ticks:{color:'#94a3b8',font:{size:9}},min:76,max:88}}}
+  });
+}
+
+// Init workspace on load
+document.getElementById('pg-workspace').style.display = 'flex';
+initCharts();
+</script>
+</body>
+</html>

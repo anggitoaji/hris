@@ -1,0 +1,5 @@
+Cara mematikan server: 
+balik ke jendela PowerShell, tekan Ctrl + C. 
+Untuk menyalakan lagi besok: buka folder → kotak alamat ketik powershell → 
+ketik .venv\Scripts\activate → lalu uvicorn app.main:app --reload. 
+Tidak perlu ulang semua dari awal.

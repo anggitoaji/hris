@@ -1,0 +1,24 @@
+﻿# Dependencies (bisa dibuat ulang, tak perlu disimpan)
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Hasil build
+dist/
+build/
+
+# Database (data) - backup manual dengan copy hris.db
+*.db
+*.db-wal
+*.db-shm
+
+# Env / rahasia
+.env
+.env.local
+
+# Editor / OS
+.vscode/
+.DS_Store
+Thumbs.db

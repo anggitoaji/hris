@@ -1,0 +1,11 @@
+Ketik dua perintah ini berurutan:
+cd "C:\Users\angsm\OneDrive\Documents\HRIS\hris-backend"
+.venv\Scripts\activate
+uvicorn app.main:app --reload
+http://localhost:8000/
+
+
+cd "C:\Users\angsm\OneDrive\Documents\HRIS\hris-dashboard"
+npm run dev
+
+Jadi urutan lengkapnya tiap mau mulai (catat saja): cd ke folder → activate → uvicorn. Cukup itu, tidak perlu ulang install apa pun.

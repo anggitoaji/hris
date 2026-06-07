@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Solusi Group HRIS</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: system-ui,-apple-system,sans-serif; background: #f0f4f8; color: #1e293b; font-size: 13px; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+.card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+.badge { border-radius: 5px; padding: 2px 8px; font-size: 10px; font-weight: 600; display:inline-block; }
+.page-tab { padding: 10px 18px; font-size: 12px; font-weight: 500; cursor: pointer; border: none; background: transparent; color: #64748b; border-bottom: 2px solid transparent; transition: all 0.15s; white-space:nowrap; display:flex; align-items:center; gap:6px; }
+.page-tab.active { color: #2563eb; border-bottom-color: #2563eb; font-weight: 600; }
+.page-tab:hover:not(.active) { color: #475569; background: #f8fafc; }
+.prog-bar { height: 5px; background: #f1f5f9; border-radius: 3px; overflow: hidden; }
+.prog-fill { height: 100%; border-radius: 3px; }
+.fb { padding: 4px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; border: 1px solid #e2e8f0; background: #fff; color: #64748b; }
+.fb.active { border-color: #bfdbfe; background: #eff6ff; color: #2563eb; font-weight: 600; }
+.tr-h:hover td { background: #f8fafc; }
+th { position: sticky; top: 0; z-index: 1; }
+.btn-primary { padding:6px 13px; border-radius:6px; font-size:11px; background:linear-gradient(135deg,#2563eb,#0891b2); color:#fff; border:none; font-weight:600; cursor:pointer; }
+.btn-ghost { padding:5px 10px; border-radius:6px; font-size:10.5px; background:#fff; color:#64748b; border:1px solid #e2e8f0; cursor:pointer; }
+.input { width:100%; padding:7px 10px; border:1px solid #e2e8f0; border-radius:7px; font-size:12px; margin-top:3px; }
+.label { font-size:10px; color:#64748b; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; }
+.overlay { position:fixed; inset:0; background:rgba(15,23,42,0.45); display:none; align-items:center; justify-content:center; z-index:50; }
+.modal { background:#fff; border-radius:12px; padding:18px 20px; width:420px; max-width:92vw; max-height:90vh; overflow:auto; box-shadow:0 10px 40px rgba(0,0,0,0.2); }
+.statcard { background:#fff; border:1px solid #e2e8f0; border-radius:9px; padding:10px 12px; }
+</style>
+</head>
+<body>
+<div style="display:flex;height:100vh;background:#f0f4f8;overflow:hidden;">
+
+  <!-- SIDEBAR -->
+  <div style="width:44px;background:#1e293b;display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:8px;flex-shrink:0;">
+    <div style="width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,#2563eb,#06b6d4);display:flex;align-items:center;justify-content:center;margin-bottom:6px;">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+    </div>
+    <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#818cf8,#6366f1);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;margin-top:auto;">SA</div>
+  </div>
+
+  <!-- MAIN -->
+  <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;">
+
+    <!-- TOPBAR -->
+    <div style="height:46px;background:#fff;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0;">
+      <span style="font-size:14px;font-weight:700;letter-spacing:-0.02em;">Solusi Group HRIS</span>
+      <span style="background:#f1f5f9;color:#64748b;border-radius:4px;padding:1px 7px;font-size:10px;font-weight:500;">Enterprise</span>
+      <div style="flex:1;"></div>
+      <span id="conn" style="font-size:10px;color:#94a3b8;">menghubungkan…</span>
+      <div style="display:flex;align-items:center;gap:7px;padding-left:10px;border-left:1px solid #f1f5f9;">
+        <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#818cf8,#6366f1);display:flex;align-items:center;justify-content:center;font-size:8.5px;font-weight:700;color:#fff;">SA</div>
+        <div><div style="font-size:11px;font-weight:600;">Super Admin</div><div style="font-size:9px;color:#94a3b8;">CEO · Solusi Group</div></div>
+      </div>
+    </div>
+
+    <!-- PAGE TABS -->
+    <div style="background:#fff;border-bottom:2px solid #f1f5f9;display:flex;align-items:flex-end;padding:0 16px;flex-shrink:0;overflow-x:auto;">
+      <button class="page-tab" onclick="sp('workspace',this)">Workspace</button>
+      <button class="page-tab" onclick="sp('kpi',this)">KPI &amp; Performa</button>
+      <button class="page-tab" onclick="sp('analysis',this)">AI Analysis</button>
+      <button class="page-tab active" onclick="sp('karyawan',this)">Data Karyawan</button>
+    </div>
+
+    <!-- CONTENT -->
+    <div style="flex:1;overflow:auto;" id="pg">
+
+      <!-- Placeholder pages -->
+      <div id="pg-analysis" class="ph" style="display:none;"></div>
+
+      <!-- ===================== WORKSPACE (LIVE RINGKASAN) ===================== -->
+      <div id="pg-workspace" style="display:none;padding:12px 14px;flex-direction:column;gap:10px;">
+        <div style="font-size:13px;font-weight:700;">Ringkasan SDM</div>
+        <div id="wsStat" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="card" style="padding:12px 14px;">
+            <div style="font-size:12px;font-weight:600;margin-bottom:10px;">🏆 Top 3 Performer <span id="wsTopPeriod" style="font-size:10px;color:#94a3b8;font-weight:400;"></span></div>
+            <div id="wsTop"></div>
+          </div>
+          <div class="card" style="padding:12px 14px;">
+            <div style="font-size:12px;font-weight:600;margin-bottom:10px;">⚠️ Perlu Perhatian</div>
+            <div id="wsAttn"></div>
+          </div>
+        </div>
+        <div class="card" style="padding:12px 14px;">
+          <div style="font-size:12px;font-weight:600;margin-bottom:10px;">Komposisi Karyawan per Divisi</div>
+          <div id="wsDiv"></div>
+        </div>
+      </div>
+
+      <!-- ===================== KPI & PERFORMA (LIVE) ===================== -->
+      <div id="pg-kpi" style="display:none;padding:12px 14px;flex-direction:column;gap:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+          <div style="font-size:13px;font-weight:700;">Penilaian KPI per Semester</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:11px;color:#64748b;font-weight:600;">Periode:</span>
+            <select id="kpiPeriod" class="input" style="width:auto;margin-top:0;" onchange="renderKpi()"></select>
+          </div>
+        </div>
+        <div id="kpiStat" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;"></div>
+        <div class="card" style="overflow:auto;">
+          <table style="width:100%;border-collapse:collapse;min-width:760px;">
+            <thead><tr style="background:#f8fafc;" id="kpiThead"></tr></thead>
+            <tbody id="kpiTbody"></tbody>
+          </table>
+          <div id="kpiFooter" style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9;font-size:11px;color:#94a3b8;"></div>
+        </div>
+        <div class="card" style="padding:12px 14px;">
+          <div style="font-size:12px;font-weight:600;margin-bottom:10px;">Ringkasan KPI per Divisi</div>
+          <div id="kpiDivSummary"></div>
+        </div>
+      </div>
+
+      <!-- ===================== DATA KARYAWAN (LIVE) ===================== -->
+      <div id="pg-karyawan" style="display:flex;padding:12px 14px;flex-direction:column;gap:10px;">
+        <div id="statStrip" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+          <div id="filterBar" style="display:flex;gap:5px;flex-wrap:wrap;"></div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <input id="search" class="input" style="width:180px;margin-top:0;" placeholder="Cari nama / NIK…" oninput="render()">
+            <button class="btn-primary" onclick="openAdd()">+ Tambah Karyawan</button>
+          </div>
+        </div>
+        <div class="card" style="overflow:hidden;">
+          <table style="width:100%;border-collapse:collapse;">
+            <thead><tr style="background:#f8fafc;" id="theadRow"></tr></thead>
+            <tbody id="tbody"></tbody>
+          </table>
+          <div id="footer" style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9;font-size:11px;color:#94a3b8;"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ADD MODAL -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div style="font-size:15px;font-weight:700;margin-bottom:14px;">Tambah Karyawan</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div><div class="label">NIK *</div><input id="f_nik" class="input" placeholder="EMP-011"></div>
+      <div><div class="label">Nama *</div><input id="f_nama" class="input" placeholder="Nama lengkap"></div>
+      <div><div class="label">Divisi *</div><input id="f_dept" class="input" placeholder="Programmer"></div>
+      <div><div class="label">Jabatan *</div><input id="f_pos" class="input" placeholder="Developer"></div>
+      <div><div class="label">Status</div>
+        <select id="f_status" class="input"><option>Aktif</option><option>Cuti</option><option>Probasi</option></select></div>
+      <div><div class="label">Tipe Kontrak</div>
+        <select id="f_kontrak" class="input"><option>Tetap</option><option>Kontrak</option><option>Probasi</option></select></div>
+      <div><div class="label">Email</div><input id="f_email" class="input" placeholder="opsional"></div>
+      <div><div class="label">Telepon</div><input id="f_phone" class="input" placeholder="opsional"></div>
+      <div><div class="label">Tgl Masuk</div><input id="f_join" type="date" class="input"></div>
+      <div><div class="label">KPI (0-100)</div><input id="f_kpi" type="number" class="input" value="0" min="0" max="100"></div>
+      <div><div class="label">AI Risk</div>
+        <select id="f_risk" class="input"><option>Low</option><option>Medium</option><option>High</option></select></div>
+    </div>
+    <div id="addErr" style="color:#dc2626;font-size:11px;margin-top:10px;display:none;"></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px;">
+      <button class="btn-ghost" onclick="closeAdd()">Batal</button>
+      <button class="btn-primary" id="saveBtn" onclick="saveEmployee()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ====== helper umum ======
+const statusColor = { "Aktif":["#16a34a","#dcfce7"], "Cuti":["#d97706","#fef3c7"], "Probasi":["#7c3aed","#ede9fe"] };
+const kontrakColor = { "Tetap":["#16a34a","#dcfce7"], "Kontrak":["#d97706","#fef3c7"], "Probasi":["#7c3aed","#ede9fe"] };
+const riskColor = { "Low":["#16a34a","#f0fdf4"], "Medium":["#d97706","#fffbeb"], "High":["#dc2626","#fee2e2"] };
+const kpiStatusColor = { "Excellent":["#16a34a","#dcfce7"], "Good":["#2563eb","#dbeafe"], "Below":["#d97706","#fef3c7"], "Poor":["#dc2626","#fee2e2"] };
+
+function kpiC(v){ return v>=88?"#16a34a":v>=80?"#2563eb":v>=70?"#d97706":"#dc2626"; }
+function inits(nama){ return (nama||"").trim().split(/\s+/).slice(0,2).map(w=>w[0]||"").join("").toUpperCase(); }
+function masaKerja(d){ if(!d) return "-"; const s=new Date(d), n=new Date(); let m=(n.getFullYear()-s.getFullYear())*12+(n.getMonth()-s.getMonth()); if(m<0)m=0; return Math.floor(m/12)+" th "+(m%12)+" bl"; }
+function esc(t){ const d=document.createElement("div"); d.textContent=t==null?"":t; return d.innerHTML; }
+function statCard(label,val,sub,color){ return '<div class="statcard" style="border-top:3px solid '+color+';"><div style="font-size:10px;color:#475569;font-weight:700;letter-spacing:0.05em;margin-bottom:4px;">'+label+'</div><div style="font-size:20px;font-weight:700;margin-bottom:2px;">'+val+'</div><div style="font-size:9.5px;color:'+color+';font-weight:500;">'+sub+'</div></div>'; }
+
+// ====== tab switching ======
+const pages = ["workspace","kpi","analysis","karyawan"];
+const phText = {
+  analysis:["AI Analysis","Insight workforce, prediksi, dan screening kandidat berbasis AI."],
+};
+function sp(id, el){
+  pages.forEach(p=>{ const e=document.getElementById("pg-"+p); if(e) e.style.display="none"; });
+  const t=document.getElementById("pg-"+id);
+  if(t) t.style.display = (id==="analysis") ? "block" : "flex";
+  document.querySelectorAll(".page-tab").forEach(b=>b.classList.remove("active"));
+  if(el) el.classList.add("active");
+}
+Object.keys(phText).forEach(k=>{
+  const [judul,desc]=phText[k];
+  document.getElementById("pg-"+k).innerHTML =
+    '<div style="padding:40px 24px;"><div class="card" style="padding:30px;text-align:center;max-width:520px;margin:0 auto;">'
+    + '<div style="font-size:16px;font-weight:700;margin-bottom:8px;">'+judul+'</div>'
+    + '<div style="font-size:12px;color:#64748b;margin-bottom:14px;">'+desc+'</div>'
+    + '<div style="display:inline-block;background:#fef3c7;color:#92400e;border-radius:6px;padding:6px 12px;font-size:11px;font-weight:600;">⚙️ Modul ini belum terhubung — akan aktif setelah backend-nya dibuat</div>'
+    + '</div></div>';
+});
+
+// ====== DATA KARYAWAN ======
+const API = "/api/employees";
+let DATA = [];
+let activeFilter = "Semua";
+
+async function load(){
+  try{
+    const res = await fetch(API + "?page_size=100");
+    if(!res.ok) throw new Error("HTTP "+res.status);
+    const json = await res.json();
+    DATA = json.items || [];
+    document.getElementById("conn").textContent = "● terhubung ("+ (json.total||DATA.length) +" karyawan)";
+    document.getElementById("conn").style.color = "#16a34a";
+    buildFilters();
+    render();
+    renderWorkspace();
+  }catch(err){
+    document.getElementById("conn").textContent = "● gagal terhubung";
+    document.getElementById("conn").style.color = "#dc2626";
+    document.getElementById("tbody").innerHTML =
+      '<tr><td style="padding:30px;text-align:center;color:#dc2626;">Tidak bisa mengambil data dari server.<br>Pastikan server berjalan, lalu muat ulang halaman.</td></tr>';
+  }
+}
+function buildFilters(){
+  const depts = [...new Set(DATA.map(e=>e.department).filter(Boolean))];
+  const opts = ["Semua","Aktif","Cuti", ...depts];
+  document.getElementById("filterBar").innerHTML = opts.map(f=>
+    '<button class="fb '+(f===activeFilter?"active":"")+'" onclick="setFilter(\''+f.replace(/'/g,"\\'")+'\')">'+esc(f)+'</button>'
+  ).join("");
+}
+function setFilter(f){ activeFilter=f; buildFilters(); render(); }
+function render(){
+  const q = (document.getElementById("search").value||"").toLowerCase();
+  let rows = DATA.filter(e=>{
+    if(activeFilter==="Aktif" && e.status!=="Aktif") return false;
+    if(activeFilter==="Cuti" && e.status!=="Cuti") return false;
+    if(!["Semua","Aktif","Cuti"].includes(activeFilter) && e.department!==activeFilter) return false;
+    if(q && !((e.nama||"").toLowerCase().includes(q) || (e.nik||"").toLowerCase().includes(q))) return false;
+    return true;
+  });
+  const total = DATA.length;
+  const aktif = DATA.filter(e=>e.status==="Aktif").length;
+  const cuti  = DATA.filter(e=>e.status==="Cuti").length;
+  const avgKpi = total ? Math.round(DATA.reduce((s,e)=>s+(e.kpi_score||0),0)/total) : 0;
+  const highRisk = DATA.filter(e=>e.ai_risk==="High").length;
+  document.getElementById("statStrip").innerHTML =
+      statCard("TOTAL KARYAWAN", total, "Aktif: "+aktif, "#2563eb")
+    + statCard("SEDANG CUTI", cuti, "dari "+total+" karyawan", "#d97706")
+    + statCard("RATA-RATA KPI", avgKpi, "skala 0–100", "#16a34a")
+    + statCard("AI RISK TINGGI", highRisk, "perlu perhatian", "#dc2626")
+    + statCard("DITAMPILKAN", rows.length, "sesuai filter", "#7c3aed");
+  const cols = ["ID","Nama Karyawan","Divisi","Jabatan","Status","Masa Kerja","Tipe Kontrak","KPI","AI Risk","Kontak"];
+  document.getElementById("theadRow").innerHTML = cols.map(h=>
+    '<th style="padding:8px 10px;text-align:left;font-size:10px;color:#334155;font-weight:700;letter-spacing:0.06em;border-bottom:1px solid #e2e8f0;white-space:nowrap;">'+h.toUpperCase()+'</th>'
+  ).join("");
+  if(rows.length===0){
+    document.getElementById("tbody").innerHTML = '<tr><td colspan="10" style="padding:24px;text-align:center;color:#94a3b8;">Tidak ada karyawan yang cocok.</td></tr>';
+  } else {
+    document.getElementById("tbody").innerHTML = rows.map((e,i)=>{
+      const sc=statusColor[e.status]||["#64748b","#f1f5f9"];
+      const kc=kontrakColor[e.contract_type]||["#64748b","#f1f5f9"];
+      const rc=riskColor[e.ai_risk]||["#64748b","#f1f5f9"];
+      const bb = i<rows.length-1 ? "1px solid #f8fafc" : "none";
+      const kpi = Math.round(e.kpi_score||0);
+      return '<tr class="tr-h">'
+        + '<td style="padding:8px 10px;border-bottom:'+bb+';font-size:9.5px;color:#94a3b8;white-space:nowrap;">'+esc(e.nik)+'</td>'
+        + '<td style="padding:8px 10px;border-bottom:'+bb+';"><div style="display:flex;align-items:center;gap:7px;">'
+          + '<div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#dbeafe,#eff6ff);border:1.5px solid #bfdbfe;display:flex;align-items:center;justify-content:center;font-size:8.5px;font-weight:700;color:#2563eb;flex-shrink:0;">'+esc(inits(e.nama))+'</div>'
+          + '<span style="font-size:12px;font-weight:500;white-space:nowrap;">'+esc(e.nama)+'</span></div></td>'
+        + '<td style="padding:8px 10px;border-bottom:'+bb+';font-size:11px;color:#64748b;white-space:nowrap;">'+esc(e.department)+'</td>'
+        + '<td style="padding:8px 10px;border-bottom:'+bb+';font-size:11px;color:#64748b;white-space:nowrap;">'+esc(e.position)+'</td>'
+        + '<td style="padding:8px 10px;border-bottom:'+bb+';"><span class="badge" style="background:'+sc[1]+';color:'+sc[0]+';">'+esc(e.status)+'</span></td>'
+        + '<td style="padding:8px 10px;border-bottom:'+bb+';font-size:11px;color:#64748b;white-space:nowrap;">'+masaKerja(e.join_date)+'</td>'
+        + '<td style="padding:8px 10px;border-bottom:'+bb+';"><span class="badge" style="background:'+kc[1]+';color:'+kc[0]+';">'+esc(e.contract_type)+'</span></td>'
+        + '<td style="padding:8px 10px;border-bottom:'+bb+';"><div style="display:flex;align-items:center;gap:4px;">'
+          + '<div class="prog-bar" style="width:40px;"><div class="prog-fill" style="width:'+kpi+'%;background:'+kpiC(kpi)+';"></div></div>'
+          + '<span style="font-size:11px;font-weight:700;color:'+kpiC(kpi)+';">'+kpi+'</span></div></td>'
+        + '<td style="padding:8px 10px;border-bottom:'+bb+';"><span class="badge" style="background:'+rc[1]+';color:'+rc[0]+';">'+esc(e.ai_risk)+'</span></td>'
+        + '<td style="padding:8px 10px;border-bottom:'+bb+';font-size:10px;color:#94a3b8;white-space:nowrap;">'+esc(e.phone||"-")+'</td>'
+        + '</tr>';
+    }).join("");
+  }
+  document.getElementById("footer").textContent = "Menampilkan "+rows.length+" dari "+DATA.length+" karyawan";
+}
+
+// ====== tambah karyawan ======
+function openAdd(){ document.getElementById("addErr").style.display="none"; document.getElementById("overlay").style.display="flex"; }
+function closeAdd(){ document.getElementById("overlay").style.display="none"; }
+async function saveEmployee(){
+  const body = {
+    nik: val("f_nik"), nama: val("f_nama"), department: val("f_dept"), position: val("f_pos"),
+    status: val("f_status"), contract_type: val("f_kontrak"),
+    email: val("f_email")||null, phone: val("f_phone")||null, join_date: val("f_join")||null,
+    kpi_score: parseFloat(val("f_kpi"))||0, ai_risk: val("f_risk"),
+  };
+  if(!body.nik || !body.nama || !body.department || !body.position){ return showErr("NIK, Nama, Divisi, dan Jabatan wajib diisi."); }
+  const btn=document.getElementById("saveBtn"); btn.disabled=true; btn.textContent="Menyimpan…";
+  try{
+    const res = await fetch(API, { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body) });
+    if(res.status===409){ return showErr("NIK sudah dipakai karyawan lain."); }
+    if(!res.ok){ return showErr("Gagal menyimpan ("+res.status+")."); }
+    closeAdd();
+    ["f_nik","f_nama","f_dept","f_pos","f_email","f_phone","f_join"].forEach(id=>document.getElementById(id).value="");
+    await load();
+  }catch(err){ showErr("Tidak bisa terhubung ke server."); }
+  finally{ btn.disabled=false; btn.textContent="Simpan"; }
+}
+function val(id){ return document.getElementById(id).value.trim(); }
+function showErr(msg){ const e=document.getElementById("addErr"); e.textContent=msg; e.style.display="block";
+  document.getElementById("saveBtn").disabled=false; document.getElementById("saveBtn").textContent="Simpan"; }
+
+// ====== KPI & PERFORMA ======
+let KPI = [];
+async function loadKpi(){
+  try{
+    const res = await fetch("/api/kpi/assessments");
+    if(!res.ok) throw new Error("HTTP "+res.status);
+    const json = await res.json();
+    KPI = json.items || [];
+    const periods = [...new Set(KPI.map(k=>k.period))].sort();
+    const sel = document.getElementById("kpiPeriod");
+    sel.innerHTML = periods.map(p=>'<option>'+esc(p)+'</option>').join("");
+    if(periods.length) sel.value = periods[periods.length-1];
+    renderKpi();
+    renderWorkspace();
+  }catch(err){
+    document.getElementById("kpiTbody").innerHTML = '<tr><td style="padding:20px;color:#dc2626;">Gagal memuat data KPI. Pastikan sudah menjalankan: python -m app.seed_kpi</td></tr>';
+  }
+}
+function renderKpi(){
+  const period = document.getElementById("kpiPeriod").value;
+  const rows = KPI.filter(k=>k.period===period);
+  const aspectNames = [];
+  rows.forEach(r=>r.aspects.forEach(a=>{ if(!aspectNames.includes(a.aspect)) aspectNames.push(a.aspect); }));
+
+  const n = rows.length;
+  const avg = n? Math.round(rows.reduce((s,r)=>s+r.overall_score,0)/n):0;
+  const exc = rows.filter(r=>r.status==="Excellent").length;
+  const coach = rows.filter(r=>r.needs_coaching).length;
+  document.getElementById("kpiStat").innerHTML =
+      statCard("RATA-RATA KPI", avg, "periode ini", "#2563eb")
+    + statCard("EXCELLENT", exc, "karyawan", "#16a34a")
+    + statCard("PERLU COACHING", coach, "karyawan", "#dc2626")
+    + statCard("DINILAI", n, "karyawan", "#7c3aed");
+
+  const cols = ["Nama","Divisi"].concat(aspectNames).concat(["Overall","Status","Coaching"]);
+  document.getElementById("kpiThead").innerHTML = cols.map(h=>
+    '<th style="padding:8px 10px;text-align:left;font-size:10px;color:#334155;font-weight:700;letter-spacing:0.06em;border-bottom:1px solid #e2e8f0;white-space:nowrap;">'+esc(h).toUpperCase()+'</th>'
+  ).join("");
+
+  if(rows.length===0){
+    document.getElementById("kpiTbody").innerHTML = '<tr><td colspan="'+cols.length+'" style="padding:24px;text-align:center;color:#94a3b8;">Belum ada data KPI untuk periode ini.</td></tr>';
+  } else {
+    document.getElementById("kpiTbody").innerHTML = rows.map((r,i)=>{
+      const bb = i<rows.length-1 ? "1px solid #f8fafc" : "none";
+      const sc = kpiStatusColor[r.status]||["#64748b","#f1f5f9"];
+      const aspCells = aspectNames.map(name=>{
+        const a = r.aspects.find(x=>x.aspect===name);
+        const v = a? Math.round(a.score) : "-";
+        const col = a? "#1e293b" : "#cbd5e1";
+        return '<td style="padding:8px 10px;border-bottom:'+bb+';font-size:11px;font-weight:600;color:'+col+';">'+v+'</td>';
+      }).join("");
+      const ov = Math.round(r.overall_score);
+      return '<tr class="tr-h">'
+        + '<td style="padding:8px 10px;border-bottom:'+bb+';font-size:12px;font-weight:500;white-space:nowrap;">'+esc(r.employee_nama)+'</td>'
+        + '<td style="padding:8px 10px;border-bottom:'+bb+';font-size:11px;color:#64748b;white-space:nowrap;">'+esc(r.employee_department)+'</td>'
+        + aspCells
+        + '<td style="padding:8px 10px;border-bottom:'+bb+';"><div style="display:flex;align-items:center;gap:4px;">'
+          + '<div class="prog-bar" style="width:40px;"><div class="prog-fill" style="width:'+ov+'%;background:'+kpiC(ov)+';"></div></div>'
+          + '<span style="font-size:11px;font-weight:700;color:#1e293b;">'+ov+'</span></div></td>'
+        + '<td style="padding:8px 10px;border-bottom:'+bb+';"><span class="badge" style="background:'+sc[1]+';color:'+sc[0]+';">'+esc(r.status)+'</span></td>'
+        + '<td style="padding:8px 10px;border-bottom:'+bb+';">'+(r.needs_coaching?'<span class="badge" style="background:#fee2e2;color:#dc2626;">Perlu</span>':'<span style="color:#cbd5e1;font-size:11px;">—</span>')+'</td>'
+        + '</tr>';
+    }).join("");
+  }
+  document.getElementById("kpiFooter").textContent = "Menampilkan "+rows.length+" penilaian — periode "+period;
+
+  const div={};
+  rows.forEach(r=>{ const d=r.employee_department||"-"; (div[d]=div[d]||[]).push(r.overall_score); });
+  const keys = Object.keys(div);
+  document.getElementById("kpiDivSummary").innerHTML = keys.length? keys.map(d=>{
+    const a=Math.round(div[d].reduce((s,x)=>s+x,0)/div[d].length);
+    return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:7px;">'
+      + '<span style="width:170px;font-size:11px;color:#64748b;">'+esc(d)+'</span>'
+      + '<div class="prog-bar" style="flex:1;max-width:320px;"><div class="prog-fill" style="width:'+a+'%;background:'+kpiC(a)+';"></div></div>'
+      + '<span style="font-size:11px;font-weight:700;color:#1e293b;">'+a+'</span></div>';
+  }).join("") : '<div style="font-size:11px;color:#94a3b8;">Belum ada data.</div>';
+}
+
+// ====== WORKSPACE (ringkasan dari data karyawan + KPI) ======
+function renderWorkspace(){
+  if(!DATA || DATA.length===0) return;
+  const total = DATA.length;
+  const aktif = DATA.filter(e=>e.status==="Aktif").length;
+  const cuti  = DATA.filter(e=>e.status==="Cuti").length;
+  const avgKpi = total ? Math.round(DATA.reduce((s,e)=>s+(e.kpi_score||0),0)/total) : 0;
+
+  // periode KPI terbaru
+  const periods = [...new Set((KPI||[]).map(k=>k.period))].sort();
+  const lastPeriod = periods.length ? periods[periods.length-1] : null;
+  const kpiRows = lastPeriod ? KPI.filter(k=>k.period===lastPeriod) : [];
+  const coachCount = kpiRows.filter(r=>r.needs_coaching).length;
+
+  document.getElementById("wsStat").innerHTML =
+      statCard("TOTAL KARYAWAN", total, "Aktif: "+aktif, "#2563eb")
+    + statCard("SEDANG CUTI", cuti, "dari "+total+" karyawan", "#d97706")
+    + statCard("RATA-RATA KPI", avgKpi, "skala 0–100", "#16a34a")
+    + statCard("PERLU COACHING", coachCount, lastPeriod||"-", "#dc2626");
+
+  // Top 3 performer (dari KPI periode terbaru)
+  document.getElementById("wsTopPeriod").textContent = lastPeriod ? "("+lastPeriod+")" : "";
+  const top = [...kpiRows].sort((a,b)=>b.overall_score-a.overall_score).slice(0,3);
+  document.getElementById("wsTop").innerHTML = top.length ? top.map((r,i)=>{
+    const medal = ["🥇","🥈","🥉"][i]||"";
+    return '<div style="display:flex;align-items:center;gap:9px;margin-bottom:8px;">'
+      + '<span style="font-size:15px;width:20px;">'+medal+'</span>'
+      + '<div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#dbeafe,#eff6ff);border:1.5px solid #bfdbfe;display:flex;align-items:center;justify-content:center;font-size:8.5px;font-weight:700;color:#2563eb;flex-shrink:0;">'+esc(inits(r.employee_nama))+'</div>'
+      + '<div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+esc(r.employee_nama)+'</div>'
+      + '<div style="font-size:10px;color:#94a3b8;">'+esc(r.employee_department)+'</div></div>'
+      + '<span style="font-size:14px;font-weight:700;color:'+kpiC(r.overall_score)+';">'+Math.round(r.overall_score)+'</span></div>';
+  }).join("") : '<div style="font-size:11px;color:#94a3b8;">Belum ada data KPI.</div>';
+
+  // Perlu perhatian: AI risk tinggi/medium ATAU perlu coaching
+  const coachNames = new Set(kpiRows.filter(r=>r.needs_coaching).map(r=>r.employee_id));
+  const attn = DATA.filter(e=>e.ai_risk==="High"||e.ai_risk==="Medium"||coachNames.has(e.id));
+  document.getElementById("wsAttn").innerHTML = attn.length ? attn.map(e=>{
+    const reasons=[];
+    if(e.ai_risk==="High") reasons.push('<span class="badge" style="background:#fee2e2;color:#dc2626;">Risk High</span>');
+    else if(e.ai_risk==="Medium") reasons.push('<span class="badge" style="background:#fef3c7;color:#d97706;">Risk Medium</span>');
+    if(coachNames.has(e.id)) reasons.push('<span class="badge" style="background:#ede9fe;color:#7c3aed;">Coaching</span>');
+    return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
+      + '<div style="width:24px;height:24px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#64748b;flex-shrink:0;">'+esc(inits(e.nama))+'</div>'
+      + '<div style="flex:1;min-width:0;"><span style="font-size:12px;font-weight:500;">'+esc(e.nama)+'</span> <span style="font-size:10px;color:#94a3b8;">· '+esc(e.department)+'</span></div>'
+      + '<div style="display:flex;gap:4px;">'+reasons.join("")+'</div></div>';
+  }).join("") : '<div style="font-size:11px;color:#16a34a;">✓ Semua karyawan dalam kondisi baik.</div>';
+
+  // Komposisi per divisi
+  const byDiv={};
+  DATA.forEach(e=>{ const d=e.department||"-"; byDiv[d]=(byDiv[d]||0)+1; });
+  const maxN = Math.max(...Object.values(byDiv), 1);
+  document.getElementById("wsDiv").innerHTML = Object.keys(byDiv).sort((a,b)=>byDiv[b]-byDiv[a]).map(d=>{
+    const c=byDiv[d]; const w=Math.round(c/maxN*100);
+    return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:7px;">'
+      + '<span style="width:170px;font-size:11px;color:#64748b;">'+esc(d)+'</span>'
+      + '<div class="prog-bar" style="flex:1;max-width:320px;"><div class="prog-fill" style="width:'+w+'%;background:#2563eb;"></div></div>'
+      + '<span style="font-size:11px;font-weight:700;color:#1e293b;">'+c+'</span></div>';
+  }).join("");
+}
+
+// ====== mulai ======
+load();
+loadKpi();
+</script>
+</body>
+</html>
