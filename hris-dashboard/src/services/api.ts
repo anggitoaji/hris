@@ -9,8 +9,30 @@ import type {
 
 const BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8000/api";
 
+// ===== Token login (disimpan di localStorage) =====
+const TOKEN_KEY = "hris_token";
+let authToken: string | null = (typeof localStorage !== "undefined" ? localStorage.getItem(TOKEN_KEY) : null);
+let onUnauthorized: (() => void) | null = null;
+
+export function setAuthToken(t: string | null) {
+  authToken = t;
+  try {
+    if (t) localStorage.setItem(TOKEN_KEY, t);
+    else localStorage.removeItem(TOKEN_KEY);
+  } catch { /* abaikan */ }
+}
+export function getAuthToken(): string | null { return authToken; }
+export function setOnUnauthorized(cb: () => void) { onUnauthorized = cb; }
+
+function authHeaders(extra?: Record<string, string>): Record<string, string> {
+  const h: Record<string, string> = { ...(extra ?? {}) };
+  if (authToken) h["Authorization"] = `Bearer ${authToken}`;
+  return h;
+}
+
 async function getJSON<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE}${path}`);
+  const res = await fetch(`${BASE}${path}`, { headers: authHeaders() });
+  if (res.status === 401) { onUnauthorized?.(); throw new Error("Sesi berakhir. Silakan login lagi."); }
   if (!res.ok) throw new Error(`API ${path} gagal: ${res.status}`);
   return res.json() as Promise<T>;
 }
@@ -18,9 +40,10 @@ async function getJSON<T>(path: string): Promise<T> {
 async function sendJSON<T>(path: string, method: "POST" | "PUT" | "PATCH" | "DELETE", body?: unknown): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
     method,
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: body === undefined ? undefined : JSON.stringify(body),
   });
+  if (res.status === 401) { onUnauthorized?.(); throw new Error("Sesi berakhir. Silakan login lagi."); }
   if (!res.ok) {
     // Coba ambil pesan detail dari backend (mis. NIK duplikat -> 409).
     let msg = `Gagal (${res.status})`;
@@ -293,4 +316,41 @@ export async function patchActionItem(id: number, data: Record<string, unknown>)
 /** Daftar periode KPI yang tersedia (untuk dropdown). */
 export async function fetchKpiPeriods(): Promise<string[]> {
   return getJSON<string[]>("/kpi/periods");
+}
+
+
+// ===================== Auth / User =====================
+export interface AuthUser {
+  id: number;
+  username: string;
+  role: string;
+  employee_id: number | null;
+  employee_nama: string | null;
+  is_active: boolean;
+}
+export interface LoginResult { token: string; user: AuthUser; }
+
+export async function login(username: string, password: string): Promise<LoginResult> {
+  return sendJSON<LoginResult>("/auth/login", "POST", { username, password });
+}
+export async function fetchMe(): Promise<AuthUser> {
+  return getJSON<AuthUser>("/auth/me");
+}
+export async function changePassword(old_password: string, new_password: string): Promise<unknown> {
+  return sendJSON<unknown>("/auth/change-password", "POST", { old_password, new_password });
+}
+export async function fetchRoles(): Promise<string[]> {
+  return getJSON<string[]>("/auth/roles");
+}
+export async function fetchUsers(): Promise<AuthUser[]> {
+  return getJSON<AuthUser[]>("/auth/users");
+}
+export async function createUser(data: Record<string, unknown>): Promise<AuthUser> {
+  return sendJSON<AuthUser>("/auth/users", "POST", data);
+}
+export async function updateUser(id: number, data: Record<string, unknown>): Promise<AuthUser> {
+  return sendJSON<AuthUser>(`/auth/users/${id}`, "PATCH", data);
+}
+export async function deleteUser(id: number): Promise<unknown> {
+  return sendJSON<unknown>(`/auth/users/${id}`, "DELETE");
 }

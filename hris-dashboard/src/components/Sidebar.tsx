@@ -157,8 +157,9 @@ function routeFor(moduleKey: string, sub?: Sub): string {
   return "soon:" + (sub ? sub.label : moduleKey);
 }
 
-export default function Sidebar({ current, onNavigate, role, onRoleChange }: { current: string; onNavigate: (route: string) => void; role: Role; onRoleChange: (r: Role) => void }) {
+export default function Sidebar({ current, onNavigate, role, onRoleChange, username, realRole, canPreview, onLogout, onChangePassword }: { current: string; onNavigate: (route: string) => void; role: Role; onRoleChange: (r: Role) => void; username: string; realRole: Role; canPreview: boolean; onLogout: () => void; onChangePassword: () => void }) {
   const [openKey, setOpenKey] = useState<string | null>(null);
+  const initials = (username || "?").slice(0, 2).toUpperCase();
   const [active, setActive] = useState("dashboard");
 
   const toggle = (k: string) => setOpenKey((o) => (o === k ? null : k));
@@ -228,17 +229,25 @@ export default function Sidebar({ current, onNavigate, role, onRoleChange }: { c
         <button onClick={() => toggle("__role__")}
           className="rounded-full flex items-center justify-center text-white text-[10px] font-bold"
           style={{ width: 32, height: 32, background: "linear-gradient(135deg,#818cf8,#6366f1)" }}>
-          AK
+          {initials}
         </button>
         {openKey === "__role__" && (
-          <div className="absolute left-full bottom-0 ml-2 z-50 bg-white border border-slate-100 rounded-xl shadow-xl p-3" style={{ width: 200 }}>
-            <div className="text-xs font-semibold text-slate-700 truncate">Anggi Kurnianto</div>
-            <div className="text-[10px] text-slate-400 mb-2">Pratinjau tampilan per role</div>
-            <div className="text-[10px] text-slate-400 font-semibold uppercase tracking-wide mb-1">Tampil sebagai</div>
-            <select value={role} onChange={(e) => { onRoleChange(e.target.value as Role); setActive("dashboard"); }}
-              className="w-full text-sm border border-slate-200 rounded-lg px-2 py-1.5 outline-none">
-              {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
-            </select>
+          <div className="absolute left-full bottom-0 ml-2 z-50 bg-white border border-slate-100 rounded-xl shadow-xl p-3" style={{ width: 220 }}>
+            <div className="text-xs font-semibold text-slate-700 truncate">{username}</div>
+            <div className="text-[10px] text-slate-400 mb-2">Role: {realRole}</div>
+            {canPreview && (
+              <>
+                <div className="text-[10px] text-slate-400 font-semibold uppercase tracking-wide mb-1">Tampil sebagai</div>
+                <select value={role} onChange={(e) => { onRoleChange(e.target.value as Role); setActive("dashboard"); }}
+                  className="w-full text-sm border border-slate-200 rounded-lg px-2 py-1.5 outline-none mb-2">
+                  {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
+                </select>
+              </>
+            )}
+            <button onClick={() => { setOpenKey(null); onChangePassword(); }}
+              className="w-full text-left text-sm px-2 py-1.5 rounded-lg hover:bg-slate-50 text-slate-600">Ganti Password</button>
+            <button onClick={() => { setOpenKey(null); onLogout(); }}
+              className="w-full text-left text-sm px-2 py-1.5 rounded-lg hover:bg-red-50 text-red-600">Keluar (Logout)</button>
           </div>
         )}
       </div>
