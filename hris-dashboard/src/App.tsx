@@ -20,6 +20,7 @@ import ActionItemsPage from "./pages/ActionItemsPage";
 import KpiPerusahaanPage from "./pages/KpiPerusahaanPage";
 import KpiDivisiPage from "./pages/KpiDivisiPage";
 import LoginPage from "./pages/LoginPage";
+import UserManagementPage from "./pages/UserManagementPage";
 import {
   fetchMe, setAuthToken, getAuthToken, setOnUnauthorized,
   changePassword as apiChangePassword, type AuthUser, type LoginResult,
@@ -220,6 +221,8 @@ export default function App() {
           {route === "kpi.perusahaan" && <KpiPerusahaanPage />}
 
           {route === "kpi.divisi" && <KpiDivisiPage />}
+
+          {route === "users.manage" && <UserManagementPage />}
 
           {route.startsWith("soon:") && <ComingSoon name={route.slice(5)} />}
         </main>
