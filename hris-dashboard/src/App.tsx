@@ -176,6 +176,10 @@ export default function App() {
       />
       <div className="flex-1 min-w-0 flex flex-col">
         <Header
+          username={user.username}
+          role={user.role}
+          onLogout={handleLogout}
+          onChangePassword={() => setPwOpen(true)}
           actions={
             isDash ? (
               <WidgetToggle
