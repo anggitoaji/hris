@@ -9,6 +9,7 @@ from app.api.routes import employees, kpi
 from app.divisi import router as divisi_router
 from app.attendance import router as attendance_router
 from app.payroll import router as payroll_router
+from app.meeting import router as meeting_router
 from app.core.config import settings
 from app.core.database import Base, engine
 
@@ -45,6 +46,7 @@ app.include_router(kpi.router, prefix=settings.API_PREFIX)
 app.include_router(divisi_router, prefix=settings.API_PREFIX)
 app.include_router(attendance_router, prefix=settings.API_PREFIX)
 app.include_router(payroll_router, prefix=settings.API_PREFIX)
+app.include_router(meeting_router, prefix=settings.API_PREFIX)
 
 
 @app.get("/", include_in_schema=False)
