@@ -101,8 +101,9 @@ const MENU: Item[] = [
     ] },
 
   { key: "pengaturan", label: "Pengaturan", Icon: Settings, group: "Sistem",
-    roles: [], sub: [
-      { label: "User Management", roles: [] },
+    roles: ["Super Admin", "Direksi", "HR", "Manager", "Finance", "NOC", "Karyawan"], sub: [
+      { label: "Ganti Password", roles: ["Super Admin", "Direksi", "HR", "Manager", "Finance", "NOC", "Karyawan"], built: true },
+      { label: "User Management", roles: [], built: true },
       { label: "Role & Permission", roles: [] },
       { label: "Workflow Approval", roles: [] },
       { label: "Notifikasi", roles: [] },
@@ -154,10 +155,12 @@ function routeFor(moduleKey: string, sub?: Sub): string {
   if (moduleKey === "meeting" && sub && sub.label === "Action Item") return "meeting.actions";
   if (moduleKey === "kpi" && sub && sub.label === "KPI Perusahaan") return "kpi.perusahaan";
   if (moduleKey === "kpi" && sub && sub.label === "KPI Divisi") return "kpi.divisi";
+  if (moduleKey === "pengaturan" && sub && sub.label === "User Management") return "users.manage";
+  if (moduleKey === "pengaturan" && sub && sub.label === "Ganti Password") return "settings.password";
   return "soon:" + (sub ? sub.label : moduleKey);
 }
 
-export default function Sidebar({ current, onNavigate, role, onRoleChange, username, realRole, canPreview, onLogout, onChangePassword }: { current: string; onNavigate: (route: string) => void; role: Role; onRoleChange: (r: Role) => void; username: string; realRole: Role; canPreview: boolean; onLogout: () => void; onChangePassword: () => void }) {
+export default function Sidebar({ current, onNavigate, role, onRoleChange, username, realRole, canPreview, onLogout }: { current: string; onNavigate: (route: string) => void; role: Role; onRoleChange: (r: Role) => void; username: string; realRole: Role; canPreview: boolean; onLogout: () => void }) {
   const [openKey, setOpenKey] = useState<string | null>(null);
   const initials = (username || "?").slice(0, 2).toUpperCase();
   const [active, setActive] = useState("dashboard");
@@ -244,8 +247,6 @@ export default function Sidebar({ current, onNavigate, role, onRoleChange, usern
                 </select>
               </>
             )}
-            <button onClick={() => { setOpenKey(null); onChangePassword(); }}
-              className="w-full text-left text-sm px-2 py-1.5 rounded-lg hover:bg-slate-50 text-slate-600">Ganti Password</button>
             <button onClick={() => { setOpenKey(null); onLogout(); }}
               className="w-full text-left text-sm px-2 py-1.5 rounded-lg hover:bg-red-50 text-red-600">Keluar (Logout)</button>
           </div>

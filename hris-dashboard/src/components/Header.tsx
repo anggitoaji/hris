@@ -8,13 +8,12 @@ function todayID(): string {
 }
 
 export default function Header({
-  actions, username = "User", role = "", onLogout, onChangePassword,
+  actions, username = "User", role = "", onLogout,
 }: {
   actions?: ReactNode;
   username?: string;
   role?: string;
   onLogout?: () => void;
-  onChangePassword?: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const initials = (username || "?").slice(0, 2).toUpperCase();
@@ -67,8 +66,6 @@ export default function Header({
                   <div className="text-sm font-semibold text-slate-700 truncate">{username}</div>
                   <div className="text-[11px] text-slate-400">{role}</div>
                 </div>
-                <button onClick={() => { setOpen(false); onChangePassword?.(); }}
-                  className="w-full text-left text-sm px-2 py-1.5 rounded-lg hover:bg-slate-50 text-slate-600">Ganti Password</button>
                 <button onClick={() => { setOpen(false); onLogout?.(); }}
                   className="w-full text-left text-sm px-2 py-1.5 rounded-lg hover:bg-red-50 text-red-600">Keluar (Logout)</button>
               </div>
