@@ -1,7 +1,7 @@
 import os
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 
@@ -10,6 +10,7 @@ from app.divisi import router as divisi_router
 from app.attendance import router as attendance_router
 from app.payroll import router as payroll_router
 from app.meeting import router as meeting_router
+from app.auth import router as auth_router, ensure_default_admin, get_current_user, require_roles
 from app.core.config import settings
 from app.core.database import Base, engine
 
@@ -24,6 +25,7 @@ STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
 async def lifespan(app: FastAPI):
     # Buat tabel yang belum ada saat startup (termasuk tabel KPI yang baru).
     Base.metadata.create_all(bind=engine)
+    ensure_default_admin()
     yield
 
 
@@ -41,12 +43,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(employees.router, prefix=settings.API_PREFIX)
-app.include_router(kpi.router, prefix=settings.API_PREFIX)
-app.include_router(divisi_router, prefix=settings.API_PREFIX)
-app.include_router(attendance_router, prefix=settings.API_PREFIX)
-app.include_router(payroll_router, prefix=settings.API_PREFIX)
-app.include_router(meeting_router, prefix=settings.API_PREFIX)
+# Semua endpoint data WAJIB login (token dikirim dari frontend).
+login_required = [Depends(get_current_user)]
+app.include_router(employees.router, prefix=settings.API_PREFIX, dependencies=login_required)
+app.include_router(kpi.router, prefix=settings.API_PREFIX, dependencies=login_required)
+app.include_router(divisi_router, prefix=settings.API_PREFIX, dependencies=login_required)
+app.include_router(attendance_router, prefix=settings.API_PREFIX, dependencies=login_required)
+# Payroll: hanya Direksi/Finance (Super Admin selalu boleh).
+app.include_router(payroll_router, prefix=settings.API_PREFIX, dependencies=[Depends(require_roles("Direksi", "Finance"))])
+app.include_router(meeting_router, prefix=settings.API_PREFIX, dependencies=login_required)
+# Auth: login terbuka; kelola user sudah dibatasi Super Admin di dalam router.
+app.include_router(auth_router, prefix=settings.API_PREFIX)
 
 
 @app.get("/", include_in_schema=False)

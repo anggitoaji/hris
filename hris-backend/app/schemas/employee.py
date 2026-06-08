@@ -53,6 +53,9 @@ class EmployeeBase(BaseModel):
     emergency_name: str | None = Field(default=None, max_length=128)
     emergency_phone: str | None = Field(default=None, max_length=32)
     emergency_relation: str | None = Field(default=None, max_length=64, examples=["Istri"])
+    skills: str | None = Field(default=None, max_length=512, examples=["Mikrotik, Linux, Networking"])
+    job_desc: str | None = Field(default=None, max_length=2000)
+    catatan: str | None = Field(default=None, max_length=1000)
 
 
 class EmployeeCreate(EmployeeBase):
@@ -94,6 +97,9 @@ class EmployeeUpdate(BaseModel):
     emergency_name: str | None = Field(default=None, max_length=128)
     emergency_phone: str | None = Field(default=None, max_length=32)
     emergency_relation: str | None = Field(default=None, max_length=64)
+    skills: str | None = Field(default=None, max_length=512)
+    job_desc: str | None = Field(default=None, max_length=2000)
+    catatan: str | None = Field(default=None, max_length=1000)
 
 
 class EmployeeOut(EmployeeBase):

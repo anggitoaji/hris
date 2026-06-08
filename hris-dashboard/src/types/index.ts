@@ -89,6 +89,7 @@ export interface Employee {
   emergency_relation: string | null;
   skills: string | null;
   job_desc: string | null;
+  catatan: string | null;
 }
 
 export interface EmployeeListResponse {

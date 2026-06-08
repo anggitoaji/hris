@@ -54,6 +54,11 @@ class Employee(Base):
     emergency_phone: Mapped[str | None] = mapped_column(String(32), nullable=True)     # Kontak darurat: telp
     emergency_relation: Mapped[str | None] = mapped_column(String(64), nullable=True)  # Kontak darurat: hubungan
 
+    # ===== Kompetensi & uraian tugas =====
+    skills: Mapped[str | None] = mapped_column(String(512), nullable=True)     # Keahlian/kompetensi (pisah koma)
+    job_desc: Mapped[str | None] = mapped_column(String(2000), nullable=True)  # Jobdesk / uraian tugas
+    catatan: Mapped[str | None] = mapped_column(String(1000), nullable=True)   # Catatan umum
+
     # Soft delete: data tidak dihapus permanen, hanya ditandai non-aktif.
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
 

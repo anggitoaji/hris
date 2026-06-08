@@ -5,11 +5,6 @@ import type { Role } from "../components/Sidebar";
 import type { Employee } from "../types";
 
 const STATUS_OPTS = ["Aktif", "Cuti", "Probasi"];
-const STATUS_COLOR: Record<string, string> = {
-  Aktif: "bg-emerald-100 text-emerald-700",
-  Cuti: "bg-amber-100 text-amber-700",
-  Probasi: "bg-sky-100 text-sky-700",
-};
 
 function Field({ label, value }: { label: string; value: string | number | null | undefined }) {
   const empty = value === null || value === undefined || value === "";
@@ -40,7 +35,7 @@ const FIELD_KEYS = [
   "join_date", "kpi_score", "ktp", "gender", "birth_place", "birth_date", "religion",
   "marital_status", "address", "education", "npwp", "bank_name", "bank_account",
   "bpjs_kesehatan", "bpjs_ketenagakerjaan", "emergency_name", "emergency_phone", "emergency_relation",
-  "skills", "job_desc",
+  "skills", "job_desc", "catatan",
 ] as const;
 
 function emptyForm(): FormState {
@@ -110,6 +105,7 @@ const SECTIONS: { title: string; fields: FieldCfg[] }[] = [
   { title: "Kompetensi & Jobdesk", fields: [
     { key: "skills", label: "Keahlian / Kompetensi (pisahkan dengan koma)", full: true },
     { key: "job_desc", label: "Jobdesk / Uraian Tugas", type: "textarea", full: true },
+    { key: "catatan", label: "Catatan", type: "textarea", full: true },
   ] },
 ];
 
@@ -319,7 +315,7 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
     }
   }
 
-  const COLS = 6;
+  const COLS = 8;
   function Row({ e }: { e: Employee }) {
     return (
       <tr onClick={() => setSel(e)} className="border-b border-slate-50 hover:bg-slate-50 cursor-pointer">
@@ -327,10 +323,10 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
         <td className="py-2 px-2 font-medium text-slate-800">{e.nama}</td>
         <td className="py-2 px-2 text-slate-600">{e.department}</td>
         <td className="py-2 px-2 text-slate-600">{e.position}</td>
-        <td className="py-2 px-2">
-          <span className={`text-xs px-2 py-0.5 rounded-full ${STATUS_COLOR[e.status] ?? "bg-slate-100 text-slate-600"}`}>{e.status}</span>
-        </td>
-        <td className="py-2 px-2 text-right text-slate-700">{e.kpi_score.toFixed(1)}</td>
+        <td className="py-2 px-2 text-slate-600 whitespace-nowrap">{e.email || "-"}</td>
+        <td className="py-2 px-2 text-slate-600 whitespace-nowrap" style={{ width: 130 }}>{e.phone || "-"}</td>
+        <td className="py-2 px-2 text-right text-slate-700 whitespace-nowrap pr-6" style={{ width: 64 }}>{e.kpi_score.toFixed(1)}</td>
+        <td className="py-2 px-2 text-slate-500 truncate" style={{ maxWidth: 280 }}>{e.catatan || "-"}</td>
       </tr>
     );
   }
@@ -398,8 +394,10 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
                   <th className="py-2 px-2 font-bold">Nama</th>
                   <th className="py-2 px-2 font-bold">Divisi</th>
                   <th className="py-2 px-2 font-bold">Jabatan</th>
-                  <th className="py-2 px-2 font-bold">Status</th>
-                  <th className="py-2 px-2 font-bold text-right">KPI</th>
+                  <th className="py-2 px-2 font-bold whitespace-nowrap">Email</th>
+                  <th className="py-2 px-2 font-bold whitespace-nowrap" style={{ width: 130 }}>No HP</th>
+                  <th className="py-2 px-2 font-bold text-right whitespace-nowrap pr-6" style={{ width: 64 }}>KPI</th>
+                  <th className="py-2 px-2 font-bold w-full">Catatan</th>
                 </tr>
               </thead>
               <tbody>
@@ -500,6 +498,10 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
               <div>
                 <div className="text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Jobdesk / Uraian Tugas</div>
                 <div className={`text-sm whitespace-pre-line ${sel.job_desc ? "text-slate-700" : "text-slate-300"}`}>{sel.job_desc ?? "-"}</div>
+              </div>
+              <div>
+                <div className="text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Catatan</div>
+                <div className={`text-sm whitespace-pre-line ${sel.catatan ? "text-slate-700" : "text-slate-300"}`}>{sel.catatan ?? "-"}</div>
               </div>
             </div>
           </div>
