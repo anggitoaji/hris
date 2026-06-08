@@ -215,3 +215,82 @@ export async function fetchSalaryTemplate(employeeId: number): Promise<PayslipIt
 export async function saveSalaryTemplate(employeeId: number, items: PayslipItem[]): Promise<PayslipItem[]> {
   return sendJSON<PayslipItem[]>(`/payroll/template/${employeeId}`, "PUT", { items });
 }
+
+
+// ===================== Meeting / MoM =====================
+export interface ActionItem {
+  id: number;
+  task: string;
+  assignee: string | null;
+  due_date: string | null;
+  done: boolean;
+}
+
+export interface ActionItemFlat extends ActionItem {
+  meeting_id: number;
+  meeting_title: string;
+  meeting_date: string | null;
+  meeting_category: string;
+}
+
+export interface Meeting {
+  id: number;
+  title: string;
+  category: string;
+  date: string;
+  time: string | null;
+  location: string | null;
+  organizer: string | null;
+  participants: string | null;
+  agenda: string | null;
+  notes: string | null;
+  status: string;
+  action_items: ActionItem[];
+  open_actions: number;
+}
+
+export interface MeetingSummary {
+  total: number;
+  terjadwal: number;
+  selesai: number;
+  open_actions: number;
+}
+
+export async function fetchMeetings(category?: string, status?: string): Promise<Meeting[]> {
+  const p = new URLSearchParams();
+  if (category) p.set("category", category);
+  if (status) p.set("status", status);
+  const qs = p.toString() ? `?${p.toString()}` : "";
+  return getJSON<Meeting[]>(`/meetings${qs}`);
+}
+
+export async function fetchMeetingSummary(): Promise<MeetingSummary> {
+  return getJSON<MeetingSummary>("/meetings/summary");
+}
+
+export async function createMeeting(data: Record<string, unknown>): Promise<Meeting> {
+  return sendJSON<Meeting>("/meetings", "POST", data);
+}
+
+export async function updateMeeting(id: number, data: Record<string, unknown>): Promise<Meeting> {
+  return sendJSON<Meeting>(`/meetings/${id}`, "PATCH", data);
+}
+
+export async function deleteMeeting(id: number): Promise<unknown> {
+  return sendJSON<unknown>(`/meetings/${id}`, "DELETE");
+}
+
+export async function fetchActionItems(done?: boolean): Promise<ActionItemFlat[]> {
+  const qs = done === undefined ? "" : `?done=${done}`;
+  return getJSON<ActionItemFlat[]>(`/meetings/action-items${qs}`);
+}
+
+export async function patchActionItem(id: number, data: Record<string, unknown>): Promise<ActionItem> {
+  return sendJSON<ActionItem>(`/meetings/action-items/${id}`, "PATCH", data);
+}
+
+
+/** Daftar periode KPI yang tersedia (untuk dropdown). */
+export async function fetchKpiPeriods(): Promise<string[]> {
+  return getJSON<string[]>("/kpi/periods");
+}

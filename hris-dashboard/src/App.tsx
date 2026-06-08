@@ -15,6 +15,10 @@ import DataKaryawanPage from "./pages/DataKaryawanPage";
 import KpiKaryawanPage from "./pages/KpiKaryawanPage";
 import KehadiranPage from "./pages/KehadiranPage";
 import SlipGajiPage from "./pages/SlipGajiPage";
+import MeetingPage from "./pages/MeetingPage";
+import ActionItemsPage from "./pages/ActionItemsPage";
+import KpiPerusahaanPage from "./pages/KpiPerusahaanPage";
+import KpiDivisiPage from "./pages/KpiDivisiPage";
 
 const GRID_ORDER: WidgetKey[] = [
   "kpi", "project", "meeting", "marketing", "modemCustomer", "modemStock",
@@ -95,6 +99,16 @@ export default function App() {
           {route === "kehadiran.absensi" && <KehadiranPage />}
 
           {route === "payroll.slip" && <SlipGajiPage />}
+
+          {route === "meeting.internal" && <MeetingPage category="Internal" />}
+
+          {route === "meeting.pelanggan" && <MeetingPage category="Pelanggan" />}
+
+          {route === "meeting.actions" && <ActionItemsPage />}
+
+          {route === "kpi.perusahaan" && <KpiPerusahaanPage />}
+
+          {route === "kpi.divisi" && <KpiDivisiPage />}
 
           {route.startsWith("soon:") && <ComingSoon name={route.slice(5)} />}
         </main>

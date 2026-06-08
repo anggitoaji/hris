@@ -28,8 +28,8 @@ const MENU: Item[] = [
 
   { key: "kpi", label: "KPI & Performance", Icon: BarChart3, group: "Utama", built: true,
     roles: ["Direksi", "HR", "Manager", "Finance", "NOC"], sub: [
-      { label: "KPI Perusahaan", roles: ["Direksi", "Finance"] },
-      { label: "KPI Divisi", roles: ["Direksi", "HR", "Manager", "Finance"] },
+      { label: "KPI Perusahaan", roles: ["Direksi", "Finance"], built: true },
+      { label: "KPI Divisi", roles: ["Direksi", "HR", "Manager", "Finance"], built: true },
       { label: "KPI Pelanggan (SLA/Uptime)", roles: ["Direksi", "NOC"] },
       { label: "Dashboard Eksekutif", roles: ["Direksi"] },
     ] },
@@ -44,9 +44,9 @@ const MENU: Item[] = [
 
   { key: "meeting", label: "Meeting (MoM)", Icon: CalendarDays, group: "Operasional",
     roles: ["Direksi", "HR", "Manager", "Finance", "NOC"], sub: [
-      { label: "Meeting Internal", roles: ["Direksi", "HR", "Manager", "Finance", "NOC"] },
-      { label: "Meeting Pelanggan", roles: ["Direksi", "Manager", "NOC"] },
-      { label: "Action Item", roles: ["Direksi", "HR", "Manager"] },
+      { label: "Meeting Internal", roles: ["Direksi", "HR", "Manager", "Finance", "NOC"], built: true },
+      { label: "Meeting Pelanggan", roles: ["Direksi", "Manager", "NOC"], built: true },
+      { label: "Action Item", roles: ["Direksi", "HR", "Manager"], built: true },
       { label: "Arsip Meeting", roles: ["Direksi", "HR", "Manager", "Finance", "NOC"] },
     ] },
 
@@ -149,6 +149,11 @@ function routeFor(moduleKey: string, sub?: Sub): string {
   if (moduleKey === "karyawan" && sub && sub.label === "KPI Karyawan") return "kpi.karyawan";
   if (moduleKey === "karyawan" && sub && sub.label === "Kehadiran & Absensi") return "kehadiran.absensi";
   if (moduleKey === "keuangan" && sub && sub.label === "Slip Gaji") return "payroll.slip";
+  if (moduleKey === "meeting" && sub && sub.label === "Meeting Internal") return "meeting.internal";
+  if (moduleKey === "meeting" && sub && sub.label === "Meeting Pelanggan") return "meeting.pelanggan";
+  if (moduleKey === "meeting" && sub && sub.label === "Action Item") return "meeting.actions";
+  if (moduleKey === "kpi" && sub && sub.label === "KPI Perusahaan") return "kpi.perusahaan";
+  if (moduleKey === "kpi" && sub && sub.label === "KPI Divisi") return "kpi.divisi";
   return "soon:" + (sub ? sub.label : moduleKey);
 }
 
