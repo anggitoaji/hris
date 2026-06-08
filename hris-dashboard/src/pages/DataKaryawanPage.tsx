@@ -40,6 +40,7 @@ const FIELD_KEYS = [
   "join_date", "kpi_score", "ktp", "gender", "birth_place", "birth_date", "religion",
   "marital_status", "address", "education", "npwp", "bank_name", "bank_account",
   "bpjs_kesehatan", "bpjs_ketenagakerjaan", "emergency_name", "emergency_phone", "emergency_relation",
+  "skills", "job_desc",
 ] as const;
 
 function emptyForm(): FormState {
@@ -105,6 +106,10 @@ const SECTIONS: { title: string; fields: FieldCfg[] }[] = [
     { key: "emergency_name", label: "Nama" },
     { key: "emergency_phone", label: "Telepon", type: "tel" },
     { key: "emergency_relation", label: "Hubungan" },
+  ] },
+  { title: "Kompetensi & Jobdesk", fields: [
+    { key: "skills", label: "Keahlian / Kompetensi (pisahkan dengan koma)", full: true },
+    { key: "job_desc", label: "Jobdesk / Uraian Tugas", type: "textarea", full: true },
   ] },
 ];
 
@@ -423,7 +428,7 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
       {sel && (
         <>
           <div className="fixed inset-0 bg-black/20 z-40" onClick={() => setSel(null)} />
-          <div className="fixed top-0 right-0 h-full bg-white shadow-2xl z-50 overflow-y-auto" style={{ width: 420, maxWidth: "92vw" }}>
+          <div className="fixed top-0 right-0 h-full bg-white shadow-2xl z-50 overflow-y-auto" style={{ width: "50vw", minWidth: 460, maxWidth: "96vw" }}>
             <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 sticky top-0 bg-white">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
@@ -482,6 +487,20 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
                 <Field label="Telepon" value={sel.emergency_phone} />
                 <Field label="Hubungan" value={sel.emergency_relation} />
               </Group>
+              <div>
+                <div className="text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Keahlian / Kompetensi</div>
+                {sel.skills ? (
+                  <div className="flex flex-wrap gap-1.5">
+                    {sel.skills.split(",").map((x) => x.trim()).filter(Boolean).map((x, i) => (
+                      <span key={i} className="text-xs px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-100">{x}</span>
+                    ))}
+                  </div>
+                ) : <div className="text-sm text-slate-300">-</div>}
+              </div>
+              <div>
+                <div className="text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Jobdesk / Uraian Tugas</div>
+                <div className={`text-sm whitespace-pre-line ${sel.job_desc ? "text-slate-700" : "text-slate-300"}`}>{sel.job_desc ?? "-"}</div>
+              </div>
             </div>
           </div>
         </>

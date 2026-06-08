@@ -68,6 +68,27 @@ export interface Employee {
   join_date: string | null;
   kpi_score: number;
   ai_risk: AiRisk;
+  photo_url: string | null;
+
+  // ---- Biodata lengkap (opsional / bisa null) ----
+  ktp: string | null;
+  gender: string | null;
+  birth_place: string | null;
+  birth_date: string | null;
+  religion: string | null;
+  marital_status: string | null;
+  address: string | null;
+  education: string | null;
+  npwp: string | null;
+  bank_name: string | null;
+  bank_account: string | null;
+  bpjs_kesehatan: string | null;
+  bpjs_ketenagakerjaan: string | null;
+  emergency_name: string | null;
+  emergency_phone: string | null;
+  emergency_relation: string | null;
+  skills: string | null;
+  job_desc: string | null;
 }
 
 export interface EmployeeListResponse {
