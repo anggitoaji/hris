@@ -37,7 +37,7 @@ const FIELD_KEYS = [
   "bpjs_kesehatan", "bpjs_ketenagakerjaan", "emergency_name", "emergency_phone", "emergency_relation",
   "skills", "job_desc", "catatan",
   "nama_panggilan", "blood_type", "no_kk",
-  "contract_date", "permanent_date", "resign_date", "probation",
+  "resign_date",
   "grade", "work_location", "supervisor",
 ] as const;
 
@@ -79,10 +79,7 @@ const SECTIONS: { title: string; fields: FieldCfg[] }[] = [
     { key: "status", label: "Status", type: "select", options: STATUS_OPTS, required: true },
     { key: "contract_type", label: "Tipe Kontrak", type: "select", options: ["Tetap", "Kontrak", "Magang", "Outsourcing"], required: true },
     { key: "join_date", label: "Tanggal Masuk", type: "date" },
-    { key: "contract_date", label: "Tanggal Kontrak", type: "date" },
-    { key: "permanent_date", label: "Tanggal Tetap", type: "date" },
     { key: "resign_date", label: "Tanggal Resign", type: "date" },
-    { key: "probation", label: "Masa Percobaan" },
     { key: "kpi_score", label: "Skor KPI", type: "number" },
   ] },
   { title: "Struktur Organisasi", fields: [
@@ -330,7 +327,7 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
     }
   }
 
-  const COLS = 8;
+  const COLS = 9;
   function Row({ e }: { e: Employee }) {
     return (
       <tr onClick={() => setSel(e)} className="border-b border-slate-50 hover:bg-slate-50 cursor-pointer">
@@ -340,6 +337,7 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
         <td className="py-2 px-2 text-slate-600">{e.position}</td>
         <td className="py-2 px-2 text-slate-600 truncate">{e.email || "-"}</td>
         <td className="py-2 px-2 text-slate-600">{e.phone || "-"}</td>
+        <td className="py-2 px-2 text-slate-600 truncate">{e.work_location || "-"}</td>
         <td className="py-2 px-2 text-right text-slate-700 pr-4">{e.kpi_score.toFixed(1)}</td>
         <td className="py-2 px-2 text-slate-500 truncate">{e.catatan || "-"}</td>
       </tr>
@@ -404,14 +402,15 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
           <div className="overflow-x-auto">
             <table className="w-full text-sm table-fixed">
               <colgroup>
-                <col style={{ width: "8%" }} />
+                <col style={{ width: "7%" }} />
                 <col style={{ width: "12%" }} />
+                <col style={{ width: "9%" }} />
+                <col style={{ width: "11%" }} />
+                <col style={{ width: "18%" }} />
                 <col style={{ width: "10%" }} />
                 <col style={{ width: "12%" }} />
-                <col style={{ width: "22%" }} />
-                <col style={{ width: "11%" }} />
-                <col style={{ width: "6%" }} />
-                <col style={{ width: "19%" }} />
+                <col style={{ width: "5%" }} />
+                <col style={{ width: "16%" }} />
               </colgroup>
               <thead>
                 <tr className="text-left text-slate-500 border-b border-slate-100">
@@ -421,6 +420,7 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
                   <th className="py-2 px-2 font-bold">Jabatan</th>
                   <th className="py-2 px-2 font-bold">Email</th>
                   <th className="py-2 px-2 font-bold">No HP</th>
+                  <th className="py-2 px-2 font-bold">Lokasi Kerja</th>
                   <th className="py-2 px-2 font-bold text-right pr-4">KPI</th>
                   <th className="py-2 px-2 font-bold">Catatan</th>
                 </tr>
@@ -497,10 +497,7 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
                 <Field label="Status" value={sel.status} />
                 <Field label="Tipe Kontrak" value={sel.contract_type} />
                 <Field label="Tanggal Masuk" value={sel.join_date} />
-                <Field label="Tanggal Kontrak" value={sel.contract_date} />
-                <Field label="Tanggal Tetap" value={sel.permanent_date} />
                 <Field label="Tanggal Resign" value={sel.resign_date} />
-                <Field label="Masa Percobaan" value={sel.probation} />
                 <Field label="Skor KPI" value={sel.kpi_score} />
               </Group>
               <Group title="Struktur Organisasi">
