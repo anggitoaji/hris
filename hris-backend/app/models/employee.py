@@ -59,6 +59,18 @@ class Employee(Base):
     job_desc: Mapped[str | None] = mapped_column(String(2000), nullable=True)  # Jobdesk / uraian tugas
     catatan: Mapped[str | None] = mapped_column(String(1000), nullable=True)   # Catatan umum
 
+    # ===== Tambahan Fase 1: field dasar =====
+    nama_panggilan: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    blood_type: Mapped[str | None] = mapped_column(String(4), nullable=True)        # Golongan darah
+    no_kk: Mapped[str | None] = mapped_column(String(32), nullable=True)            # Nomor KK
+    contract_date: Mapped[date | None] = mapped_column(Date, nullable=True)         # Tanggal kontrak
+    permanent_date: Mapped[date | None] = mapped_column(Date, nullable=True)        # Tanggal tetap
+    resign_date: Mapped[date | None] = mapped_column(Date, nullable=True)           # Tanggal resign
+    probation: Mapped[str | None] = mapped_column(String(64), nullable=True)        # Masa percobaan
+    grade: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    work_location: Mapped[str | None] = mapped_column(String(128), nullable=True)   # Lokasi kerja
+    supervisor: Mapped[str | None] = mapped_column(String(128), nullable=True)      # Atasan langsung
+
     # Soft delete: data tidak dihapus permanen, hanya ditandai non-aktif.
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
 

@@ -14,6 +14,8 @@ class ContractType(str, Enum):
     tetap = "Tetap"
     kontrak = "Kontrak"
     probasi = "Probasi"
+    magang = "Magang"
+    outsourcing = "Outsourcing"
 
 
 class AIRisk(str, Enum):
@@ -56,6 +58,16 @@ class EmployeeBase(BaseModel):
     skills: str | None = Field(default=None, max_length=512, examples=["Mikrotik, Linux, Networking"])
     job_desc: str | None = Field(default=None, max_length=2000)
     catatan: str | None = Field(default=None, max_length=1000)
+    nama_panggilan: str | None = Field(default=None, max_length=64)
+    blood_type: str | None = Field(default=None, max_length=4)
+    no_kk: str | None = Field(default=None, max_length=32)
+    contract_date: date | None = None
+    permanent_date: date | None = None
+    resign_date: date | None = None
+    probation: str | None = Field(default=None, max_length=64)
+    grade: str | None = Field(default=None, max_length=32)
+    work_location: str | None = Field(default=None, max_length=128)
+    supervisor: str | None = Field(default=None, max_length=128)
 
 
 class EmployeeCreate(EmployeeBase):
@@ -100,6 +112,16 @@ class EmployeeUpdate(BaseModel):
     skills: str | None = Field(default=None, max_length=512)
     job_desc: str | None = Field(default=None, max_length=2000)
     catatan: str | None = Field(default=None, max_length=1000)
+    nama_panggilan: str | None = Field(default=None, max_length=64)
+    blood_type: str | None = Field(default=None, max_length=4)
+    no_kk: str | None = Field(default=None, max_length=32)
+    contract_date: date | None = None
+    permanent_date: date | None = None
+    resign_date: date | None = None
+    probation: str | None = Field(default=None, max_length=64)
+    grade: str | None = Field(default=None, max_length=32)
+    work_location: str | None = Field(default=None, max_length=128)
+    supervisor: str | None = Field(default=None, max_length=128)
 
 
 class EmployeeOut(EmployeeBase):
