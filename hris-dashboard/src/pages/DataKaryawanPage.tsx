@@ -36,6 +36,9 @@ const FIELD_KEYS = [
   "marital_status", "address", "education", "npwp", "bank_name", "bank_account",
   "bpjs_kesehatan", "bpjs_ketenagakerjaan", "emergency_name", "emergency_phone", "emergency_relation",
   "skills", "job_desc", "catatan",
+  "nama_panggilan", "blood_type", "no_kk",
+  "contract_date", "permanent_date", "resign_date", "probation",
+  "grade", "work_location", "supervisor",
 ] as const;
 
 function emptyForm(): FormState {
@@ -73,16 +76,28 @@ const SECTIONS: { title: string; fields: FieldCfg[] }[] = [
     { key: "phone", label: "Telepon", type: "tel" },
   ] },
   { title: "Kepegawaian", fields: [
-    { key: "department", label: "Divisi", required: true },
-    { key: "position", label: "Jabatan", required: true },
     { key: "status", label: "Status", type: "select", options: STATUS_OPTS, required: true },
-    { key: "contract_type", label: "Tipe Kontrak", type: "select", options: ["Tetap", "Kontrak", "Probasi"], required: true },
+    { key: "contract_type", label: "Tipe Kontrak", type: "select", options: ["Tetap", "Kontrak", "Magang", "Outsourcing"], required: true },
     { key: "join_date", label: "Tanggal Masuk", type: "date" },
+    { key: "contract_date", label: "Tanggal Kontrak", type: "date" },
+    { key: "permanent_date", label: "Tanggal Tetap", type: "date" },
+    { key: "resign_date", label: "Tanggal Resign", type: "date" },
+    { key: "probation", label: "Masa Percobaan" },
     { key: "kpi_score", label: "Skor KPI", type: "number" },
   ] },
+  { title: "Struktur Organisasi", fields: [
+    { key: "department", label: "Divisi", required: true },
+    { key: "position", label: "Jabatan", required: true },
+    { key: "grade", label: "Grade" },
+    { key: "work_location", label: "Lokasi Kerja" },
+    { key: "supervisor", label: "Atasan Langsung" },
+  ] },
   { title: "Data Pribadi", fields: [
+    { key: "nama_panggilan", label: "Nama Panggilan" },
     { key: "ktp", label: "No. KTP" },
+    { key: "no_kk", label: "No. KK" },
     { key: "gender", label: "Jenis Kelamin", type: "select", options: ["Laki-laki", "Perempuan"] },
+    { key: "blood_type", label: "Golongan Darah", type: "select", options: ["A", "B", "AB", "O"] },
     { key: "birth_place", label: "Tempat Lahir" },
     { key: "birth_date", label: "Tanggal Lahir", type: "date" },
     { key: "religion", label: "Agama" },
@@ -459,8 +474,11 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
             <div className="p-5 flex flex-col gap-5">
               <Group title="Data Pribadi">
                 <Field label="NIK" value={sel.nik} />
+                <Field label="Nama Panggilan" value={sel.nama_panggilan} />
                 <Field label="No. KTP" value={sel.ktp} />
+                <Field label="No. KK" value={sel.no_kk} />
                 <Field label="Jenis Kelamin" value={sel.gender} />
+                <Field label="Golongan Darah" value={sel.blood_type} />
                 <Field label="Tempat Lahir" value={sel.birth_place} />
                 <Field label="Tanggal Lahir" value={sel.birth_date} />
                 <Field label="Agama" value={sel.religion} />
@@ -476,12 +494,21 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
                 <Field label="Telepon" value={sel.phone} />
               </Group>
               <Group title="Kepegawaian">
-                <Field label="Divisi" value={sel.department} />
-                <Field label="Jabatan" value={sel.position} />
                 <Field label="Status" value={sel.status} />
                 <Field label="Tipe Kontrak" value={sel.contract_type} />
                 <Field label="Tanggal Masuk" value={sel.join_date} />
+                <Field label="Tanggal Kontrak" value={sel.contract_date} />
+                <Field label="Tanggal Tetap" value={sel.permanent_date} />
+                <Field label="Tanggal Resign" value={sel.resign_date} />
+                <Field label="Masa Percobaan" value={sel.probation} />
                 <Field label="Skor KPI" value={sel.kpi_score} />
+              </Group>
+              <Group title="Struktur Organisasi">
+                <Field label="Divisi" value={sel.department} />
+                <Field label="Jabatan" value={sel.position} />
+                <Field label="Grade" value={sel.grade} />
+                <Field label="Lokasi Kerja" value={sel.work_location} />
+                <Field label="Atasan Langsung" value={sel.supervisor} />
               </Group>
               <Group title="Keuangan & BPJS">
                 <Field label="NPWP" value={sel.npwp} />

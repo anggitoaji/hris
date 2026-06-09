@@ -90,6 +90,16 @@ export interface Employee {
   skills: string | null;
   job_desc: string | null;
   catatan: string | null;
+  nama_panggilan: string | null;
+  blood_type: string | null;
+  no_kk: string | null;
+  contract_date: string | null;
+  permanent_date: string | null;
+  resign_date: string | null;
+  probation: string | null;
+  grade: string | null;
+  work_location: string | null;
+  supervisor: string | null;
 }
 
 export interface EmployeeListResponse {
