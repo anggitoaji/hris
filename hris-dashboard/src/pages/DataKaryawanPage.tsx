@@ -37,7 +37,6 @@ const FIELD_KEYS = [
   "bpjs_kesehatan", "bpjs_ketenagakerjaan", "emergency_name", "emergency_phone", "emergency_relation",
   "skills", "job_desc", "catatan",
   "nama_panggilan", "blood_type", "no_kk",
-  "resign_date",
   "grade", "work_location", "supervisor",
 ] as const;
 
@@ -79,7 +78,6 @@ const SECTIONS: { title: string; fields: FieldCfg[] }[] = [
     { key: "status", label: "Status", type: "select", options: STATUS_OPTS, required: true },
     { key: "contract_type", label: "Tipe Kontrak", type: "select", options: ["Tetap", "Kontrak", "Magang", "Outsourcing"], required: true },
     { key: "join_date", label: "Tanggal Masuk", type: "date" },
-    { key: "resign_date", label: "Tanggal Resign", type: "date" },
     { key: "kpi_score", label: "Skor KPI", type: "number" },
   ] },
   { title: "Struktur Organisasi", fields: [
@@ -497,7 +495,6 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
                 <Field label="Status" value={sel.status} />
                 <Field label="Tipe Kontrak" value={sel.contract_type} />
                 <Field label="Tanggal Masuk" value={sel.join_date} />
-                <Field label="Tanggal Resign" value={sel.resign_date} />
                 <Field label="Skor KPI" value={sel.kpi_score} />
               </Group>
               <Group title="Struktur Organisasi">
