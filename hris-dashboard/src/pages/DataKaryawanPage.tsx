@@ -323,10 +323,10 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
         <td className="py-2 px-2 font-medium text-slate-800">{e.nama}</td>
         <td className="py-2 px-2 text-slate-600">{e.department}</td>
         <td className="py-2 px-2 text-slate-600">{e.position}</td>
-        <td className="py-2 px-2 text-slate-600 whitespace-nowrap">{e.email || "-"}</td>
-        <td className="py-2 px-2 text-slate-600 whitespace-nowrap" style={{ width: 130 }}>{e.phone || "-"}</td>
-        <td className="py-2 px-2 text-right text-slate-700 whitespace-nowrap pr-6" style={{ width: 64 }}>{e.kpi_score.toFixed(1)}</td>
-        <td className="py-2 px-2 text-slate-500 truncate" style={{ maxWidth: 280 }}>{e.catatan || "-"}</td>
+        <td className="py-2 px-2 text-slate-600 truncate">{e.email || "-"}</td>
+        <td className="py-2 px-2 text-slate-600">{e.phone || "-"}</td>
+        <td className="py-2 px-2 text-right text-slate-700 pr-4">{e.kpi_score.toFixed(1)}</td>
+        <td className="py-2 px-2 text-slate-500 truncate">{e.catatan || "-"}</td>
       </tr>
     );
   }
@@ -387,17 +387,27 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
         )}
         {!loading && !err && (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm table-fixed">
+              <colgroup>
+                <col style={{ width: "8%" }} />
+                <col style={{ width: "12%" }} />
+                <col style={{ width: "10%" }} />
+                <col style={{ width: "12%" }} />
+                <col style={{ width: "22%" }} />
+                <col style={{ width: "11%" }} />
+                <col style={{ width: "6%" }} />
+                <col style={{ width: "19%" }} />
+              </colgroup>
               <thead>
                 <tr className="text-left text-slate-500 border-b border-slate-100">
                   <th className="py-2 px-2 font-bold">NIK</th>
                   <th className="py-2 px-2 font-bold">Nama</th>
                   <th className="py-2 px-2 font-bold">Divisi</th>
                   <th className="py-2 px-2 font-bold">Jabatan</th>
-                  <th className="py-2 px-2 font-bold whitespace-nowrap">Email</th>
-                  <th className="py-2 px-2 font-bold whitespace-nowrap" style={{ width: 130 }}>No HP</th>
-                  <th className="py-2 px-2 font-bold text-right whitespace-nowrap pr-6" style={{ width: 64 }}>KPI</th>
-                  <th className="py-2 px-2 font-bold w-full">Catatan</th>
+                  <th className="py-2 px-2 font-bold">Email</th>
+                  <th className="py-2 px-2 font-bold">No HP</th>
+                  <th className="py-2 px-2 font-bold text-right pr-4">KPI</th>
+                  <th className="py-2 px-2 font-bold">Catatan</th>
                 </tr>
               </thead>
               <tbody>
