@@ -380,3 +380,27 @@ export async function deleteEducation(id: number): Promise<unknown> {
   return sendJSON<unknown>(`/education/${id}`, "DELETE");
 }
 
+// ===================== Sertifikasi =====================
+export interface CertificationRecord {
+  id: number;
+  employee_id: number;
+  nama: string;
+  nomor: string | null;
+  penerbit: string | null;
+  tanggal_terbit: string | null;
+  tanggal_kadaluarsa: string | null;
+  sort: number;
+}
+export async function fetchCertifications(employee_id: number): Promise<CertificationRecord[]> {
+  return getJSON<CertificationRecord[]>(`/certifications?employee_id=${employee_id}`);
+}
+export async function createCertification(data: Record<string, unknown>): Promise<CertificationRecord> {
+  return sendJSON<CertificationRecord>("/certifications", "POST", data);
+}
+export async function updateCertification(id: number, data: Record<string, unknown>): Promise<CertificationRecord> {
+  return sendJSON<CertificationRecord>(`/certifications/${id}`, "PATCH", data);
+}
+export async function deleteCertification(id: number): Promise<unknown> {
+  return sendJSON<unknown>(`/certifications/${id}`, "DELETE");
+}
+
