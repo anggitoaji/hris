@@ -12,6 +12,9 @@ from app.payroll import router as payroll_router
 from app.meeting import router as meeting_router
 from app.education import router as education_router
 from app.certification import router as certification_router
+from app.job_history import router as job_history_router
+from app.family import router as family_router
+from app.training import router as training_router
 from app.auth import router as auth_router, ensure_default_admin, get_current_user, require_roles
 from app.core.config import settings
 from app.core.database import Base, engine
@@ -56,6 +59,9 @@ app.include_router(payroll_router, prefix=settings.API_PREFIX, dependencies=[Dep
 app.include_router(meeting_router, prefix=settings.API_PREFIX, dependencies=login_required)
 app.include_router(education_router, prefix=settings.API_PREFIX, dependencies=login_required)
 app.include_router(certification_router, prefix=settings.API_PREFIX, dependencies=login_required)
+app.include_router(job_history_router, prefix=settings.API_PREFIX, dependencies=login_required)
+app.include_router(family_router, prefix=settings.API_PREFIX, dependencies=login_required)
+app.include_router(training_router, prefix=settings.API_PREFIX, dependencies=login_required)
 # Auth: login terbuka; kelola user sudah dibatasi Super Admin di dalam router.
 app.include_router(auth_router, prefix=settings.API_PREFIX)
 

@@ -317,6 +317,165 @@ function CertificationTab({ employeeId }: { employeeId: number }) {
   );
 }
 
+function JobHistoryTab({ employeeId }: { employeeId: number }) {
+  const [rows, setRows] = useState<JobHistoryRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editId, setEditId] = useState<number | null>(null);
+  const [showAdd, setShowAdd] = useState(false);
+  const blank = { jabatan_lama: "", jabatan_baru: "", divisi_lama: "", divisi_baru: "", tanggal_efektif: "", alasan: "" };
+  const [form, setForm] = useState(blank);
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  async function load() { setLoading(true); try { setRows(await fetchJobHistory(employeeId)); } catch {} setLoading(false); }
+  useEffect(() => { load(); }, [employeeId]);
+  function openEdit(r: JobHistoryRecord) { setEditId(r.id); setForm({ jabatan_lama: r.jabatan_lama ?? "", jabatan_baru: r.jabatan_baru ?? "", divisi_lama: r.divisi_lama ?? "", divisi_baru: r.divisi_baru ?? "", tanggal_efektif: r.tanggal_efektif ?? "", alasan: r.alasan ?? "" }); setShowAdd(false); setErr(null); }
+  function openAdd() { setEditId(null); setForm(blank); setShowAdd(true); setErr(null); }
+  function cancel() { setEditId(null); setShowAdd(false); setErr(null); }
+  async function save() { setSaving(true); setErr(null); const d: Record<string,unknown> = { jabatan_lama: form.jabatan_lama.trim()||null, jabatan_baru: form.jabatan_baru.trim()||null, divisi_lama: form.divisi_lama.trim()||null, divisi_baru: form.divisi_baru.trim()||null, tanggal_efektif: form.tanggal_efektif||null, alasan: form.alasan.trim()||null }; try { if(editId!=null){await updateJobHistory(editId,d);}else{await createJobHistory({...d,employee_id:employeeId});} cancel(); await load(); } catch(e){setErr(e instanceof Error?e.message:"Gagal.");} setSaving(false); }
+  async function remove(id:number){ if(!window.confirm("Hapus riwayat jabatan ini?"))return; try{await deleteJobHistory(id);await load();}catch{} }
+  const ic="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-lg outline-none focus:border-sky-300";
+  function FormRow(){return(
+    <tr className="bg-sky-50/50">
+      <td className="py-2 px-2"><input className={ic} value={form.jabatan_lama} onChange={ev=>setForm({...form,jabatan_lama:ev.target.value})} placeholder="Jabatan lama"/></td>
+      <td className="py-2 px-2"><input className={ic} value={form.jabatan_baru} onChange={ev=>setForm({...form,jabatan_baru:ev.target.value})} placeholder="Jabatan baru"/></td>
+      <td className="py-2 px-2"><input className={ic} value={form.divisi_lama} onChange={ev=>setForm({...form,divisi_lama:ev.target.value})} placeholder="Divisi lama"/></td>
+      <td className="py-2 px-2"><input className={ic} value={form.divisi_baru} onChange={ev=>setForm({...form,divisi_baru:ev.target.value})} placeholder="Divisi baru"/></td>
+      <td className="py-2 px-2"><input type="date" className={ic} value={form.tanggal_efektif} onChange={ev=>setForm({...form,tanggal_efektif:ev.target.value})}/></td>
+      <td className="py-2 px-2"><input className={ic} value={form.alasan} onChange={ev=>setForm({...form,alasan:ev.target.value})} placeholder="Alasan"/></td>
+      <td className="py-2 px-2 whitespace-nowrap"><button onClick={save} disabled={saving} className="text-sm text-sky-600 hover:text-sky-700 mr-2">{saving?"...":"Simpan"}</button><button onClick={cancel} className="text-sm text-slate-400 hover:text-slate-600">Batal</button></td>
+    </tr>);}
+  return(<div>
+    <div className="flex items-center justify-between mb-3"><div className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Riwayat Jabatan</div><button onClick={openAdd} className="flex items-center gap-1 text-sm text-sky-600 hover:text-sky-700"><Plus size={15}/> Tambah</button></div>
+    {err&&<div className="text-sm text-red-600 mb-2">{err}</div>}
+    {loading?<div className="flex items-center gap-2 text-slate-400 text-sm py-6 justify-center"><Loader2 size={16} className="animate-spin"/> Memuat...</div>:
+    <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="text-left text-slate-500 border-b border-slate-100">
+      <th className="py-2 px-2 font-bold">Jabatan Lama</th><th className="py-2 px-2 font-bold">Jabatan Baru</th>
+      <th className="py-2 px-2 font-bold">Divisi Lama</th><th className="py-2 px-2 font-bold">Divisi Baru</th>
+      <th className="py-2 px-2 font-bold">Tgl Efektif</th><th className="py-2 px-2 font-bold">Alasan</th>
+      <th className="py-2 px-2 font-bold" style={{width:100}}></th>
+    </tr></thead><tbody>
+      {showAdd&&<FormRow/>}
+      {rows.map(r=>editId===r.id?<FormRow key={r.id}/>:(
+        <tr key={r.id} className="border-b border-slate-50 hover:bg-slate-50">
+          <td className="py-2 px-2 text-slate-700">{r.jabatan_lama||"-"}</td>
+          <td className="py-2 px-2 text-slate-700 font-medium">{r.jabatan_baru||"-"}</td>
+          <td className="py-2 px-2 text-slate-600">{r.divisi_lama||"-"}</td>
+          <td className="py-2 px-2 text-slate-600">{r.divisi_baru||"-"}</td>
+          <td className="py-2 px-2 text-slate-600">{r.tanggal_efektif||"-"}</td>
+          <td className="py-2 px-2 text-slate-600">{r.alasan||"-"}</td>
+          <td className="py-2 px-2 whitespace-nowrap"><button onClick={()=>openEdit(r)} className="text-sm text-sky-600 hover:text-sky-700 mr-2">Edit</button><button onClick={()=>remove(r.id)} className="text-sm text-red-400 hover:text-red-600"><Trash2 size={14}/></button></td>
+        </tr>))}
+      {rows.length===0&&!showAdd&&<tr><td colSpan={7} className="text-center text-slate-400 py-6">Belum ada riwayat jabatan.</td></tr>}
+    </tbody></table></div>}
+  </div>);
+}
+
+const HUBUNGAN_OPTS=["Pasangan","Anak"];
+const GENDER_OPTS=["Laki-laki","Perempuan"];
+
+function FamilyTab({ employeeId }: { employeeId: number }) {
+  const [rows, setRows] = useState<FamilyRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editId, setEditId] = useState<number | null>(null);
+  const [showAdd, setShowAdd] = useState(false);
+  const blank = { hubungan: "Anak", nama: "", jenis_kelamin: "", tempat_lahir: "", tanggal_lahir: "", pendidikan: "", no_hp: "" };
+  const [form, setForm] = useState(blank);
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  async function load() { setLoading(true); try { setRows(await fetchFamily(employeeId)); } catch {} setLoading(false); }
+  useEffect(() => { load(); }, [employeeId]);
+  function openEdit(r: FamilyRecord) { setEditId(r.id); setForm({ hubungan: r.hubungan, nama: r.nama, jenis_kelamin: r.jenis_kelamin??"", tempat_lahir: r.tempat_lahir??"", tanggal_lahir: r.tanggal_lahir??"", pendidikan: r.pendidikan??"", no_hp: r.no_hp??"" }); setShowAdd(false); setErr(null); }
+  function openAdd() { setEditId(null); setForm(blank); setShowAdd(true); setErr(null); }
+  function cancel() { setEditId(null); setShowAdd(false); setErr(null); }
+  async function save() { if(!form.nama.trim()){setErr("Nama wajib diisi.");return;} setSaving(true); setErr(null); const d:Record<string,unknown>={ hubungan:form.hubungan, nama:form.nama.trim(), jenis_kelamin:form.jenis_kelamin||null, tempat_lahir:form.tempat_lahir.trim()||null, tanggal_lahir:form.tanggal_lahir||null, pendidikan:form.pendidikan.trim()||null, no_hp:form.no_hp.trim()||null }; try{ if(editId!=null){await updateFamily(editId,d);}else{await createFamily({...d,employee_id:employeeId});} cancel();await load(); }catch(e){setErr(e instanceof Error?e.message:"Gagal.");} setSaving(false); }
+  async function remove(id:number){ if(!window.confirm("Hapus data keluarga ini?"))return; try{await deleteFamily(id);await load();}catch{} }
+  const ic="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-lg outline-none focus:border-sky-300";
+  function FormRow(){return(
+    <tr className="bg-sky-50/50">
+      <td className="py-2 px-2"><select className={ic} value={form.hubungan} onChange={ev=>setForm({...form,hubungan:ev.target.value})}>{HUBUNGAN_OPTS.map(h=><option key={h}>{h}</option>)}</select></td>
+      <td className="py-2 px-2"><input className={ic} value={form.nama} onChange={ev=>setForm({...form,nama:ev.target.value})} placeholder="Nama"/></td>
+      <td className="py-2 px-2"><select className={ic} value={form.jenis_kelamin} onChange={ev=>setForm({...form,jenis_kelamin:ev.target.value})}><option value="">-</option>{GENDER_OPTS.map(g=><option key={g}>{g}</option>)}</select></td>
+      <td className="py-2 px-2"><input className={ic} value={form.tempat_lahir} onChange={ev=>setForm({...form,tempat_lahir:ev.target.value})} placeholder="Kota"/></td>
+      <td className="py-2 px-2"><input type="date" className={ic} value={form.tanggal_lahir} onChange={ev=>setForm({...form,tanggal_lahir:ev.target.value})}/></td>
+      <td className="py-2 px-2"><input className={ic} value={form.pendidikan} onChange={ev=>setForm({...form,pendidikan:ev.target.value})} placeholder="SD/SMP/..."/></td>
+      <td className="py-2 px-2"><input className={ic} value={form.no_hp} onChange={ev=>setForm({...form,no_hp:ev.target.value})} placeholder="08xxx"/></td>
+      <td className="py-2 px-2 whitespace-nowrap"><button onClick={save} disabled={saving} className="text-sm text-sky-600 hover:text-sky-700 mr-2">{saving?"...":"Simpan"}</button><button onClick={cancel} className="text-sm text-slate-400 hover:text-slate-600">Batal</button></td>
+    </tr>);}
+  return(<div>
+    <div className="flex items-center justify-between mb-3"><div className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Data Keluarga</div><button onClick={openAdd} className="flex items-center gap-1 text-sm text-sky-600 hover:text-sky-700"><Plus size={15}/> Tambah</button></div>
+    {err&&<div className="text-sm text-red-600 mb-2">{err}</div>}
+    {loading?<div className="flex items-center gap-2 text-slate-400 text-sm py-6 justify-center"><Loader2 size={16} className="animate-spin"/> Memuat...</div>:
+    <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="text-left text-slate-500 border-b border-slate-100">
+      <th className="py-2 px-2 font-bold">Hubungan</th><th className="py-2 px-2 font-bold">Nama</th>
+      <th className="py-2 px-2 font-bold">JK</th><th className="py-2 px-2 font-bold">Tempat Lahir</th>
+      <th className="py-2 px-2 font-bold">Tgl Lahir</th><th className="py-2 px-2 font-bold">Pendidikan</th>
+      <th className="py-2 px-2 font-bold">No HP</th><th className="py-2 px-2 font-bold" style={{width:100}}></th>
+    </tr></thead><tbody>
+      {showAdd&&<FormRow/>}
+      {rows.map(r=>editId===r.id?<FormRow key={r.id}/>:(
+        <tr key={r.id} className="border-b border-slate-50 hover:bg-slate-50">
+          <td className="py-2 px-2"><span className={`text-xs px-2 py-0.5 rounded-full ${r.hubungan==="Pasangan"?"bg-violet-100 text-violet-700":"bg-sky-100 text-sky-700"}`}>{r.hubungan}</span></td>
+          <td className="py-2 px-2 text-slate-700 font-medium">{r.nama}</td>
+          <td className="py-2 px-2 text-slate-600">{r.jenis_kelamin||"-"}</td>
+          <td className="py-2 px-2 text-slate-600">{r.tempat_lahir||"-"}</td>
+          <td className="py-2 px-2 text-slate-600">{r.tanggal_lahir||"-"}</td>
+          <td className="py-2 px-2 text-slate-600">{r.pendidikan||"-"}</td>
+          <td className="py-2 px-2 text-slate-600">{r.no_hp||"-"}</td>
+          <td className="py-2 px-2 whitespace-nowrap"><button onClick={()=>openEdit(r)} className="text-sm text-sky-600 hover:text-sky-700 mr-2">Edit</button><button onClick={()=>remove(r.id)} className="text-sm text-red-400 hover:text-red-600"><Trash2 size={14}/></button></td>
+        </tr>))}
+      {rows.length===0&&!showAdd&&<tr><td colSpan={8} className="text-center text-slate-400 py-6">Belum ada data keluarga.</td></tr>}
+    </tbody></table></div>}
+  </div>);
+}
+
+function TrainingTab({ employeeId }: { employeeId: number }) {
+  const [rows, setRows] = useState<TrainingRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editId, setEditId] = useState<number | null>(null);
+  const [showAdd, setShowAdd] = useState(false);
+  const blank = { nama: "", penyelenggara: "", tanggal: "", nilai: "" };
+  const [form, setForm] = useState(blank);
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  async function load() { setLoading(true); try { setRows(await fetchTraining(employeeId)); } catch {} setLoading(false); }
+  useEffect(() => { load(); }, [employeeId]);
+  function openEdit(r: TrainingRecord) { setEditId(r.id); setForm({ nama: r.nama, penyelenggara: r.penyelenggara??"", tanggal: r.tanggal??"", nilai: r.nilai!=null?String(r.nilai):"" }); setShowAdd(false); setErr(null); }
+  function openAdd() { setEditId(null); setForm(blank); setShowAdd(true); setErr(null); }
+  function cancel() { setEditId(null); setShowAdd(false); setErr(null); }
+  async function save() { if(!form.nama.trim()){setErr("Nama training wajib diisi.");return;} setSaving(true); setErr(null); const d:Record<string,unknown>={ nama:form.nama.trim(), penyelenggara:form.penyelenggara.trim()||null, tanggal:form.tanggal||null, nilai:form.nilai?Number(form.nilai):null }; try{ if(editId!=null){await updateTraining(editId,d);}else{await createTraining({...d,employee_id:employeeId});} cancel();await load(); }catch(e){setErr(e instanceof Error?e.message:"Gagal.");} setSaving(false); }
+  async function remove(id:number){ if(!window.confirm("Hapus data training ini?"))return; try{await deleteTraining(id);await load();}catch{} }
+  const ic="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-lg outline-none focus:border-sky-300";
+  function FormRow(){return(
+    <tr className="bg-sky-50/50">
+      <td className="py-2 px-2"><input className={ic} value={form.nama} onChange={ev=>setForm({...form,nama:ev.target.value})} placeholder="Nama training"/></td>
+      <td className="py-2 px-2"><input className={ic} value={form.penyelenggara} onChange={ev=>setForm({...form,penyelenggara:ev.target.value})} placeholder="Penyelenggara"/></td>
+      <td className="py-2 px-2"><input type="date" className={ic} value={form.tanggal} onChange={ev=>setForm({...form,tanggal:ev.target.value})}/></td>
+      <td className="py-2 px-2"><input className={ic} value={form.nilai} onChange={ev=>setForm({...form,nilai:ev.target.value})} placeholder="0-100" style={{width:60}}/></td>
+      <td className="py-2 px-2 whitespace-nowrap"><button onClick={save} disabled={saving} className="text-sm text-sky-600 hover:text-sky-700 mr-2">{saving?"...":"Simpan"}</button><button onClick={cancel} className="text-sm text-slate-400 hover:text-slate-600">Batal</button></td>
+    </tr>);}
+  return(<div>
+    <div className="flex items-center justify-between mb-3"><div className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Training & Development</div><button onClick={openAdd} className="flex items-center gap-1 text-sm text-sky-600 hover:text-sky-700"><Plus size={15}/> Tambah</button></div>
+    {err&&<div className="text-sm text-red-600 mb-2">{err}</div>}
+    {loading?<div className="flex items-center gap-2 text-slate-400 text-sm py-6 justify-center"><Loader2 size={16} className="animate-spin"/> Memuat...</div>:
+    <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="text-left text-slate-500 border-b border-slate-100">
+      <th className="py-2 px-2 font-bold">Nama Training</th><th className="py-2 px-2 font-bold">Penyelenggara</th>
+      <th className="py-2 px-2 font-bold">Tanggal</th><th className="py-2 px-2 font-bold">Nilai</th>
+      <th className="py-2 px-2 font-bold" style={{width:100}}></th>
+    </tr></thead><tbody>
+      {showAdd&&<FormRow/>}
+      {rows.map(r=>editId===r.id?<FormRow key={r.id}/>:(
+        <tr key={r.id} className="border-b border-slate-50 hover:bg-slate-50">
+          <td className="py-2 px-2 text-slate-700 font-medium">{r.nama}</td>
+          <td className="py-2 px-2 text-slate-600">{r.penyelenggara||"-"}</td>
+          <td className="py-2 px-2 text-slate-600">{r.tanggal||"-"}</td>
+          <td className="py-2 px-2 text-slate-600">{r.nilai!=null?r.nilai:"-"}</td>
+          <td className="py-2 px-2 whitespace-nowrap"><button onClick={()=>openEdit(r)} className="text-sm text-sky-600 hover:text-sky-700 mr-2">Edit</button><button onClick={()=>remove(r.id)} className="text-sm text-red-400 hover:text-red-600"><Trash2 size={14}/></button></td>
+        </tr>))}
+      {rows.length===0&&!showAdd&&<tr><td colSpan={5} className="text-center text-slate-400 py-6">Belum ada data training.</td></tr>}
+    </tbody></table></div>}
+  </div>);
+}
+
 function EmployeeProfile({ e }: { e: Employee }) {
   const [tab, setTab] = useState("overview");
   return (
@@ -447,9 +606,9 @@ function EmployeeProfile({ e }: { e: Employee }) {
 
         {tab === "pendidikan" && <EducationTab employeeId={e.id} />}
         {tab === "sertifikasi" && <CertificationTab employeeId={e.id} />}
-        {tab === "riwayat" && <ComingSoonTab name="Riwayat Jabatan" />}
-        {tab === "keluarga" && <ComingSoonTab name="Keluarga (Pasangan & Anak)" />}
-        {tab === "training" && <ComingSoonTab name="Training & Development" />}
+        {tab === "riwayat" && <JobHistoryTab employeeId={e.id} />}
+        {tab === "keluarga" && <FamilyTab employeeId={e.id} />}
+        {tab === "training" && <TrainingTab employeeId={e.id} />}
       </div>
     </div>
   );

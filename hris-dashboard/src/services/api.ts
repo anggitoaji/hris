@@ -404,3 +404,38 @@ export async function deleteCertification(id: number): Promise<unknown> {
   return sendJSON<unknown>(`/certifications/${id}`, "DELETE");
 }
 
+// ===================== Riwayat Jabatan =====================
+export interface JobHistoryRecord {
+  id: number; employee_id: number;
+  jabatan_lama: string | null; jabatan_baru: string | null;
+  divisi_lama: string | null; divisi_baru: string | null;
+  tanggal_efektif: string | null; alasan: string | null; sort: number;
+}
+export async function fetchJobHistory(eid: number): Promise<JobHistoryRecord[]> { return getJSON(`/job-history?employee_id=${eid}`); }
+export async function createJobHistory(d: Record<string, unknown>): Promise<JobHistoryRecord> { return sendJSON("/job-history", "POST", d); }
+export async function updateJobHistory(id: number, d: Record<string, unknown>): Promise<JobHistoryRecord> { return sendJSON(`/job-history/${id}`, "PATCH", d); }
+export async function deleteJobHistory(id: number): Promise<unknown> { return sendJSON(`/job-history/${id}`, "DELETE"); }
+
+// ===================== Keluarga =====================
+export interface FamilyRecord {
+  id: number; employee_id: number;
+  hubungan: string; nama: string; jenis_kelamin: string | null;
+  tempat_lahir: string | null; tanggal_lahir: string | null;
+  pendidikan: string | null; no_hp: string | null; sort: number;
+}
+export async function fetchFamily(eid: number): Promise<FamilyRecord[]> { return getJSON(`/family?employee_id=${eid}`); }
+export async function createFamily(d: Record<string, unknown>): Promise<FamilyRecord> { return sendJSON("/family", "POST", d); }
+export async function updateFamily(id: number, d: Record<string, unknown>): Promise<FamilyRecord> { return sendJSON(`/family/${id}`, "PATCH", d); }
+export async function deleteFamily(id: number): Promise<unknown> { return sendJSON(`/family/${id}`, "DELETE"); }
+
+// ===================== Training =====================
+export interface TrainingRecord {
+  id: number; employee_id: number;
+  nama: string; penyelenggara: string | null;
+  tanggal: string | null; nilai: number | null; sort: number;
+}
+export async function fetchTraining(eid: number): Promise<TrainingRecord[]> { return getJSON(`/training?employee_id=${eid}`); }
+export async function createTraining(d: Record<string, unknown>): Promise<TrainingRecord> { return sendJSON("/training", "POST", d); }
+export async function updateTraining(id: number, d: Record<string, unknown>): Promise<TrainingRecord> { return sendJSON(`/training/${id}`, "PATCH", d); }
+export async function deleteTraining(id: number): Promise<unknown> { return sendJSON(`/training/${id}`, "DELETE"); }
+
