@@ -29,6 +29,186 @@ function initials(nama: string): string {
   return nama.split(" ").filter(Boolean).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
 }
 
+function masaKerja(join?: string | null): string {
+  if (!join) return "-";
+  const start = new Date(join);
+  if (isNaN(start.getTime())) return "-";
+  const now = new Date();
+  let months = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth());
+  if (months < 0) months = 0;
+  const y = Math.floor(months / 12);
+  const m = months % 12;
+  return `${y > 0 ? y + " thn " : ""}${m} bln`;
+}
+
+function waLink(phone: string): string {
+  const d = phone.replace(/\D/g, "");
+  const intl = d.startsWith("0") ? "62" + d.slice(1) : d;
+  return `https://wa.me/${intl}`;
+}
+
+const PROFILE_TABS: { key: string; label: string }[] = [
+  { key: "overview", label: "Overview" },
+  { key: "pribadi", label: "Pribadi" },
+  { key: "kontak", label: "Kontak" },
+  { key: "kepegawaian", label: "Kepegawaian" },
+  { key: "keuangan", label: "Keuangan & BPJS" },
+  { key: "kompetensi", label: "Kompetensi" },
+  { key: "pendidikan", label: "Pendidikan" },
+  { key: "sertifikasi", label: "Sertifikasi" },
+  { key: "riwayat", label: "Riwayat Jabatan" },
+  { key: "keluarga", label: "Keluarga" },
+  { key: "training", label: "Training" },
+];
+
+function ComingSoonTab({ name }: { name: string }) {
+  return (
+    <div className="text-center text-slate-400 py-12">
+      <div className="text-sm">Bagian <span className="font-semibold text-slate-500">{name}</span> (data multi-baris)</div>
+      <div className="text-xs mt-1">akan ditambahkan di langkah Fase 2 berikutnya.</div>
+    </div>
+  );
+}
+
+function EmployeeProfile({ e }: { e: Employee }) {
+  const [tab, setTab] = useState("overview");
+  return (
+    <div>
+      <div className="flex gap-1 border-b border-slate-100 px-3 overflow-x-auto bg-white">
+        {PROFILE_TABS.map((t) => (
+          <button
+            key={t.key}
+            onClick={() => setTab(t.key)}
+            className={`px-3 py-2 text-sm whitespace-nowrap border-b-2 -mb-px ${tab === t.key ? "border-sky-500 text-sky-700 font-semibold" : "border-transparent text-slate-500 hover:text-slate-700"}`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="p-5 flex flex-col gap-5">
+        {tab === "overview" && (
+          <>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="NIK" value={e.nik} />
+              <Field label="Status" value={e.status} />
+              <Field label="Divisi" value={e.department} />
+              <Field label="Jabatan" value={e.position} />
+              <Field label="Masa Kerja" value={masaKerja(e.join_date)} />
+              <Field label="Atasan Langsung" value={e.supervisor} />
+              <Field label="Lokasi Kerja" value={e.work_location} />
+              <Field label="Skor KPI" value={e.kpi_score} />
+            </div>
+            <Group title="Kontak Cepat">
+              <Field label="Email" value={e.email} />
+              <div className="flex flex-col">
+                <span className="text-[11px] text-slate-400">No WhatsApp</span>
+                {e.phone
+                  ? <a href={waLink(e.phone)} target="_blank" rel="noreferrer" className="text-sm text-emerald-600 hover:underline">{e.phone}</a>
+                  : <span className="text-sm text-slate-300">-</span>}
+              </div>
+            </Group>
+          </>
+        )}
+
+        {tab === "pribadi" && (
+          <>
+            <Group title="Data Pribadi">
+              <Field label="NIK" value={e.nik} />
+              <Field label="Nama Panggilan" value={e.nama_panggilan} />
+              <Field label="No. KTP" value={e.ktp} />
+              <Field label="No. KK" value={e.no_kk} />
+              <Field label="Jenis Kelamin" value={e.gender} />
+              <Field label="Golongan Darah" value={e.blood_type} />
+              <Field label="Tempat Lahir" value={e.birth_place} />
+              <Field label="Tanggal Lahir" value={e.birth_date} />
+              <Field label="Agama" value={e.religion} />
+              <Field label="Status Pernikahan" value={e.marital_status} />
+              <Field label="Pendidikan" value={e.education} />
+            </Group>
+            <div>
+              <div className="text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Alamat</div>
+              <div className={`text-sm ${e.address ? "text-slate-700" : "text-slate-300"}`}>{e.address ?? "-"}</div>
+            </div>
+          </>
+        )}
+
+        {tab === "kontak" && (
+          <>
+            <Group title="Kontak">
+              <Field label="Email" value={e.email} />
+              <Field label="Telepon" value={e.phone} />
+            </Group>
+            <Group title="Kontak Darurat">
+              <Field label="Nama" value={e.emergency_name} />
+              <Field label="Telepon" value={e.emergency_phone} />
+              <Field label="Hubungan" value={e.emergency_relation} />
+            </Group>
+          </>
+        )}
+
+        {tab === "kepegawaian" && (
+          <>
+            <Group title="Kepegawaian">
+              <Field label="Status" value={e.status} />
+              <Field label="Tipe Kontrak" value={e.contract_type} />
+              <Field label="Tanggal Masuk" value={e.join_date} />
+              <Field label="Skor KPI" value={e.kpi_score} />
+            </Group>
+            <Group title="Struktur Organisasi">
+              <Field label="Divisi" value={e.department} />
+              <Field label="Jabatan" value={e.position} />
+              <Field label="Grade" value={e.grade} />
+              <Field label="Lokasi Kerja" value={e.work_location} />
+              <Field label="Atasan Langsung" value={e.supervisor} />
+            </Group>
+          </>
+        )}
+
+        {tab === "keuangan" && (
+          <Group title="Keuangan & BPJS">
+            <Field label="NPWP" value={e.npwp} />
+            <Field label="Bank" value={e.bank_name} />
+            <Field label="No. Rekening" value={e.bank_account} />
+            <Field label="BPJS Kesehatan" value={e.bpjs_kesehatan} />
+            <Field label="BPJS Ketenagakerjaan" value={e.bpjs_ketenagakerjaan} />
+          </Group>
+        )}
+
+        {tab === "kompetensi" && (
+          <>
+            <div>
+              <div className="text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Keahlian / Kompetensi</div>
+              {e.skills ? (
+                <div className="flex flex-wrap gap-1.5">
+                  {e.skills.split(",").map((x) => x.trim()).filter(Boolean).map((x, i) => (
+                    <span key={i} className="text-xs px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-100">{x}</span>
+                  ))}
+                </div>
+              ) : <div className="text-sm text-slate-300">-</div>}
+            </div>
+            <div>
+              <div className="text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Jobdesk / Uraian Tugas</div>
+              <div className={`text-sm whitespace-pre-line ${e.job_desc ? "text-slate-700" : "text-slate-300"}`}>{e.job_desc ?? "-"}</div>
+            </div>
+            <div>
+              <div className="text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Catatan</div>
+              <div className={`text-sm whitespace-pre-line ${e.catatan ? "text-slate-700" : "text-slate-300"}`}>{e.catatan ?? "-"}</div>
+            </div>
+          </>
+        )}
+
+        {tab === "pendidikan" && <ComingSoonTab name="Riwayat Pendidikan" />}
+        {tab === "sertifikasi" && <ComingSoonTab name="Sertifikasi" />}
+        {tab === "riwayat" && <ComingSoonTab name="Riwayat Jabatan" />}
+        {tab === "keluarga" && <ComingSoonTab name="Keluarga (Pasangan & Anak)" />}
+        {tab === "training" && <ComingSoonTab name="Training & Development" />}
+      </div>
+    </div>
+  );
+}
+
+
 type FormState = Record<string, string>;
 const FIELD_KEYS = [
   "nik", "nama", "email", "phone", "department", "position", "status", "contract_type",
@@ -469,72 +649,7 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
               </div>
             </div>
 
-            <div className="p-5 flex flex-col gap-5">
-              <Group title="Data Pribadi">
-                <Field label="NIK" value={sel.nik} />
-                <Field label="Nama Panggilan" value={sel.nama_panggilan} />
-                <Field label="No. KTP" value={sel.ktp} />
-                <Field label="No. KK" value={sel.no_kk} />
-                <Field label="Jenis Kelamin" value={sel.gender} />
-                <Field label="Golongan Darah" value={sel.blood_type} />
-                <Field label="Tempat Lahir" value={sel.birth_place} />
-                <Field label="Tanggal Lahir" value={sel.birth_date} />
-                <Field label="Agama" value={sel.religion} />
-                <Field label="Status Pernikahan" value={sel.marital_status} />
-                <Field label="Pendidikan" value={sel.education} />
-              </Group>
-              <div>
-                <div className="text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Alamat</div>
-                <div className={`text-sm ${sel.address ? "text-slate-700" : "text-slate-300"}`}>{sel.address ?? "-"}</div>
-              </div>
-              <Group title="Kontak">
-                <Field label="Email" value={sel.email} />
-                <Field label="Telepon" value={sel.phone} />
-              </Group>
-              <Group title="Kepegawaian">
-                <Field label="Status" value={sel.status} />
-                <Field label="Tipe Kontrak" value={sel.contract_type} />
-                <Field label="Tanggal Masuk" value={sel.join_date} />
-                <Field label="Skor KPI" value={sel.kpi_score} />
-              </Group>
-              <Group title="Struktur Organisasi">
-                <Field label="Divisi" value={sel.department} />
-                <Field label="Jabatan" value={sel.position} />
-                <Field label="Grade" value={sel.grade} />
-                <Field label="Lokasi Kerja" value={sel.work_location} />
-                <Field label="Atasan Langsung" value={sel.supervisor} />
-              </Group>
-              <Group title="Keuangan & BPJS">
-                <Field label="NPWP" value={sel.npwp} />
-                <Field label="Bank" value={sel.bank_name} />
-                <Field label="No. Rekening" value={sel.bank_account} />
-                <Field label="BPJS Kesehatan" value={sel.bpjs_kesehatan} />
-                <Field label="BPJS Ketenagakerjaan" value={sel.bpjs_ketenagakerjaan} />
-              </Group>
-              <Group title="Kontak Darurat">
-                <Field label="Nama" value={sel.emergency_name} />
-                <Field label="Telepon" value={sel.emergency_phone} />
-                <Field label="Hubungan" value={sel.emergency_relation} />
-              </Group>
-              <div>
-                <div className="text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Keahlian / Kompetensi</div>
-                {sel.skills ? (
-                  <div className="flex flex-wrap gap-1.5">
-                    {sel.skills.split(",").map((x) => x.trim()).filter(Boolean).map((x, i) => (
-                      <span key={i} className="text-xs px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-100">{x}</span>
-                    ))}
-                  </div>
-                ) : <div className="text-sm text-slate-300">-</div>}
-              </div>
-              <div>
-                <div className="text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Jobdesk / Uraian Tugas</div>
-                <div className={`text-sm whitespace-pre-line ${sel.job_desc ? "text-slate-700" : "text-slate-300"}`}>{sel.job_desc ?? "-"}</div>
-              </div>
-              <div>
-                <div className="text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Catatan</div>
-                <div className={`text-sm whitespace-pre-line ${sel.catatan ? "text-slate-700" : "text-slate-300"}`}>{sel.catatan ?? "-"}</div>
-              </div>
-            </div>
+            <EmployeeProfile e={sel} />
           </div>
         </>
       )}
