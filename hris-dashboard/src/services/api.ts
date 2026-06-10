@@ -354,3 +354,29 @@ export async function updateUser(id: number, data: Record<string, unknown>): Pro
 export async function deleteUser(id: number): Promise<unknown> {
   return sendJSON<unknown>(`/auth/users/${id}`, "DELETE");
 }
+
+// ===================== Riwayat Pendidikan =====================
+export interface EducationRecord {
+  id: number;
+  employee_id: number;
+  jenjang: string;
+  institusi: string;
+  jurusan: string | null;
+  ipk: number | null;
+  tahun_masuk: number | null;
+  tahun_lulus: number | null;
+  sort: number;
+}
+export async function fetchEducation(employee_id: number): Promise<EducationRecord[]> {
+  return getJSON<EducationRecord[]>(`/education?employee_id=${employee_id}`);
+}
+export async function createEducation(data: Record<string, unknown>): Promise<EducationRecord> {
+  return sendJSON<EducationRecord>("/education", "POST", data);
+}
+export async function updateEducation(id: number, data: Record<string, unknown>): Promise<EducationRecord> {
+  return sendJSON<EducationRecord>(`/education/${id}`, "PATCH", data);
+}
+export async function deleteEducation(id: number): Promise<unknown> {
+  return sendJSON<unknown>(`/education/${id}`, "DELETE");
+}
+

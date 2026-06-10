@@ -70,6 +70,133 @@ function ComingSoonTab({ name }: { name: string }) {
   );
 }
 
+
+const JENJANG_OPTS = ["SD", "SMP", "SMA/SMK", "D1", "D2", "D3", "D4", "S1", "S2", "S3"];
+
+function EducationTab({ employeeId }: { employeeId: number }) {
+  const [rows, setRows] = useState<EducationRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editId, setEditId] = useState<number | null>(null);
+  const [showAdd, setShowAdd] = useState(false);
+
+  const blank = { jenjang: "S1", institusi: "", jurusan: "", ipk: "", tahun_masuk: "", tahun_lulus: "" };
+  const [form, setForm] = useState(blank);
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  async function load() {
+    setLoading(true);
+    try { setRows(await fetchEducation(employeeId)); } catch { /* */ }
+    setLoading(false);
+  }
+  useEffect(() => { load(); }, [employeeId]);
+
+  function openEdit(r: EducationRecord) {
+    setEditId(r.id);
+    setForm({ jenjang: r.jenjang, institusi: r.institusi, jurusan: r.jurusan ?? "", ipk: r.ipk != null ? String(r.ipk) : "", tahun_masuk: r.tahun_masuk != null ? String(r.tahun_masuk) : "", tahun_lulus: r.tahun_lulus != null ? String(r.tahun_lulus) : "" });
+    setShowAdd(false); setErr(null);
+  }
+  function openAdd() {
+    setEditId(null); setForm(blank); setShowAdd(true); setErr(null);
+  }
+  function cancel() { setEditId(null); setShowAdd(false); setErr(null); }
+
+  async function save() {
+    if (!form.institusi.trim()) { setErr("Institusi wajib diisi."); return; }
+    setSaving(true); setErr(null);
+    const data: Record<string, unknown> = {
+      jenjang: form.jenjang, institusi: form.institusi.trim(),
+      jurusan: form.jurusan.trim() || null,
+      ipk: form.ipk ? Number(form.ipk) : null,
+      tahun_masuk: form.tahun_masuk ? Number(form.tahun_masuk) : null,
+      tahun_lulus: form.tahun_lulus ? Number(form.tahun_lulus) : null,
+    };
+    try {
+      if (editId != null) { await updateEducation(editId, data); }
+      else { await createEducation({ ...data, employee_id: employeeId }); }
+      cancel(); await load();
+    } catch (e) { setErr(e instanceof Error ? e.message : "Gagal menyimpan."); }
+    setSaving(false);
+  }
+
+  async function remove(id: number) {
+    if (!window.confirm("Hapus data pendidikan ini?")) return;
+    try { await deleteEducation(id); await load(); } catch { /* */ }
+  }
+
+  const ic = "w-full px-2 py-1.5 text-sm border border-slate-200 rounded-lg outline-none focus:border-sky-300";
+
+  function FormRow() {
+    return (
+      <tr className="bg-sky-50/50">
+        <td className="py-2 px-2"><select className={ic} value={form.jenjang} onChange={(ev) => setForm({ ...form, jenjang: ev.target.value })}>{JENJANG_OPTS.map((j) => <option key={j}>{j}</option>)}</select></td>
+        <td className="py-2 px-2"><input className={ic} value={form.institusi} onChange={(ev) => setForm({ ...form, institusi: ev.target.value })} placeholder="Nama institusi" /></td>
+        <td className="py-2 px-2"><input className={ic} value={form.jurusan} onChange={(ev) => setForm({ ...form, jurusan: ev.target.value })} placeholder="Jurusan" /></td>
+        <td className="py-2 px-2"><input className={ic} value={form.ipk} onChange={(ev) => setForm({ ...form, ipk: ev.target.value })} placeholder="0.00" style={{ width: 60 }} /></td>
+        <td className="py-2 px-2"><input className={ic} value={form.tahun_masuk} onChange={(ev) => setForm({ ...form, tahun_masuk: ev.target.value })} placeholder="2020" style={{ width: 60 }} /></td>
+        <td className="py-2 px-2"><input className={ic} value={form.tahun_lulus} onChange={(ev) => setForm({ ...form, tahun_lulus: ev.target.value })} placeholder="2024" style={{ width: 60 }} /></td>
+        <td className="py-2 px-2 whitespace-nowrap">
+          <button onClick={save} disabled={saving} className="text-sm text-sky-600 hover:text-sky-700 mr-2">{saving ? "..." : "Simpan"}</button>
+          <button onClick={cancel} className="text-sm text-slate-400 hover:text-slate-600">Batal</button>
+        </td>
+      </tr>
+    );
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-3">
+        <div className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Riwayat Pendidikan</div>
+        <button onClick={openAdd} className="flex items-center gap-1 text-sm text-sky-600 hover:text-sky-700"><Plus size={15} /> Tambah</button>
+      </div>
+      {err && <div className="text-sm text-red-600 mb-2">{err}</div>}
+      {loading ? (
+        <div className="flex items-center gap-2 text-slate-400 text-sm py-6 justify-center"><Loader2 size={16} className="animate-spin" /> Memuat...</div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-left text-slate-500 border-b border-slate-100">
+                <th className="py-2 px-2 font-bold">Jenjang</th>
+                <th className="py-2 px-2 font-bold">Institusi</th>
+                <th className="py-2 px-2 font-bold">Jurusan</th>
+                <th className="py-2 px-2 font-bold">IPK</th>
+                <th className="py-2 px-2 font-bold">Masuk</th>
+                <th className="py-2 px-2 font-bold">Lulus</th>
+                <th className="py-2 px-2 font-bold" style={{ width: 100 }}></th>
+              </tr>
+            </thead>
+            <tbody>
+              {showAdd && <FormRow />}
+              {rows.map((r) =>
+                editId === r.id ? (
+                  <FormRow key={r.id} />
+                ) : (
+                  <tr key={r.id} className="border-b border-slate-50 hover:bg-slate-50">
+                    <td className="py-2 px-2 text-slate-700">{r.jenjang}</td>
+                    <td className="py-2 px-2 text-slate-700 font-medium">{r.institusi}</td>
+                    <td className="py-2 px-2 text-slate-600">{r.jurusan || "-"}</td>
+                    <td className="py-2 px-2 text-slate-600">{r.ipk != null ? r.ipk.toFixed(2) : "-"}</td>
+                    <td className="py-2 px-2 text-slate-600">{r.tahun_masuk ?? "-"}</td>
+                    <td className="py-2 px-2 text-slate-600">{r.tahun_lulus ?? "-"}</td>
+                    <td className="py-2 px-2 whitespace-nowrap">
+                      <button onClick={() => openEdit(r)} className="text-sm text-sky-600 hover:text-sky-700 mr-2">Edit</button>
+                      <button onClick={() => remove(r.id)} className="text-sm text-red-400 hover:text-red-600"><Trash2 size={14} /></button>
+                    </td>
+                  </tr>
+                )
+              )}
+              {rows.length === 0 && !showAdd && (
+                <tr><td colSpan={7} className="text-center text-slate-400 py-6">Belum ada data pendidikan.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function EmployeeProfile({ e }: { e: Employee }) {
   const [tab, setTab] = useState("overview");
   return (
@@ -198,7 +325,7 @@ function EmployeeProfile({ e }: { e: Employee }) {
           </>
         )}
 
-        {tab === "pendidikan" && <ComingSoonTab name="Riwayat Pendidikan" />}
+        {tab === "pendidikan" && <EducationTab employeeId={e.id} />}
         {tab === "sertifikasi" && <ComingSoonTab name="Sertifikasi" />}
         {tab === "riwayat" && <ComingSoonTab name="Riwayat Jabatan" />}
         {tab === "keluarga" && <ComingSoonTab name="Keluarga (Pasangan & Anak)" />}

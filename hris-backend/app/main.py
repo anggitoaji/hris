@@ -10,6 +10,7 @@ from app.divisi import router as divisi_router
 from app.attendance import router as attendance_router
 from app.payroll import router as payroll_router
 from app.meeting import router as meeting_router
+from app.education import router as education_router
 from app.auth import router as auth_router, ensure_default_admin, get_current_user, require_roles
 from app.core.config import settings
 from app.core.database import Base, engine
@@ -52,6 +53,7 @@ app.include_router(attendance_router, prefix=settings.API_PREFIX, dependencies=l
 # Payroll: hanya Direksi/Finance (Super Admin selalu boleh).
 app.include_router(payroll_router, prefix=settings.API_PREFIX, dependencies=[Depends(require_roles("Direksi", "Finance"))])
 app.include_router(meeting_router, prefix=settings.API_PREFIX, dependencies=login_required)
+app.include_router(education_router, prefix=settings.API_PREFIX, dependencies=login_required)
 # Auth: login terbuka; kelola user sudah dibatasi Super Admin di dalam router.
 app.include_router(auth_router, prefix=settings.API_PREFIX)
 
