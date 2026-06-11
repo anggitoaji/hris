@@ -64,7 +64,8 @@ app.include_router(certification_router, prefix=settings.API_PREFIX, dependencie
 app.include_router(job_history_router, prefix=settings.API_PREFIX, dependencies=login_required)
 app.include_router(family_router, prefix=settings.API_PREFIX, dependencies=login_required)
 app.include_router(training_router, prefix=settings.API_PREFIX, dependencies=login_required)
-app.include_router(audit_router, prefix=settings.API_PREFIX, dependencies=login_required)
+# Audit Trail: hanya Super Admin
+app.include_router(audit_router, prefix=settings.API_PREFIX, dependencies=[Depends(require_roles())])
 # Documents: auth per-endpoint (download/preview pakai token query param)
 app.include_router(documents_router, prefix=settings.API_PREFIX)
 # Auth: login terbuka; kelola user sudah dibatasi Super Admin di dalam router.

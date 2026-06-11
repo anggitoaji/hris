@@ -711,12 +711,13 @@ function AuditTab({ employeeId }: { employeeId: number }) {
   );
 }
 
-function EmployeeProfile({ e }: { e: Employee }) {
+function EmployeeProfile({ e, role }: { e: Employee; role: string }) {
   const [tab, setTab] = useState("overview");
+  const visibleTabs = PROFILE_TABS.filter(t => t.key !== "audit" || role === "Super Admin");
   return (
     <div>
       <div className="flex gap-1 border-b border-slate-100 px-3 overflow-x-auto bg-white">
-        {PROFILE_TABS.map((t) => (
+        {visibleTabs.map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
@@ -1294,7 +1295,7 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
               </div>
             </div>
 
-            <EmployeeProfile e={sel} />
+            <EmployeeProfile e={sel} role={role} />
           </div>
         </>
       )}
