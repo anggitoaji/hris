@@ -1,6 +1,15 @@
 import { useEffect, useMemo, useState, Fragment, type ReactNode } from "react";
 import { Search, X, Loader2, Plus, Pencil, Building2, Trash2, Check, Upload, Download, Eye, FileText } from "lucide-react";
-import { fetchEmployees, createEmployee, updateEmployee, fetchDivisions, createDivision, updateDivision, deleteDivision, type Division } from "../services/api";
+import {
+  fetchEmployees, createEmployee, updateEmployee,
+  fetchDivisions, createDivision, updateDivision, deleteDivision, type Division,
+  fetchEducation, createEducation, updateEducation, deleteEducation, type EducationRecord,
+  fetchCertifications, createCertification, updateCertification, deleteCertification, type CertificationRecord,
+  fetchJobHistory, createJobHistory, updateJobHistory, deleteJobHistory, type JobHistoryRecord,
+  fetchFamily, createFamily, updateFamily, deleteFamily, type FamilyRecord,
+  fetchTraining, createTraining, updateTraining, deleteTraining, type TrainingRecord,
+  fetchDocuments, uploadDocument, docPreviewUrl, docDownloadUrl, deleteDocument, type DocumentRecord,
+} from "../services/api";
 import type { Role } from "../components/Sidebar";
 import type { Employee } from "../types";
 
@@ -482,6 +491,8 @@ function formatSize(bytes: number): string {
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
   return (bytes / (1024 * 1024)).toFixed(1) + " MB";
 }
+
+const DOC_CATEGORIES = ["Identitas", "Pendidikan", "Kepegawaian", "Sertifikasi", "Kesehatan", "Lainnya"];
 
 function DocumentsTab({ employeeId }: { employeeId: number }) {
   const [rows, setRows] = useState<DocumentRecord[]>([]);

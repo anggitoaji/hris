@@ -463,7 +463,7 @@ export async function uploadDocument(file: File, employee_id: number, category: 
   if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.detail || `Upload gagal: ${res.status}`); }
   return res.json();
 }
-export function docPreviewUrl(id: number): string { return `${BASE}/documents/${id}/preview`; }
-export function docDownloadUrl(id: number): string { return `${BASE}/documents/${id}/download`; }
+export function docPreviewUrl(id: number): string { return `${BASE}/documents/${id}/preview${authToken ? "?token=" + encodeURIComponent(authToken) : ""}`; }
+export function docDownloadUrl(id: number): string { return `${BASE}/documents/${id}/download${authToken ? "?token=" + encodeURIComponent(authToken) : ""}`; }
 export async function deleteDocument(id: number): Promise<unknown> { return sendJSON(`/documents/${id}`, "DELETE"); }
 

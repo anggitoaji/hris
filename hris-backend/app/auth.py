@@ -116,6 +116,17 @@ def get_current_user(
     return user
 
 
+def get_current_user_from_token(token: str, db: Session = Depends(get_db)) -> User:
+    """Verifikasi token string langsung (untuk query param)."""
+    payload = verify_token(token)
+    if not payload:
+        raise HTTPException(status_code=401, detail="Token tidak valid.")
+    user = db.get(User, int(payload["uid"]))
+    if not user or not user.is_active:
+        raise HTTPException(status_code=401, detail="Akun tidak ditemukan.")
+    return user
+
+
 def require_roles(*roles: str):
     """Dependency: izinkan hanya role tertentu (Super Admin selalu boleh)."""
     def dep(user: User = Depends(get_current_user)) -> User:

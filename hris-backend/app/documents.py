@@ -10,13 +10,21 @@ import os
 import uuid
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, Form, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, UploadFile, File, Form, status
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy import DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, Session, mapped_column
 
 from app.core.database import Base, get_db
+
+def verify_token_param(token: str = Query(None), authorization: str = Header(None)):
+    """Izinkan akses via query param ?token= ATAU header Authorization."""
+    from app.auth import get_current_user_from_token
+    t = token or (authorization.removeprefix("Bearer ").strip() if authorization else None)
+    if not t:
+        raise HTTPException(status_code=401, detail="Token tidak ada.")
+    return get_current_user_from_token(t)
 
 UPLOAD_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "uploads", "documents")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -120,7 +128,7 @@ async def upload_document(
 
 
 @router.get("/{doc_id}/download")
-def download_document(doc_id: int, db: Session = Depends(get_db)):
+def download_document(doc_id: int, db: Session = Depends(get_db), _user=Depends(verify_token_param)):
     doc = db.get(Document, doc_id)
     if not doc:
         raise HTTPException(status_code=404, detail="Dokumen tidak ditemukan.")
@@ -135,7 +143,7 @@ def download_document(doc_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/{doc_id}/preview")
-def preview_document(doc_id: int, db: Session = Depends(get_db)):
+def preview_document(doc_id: int, db: Session = Depends(get_db), _user=Depends(verify_token_param)):
     """Serve file untuk preview (inline, bukan download)."""
     doc = db.get(Document, doc_id)
     if not doc:
