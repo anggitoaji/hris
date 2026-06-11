@@ -503,6 +503,7 @@ function DocumentsTab({ employeeId }: { employeeId: number }) {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [previewDoc, setPreviewDoc] = useState<DocumentRecord | null>(null);
 
   async function load() { setLoading(true); try { setRows(await fetchDocuments(employeeId)); } catch {} setLoading(false); }
   useEffect(() => { load(); }, [employeeId]);
@@ -585,7 +586,7 @@ function DocumentsTab({ employeeId }: { employeeId: number }) {
                       </div>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
-                      <a href={docPreviewUrl(d.id)} target="_blank" rel="noreferrer" className="p-1.5 rounded-md hover:bg-slate-50 text-slate-400 hover:text-sky-600" title="Preview"><Eye size={16} /></a>
+                      <button onClick={() => setPreviewDoc(d)} className="p-1.5 rounded-md hover:bg-slate-50 text-slate-400 hover:text-sky-600" title="Preview"><Eye size={16} /></button>
                       <a href={docDownloadUrl(d.id)} className="p-1.5 rounded-md hover:bg-slate-50 text-slate-400 hover:text-emerald-600" title="Download"><Download size={16} /></a>
                       <button onClick={() => remove(d.id)} className="p-1.5 rounded-md hover:bg-red-50 text-slate-400 hover:text-red-600" title="Hapus"><Trash2 size={16} /></button>
                     </div>
@@ -594,6 +595,31 @@ function DocumentsTab({ employeeId }: { employeeId: number }) {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {previewDoc && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setPreviewDoc(null)} />
+          <div className="relative bg-white rounded-2xl shadow-2xl overflow-hidden" style={{ width: "70vw", maxWidth: 900, height: "80vh" }}>
+            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-white">
+              <div className="min-w-0">
+                <div className="text-sm font-semibold text-slate-700 truncate">{previewDoc.filename_original}</div>
+                <div className="text-[11px] text-slate-400">{previewDoc.sub_category || previewDoc.category}</div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <a href={docDownloadUrl(previewDoc.id)} className="text-sm text-sky-600 hover:text-sky-700 flex items-center gap-1"><Download size={14} /> Download</a>
+                <button onClick={() => setPreviewDoc(null)} className="text-slate-400 hover:text-slate-600 ml-2"><X size={20} /></button>
+              </div>
+            </div>
+            <div className="flex items-center justify-center bg-slate-50" style={{ height: "calc(80vh - 52px)" }}>
+              {previewDoc.mime_type.startsWith("image/") ? (
+                <img src={docPreviewUrl(previewDoc.id)} alt={previewDoc.filename_original} className="max-w-full max-h-full object-contain" />
+              ) : (
+                <iframe src={docPreviewUrl(previewDoc.id)} className="w-full h-full border-0" title={previewDoc.filename_original} />
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>

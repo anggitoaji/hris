@@ -17,14 +17,25 @@ from sqlalchemy import DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, Session, mapped_column
 
 from app.core.database import Base, get_db
+from app.auth import get_current_user
 
-def verify_token_param(token: str = Query(None), authorization: str = Header(None)):
+def verify_token_param(
+    token: str = Query(None),
+    authorization: str = Header(None),
+    db: Session = Depends(get_db),
+):
     """Izinkan akses via query param ?token= ATAU header Authorization."""
-    from app.auth import get_current_user_from_token
+    from app.auth import verify_token, User
     t = token or (authorization.removeprefix("Bearer ").strip() if authorization else None)
     if not t:
         raise HTTPException(status_code=401, detail="Token tidak ada.")
-    return get_current_user_from_token(t)
+    payload = verify_token(t)
+    if not payload:
+        raise HTTPException(status_code=401, detail="Token tidak valid atau kedaluwarsa.")
+    user = db.get(User, int(payload["uid"]))
+    if not user or not user.is_active:
+        raise HTTPException(status_code=401, detail="Akun tidak ditemukan.")
+    return user
 
 UPLOAD_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "uploads", "documents")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -71,7 +82,7 @@ router = APIRouter(prefix="/documents", tags=["Documents"])
 
 
 @router.get("", response_model=list[DocOut])
-def list_documents(employee_id: int = Query(...), db: Session = Depends(get_db)):
+def list_documents(employee_id: int = Query(...), db: Session = Depends(get_db), _user=Depends(get_current_user)):
     return (
         db.query(Document)
         .filter(Document.employee_id == employee_id)
@@ -87,6 +98,7 @@ async def upload_document(
     sub_category: str = Form(None),
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
+    _user=Depends(get_current_user),
 ):
     # Validasi ekstensi
     ext = os.path.splitext(file.filename or "")[1].lower()
@@ -159,7 +171,7 @@ def preview_document(doc_id: int, db: Session = Depends(get_db), _user=Depends(v
 
 
 @router.delete("/{doc_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_document(doc_id: int, db: Session = Depends(get_db)):
+def delete_document(doc_id: int, db: Session = Depends(get_db), _user=Depends(get_current_user)):
     doc = db.get(Document, doc_id)
     if not doc:
         raise HTTPException(status_code=404, detail="Dokumen tidak ditemukan.")
