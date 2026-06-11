@@ -1,4 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+import os
+import uuid
+
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, UploadFile, File, status
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from app.auth import get_current_user, User
@@ -84,3 +88,68 @@ def delete_employee(employee_id: int, request: Request, db: Session = Depends(ge
     log_audit(db, user_id=user.id, username=user.username, action="DELETE", entity_type="employee", entity_id=employee_id, employee_id=employee_id, description=f"Nonaktifkan: {employee.nama} ({employee.nik})", old_data={"nama": employee.nama, "nik": employee.nik, "status": employee.status}, ip_address=get_client_ip(request))
     crud.soft_delete_employee(db, employee)
     return {"detail": "Karyawan ditandai non-aktif", "id": employee_id}
+
+
+# ===================== Foto Profil =====================
+PHOTO_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads", "photos")
+os.makedirs(PHOTO_DIR, exist_ok=True)
+PHOTO_EXT = {".jpg", ".jpeg", ".png", ".webp"}
+
+
+@router.post("/{employee_id}/photo", response_model=EmployeeOut)
+async def upload_photo(
+    employee_id: int,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+    request: Request = None,
+):
+    employee = crud.get_employee(db, employee_id)
+    if not employee:
+        raise HTTPException(status_code=404, detail="Karyawan tidak ditemukan")
+
+    ext = os.path.splitext(file.filename or "")[1].lower()
+    if ext not in PHOTO_EXT:
+        raise HTTPException(status_code=400, detail=f"Format foto tidak didukung. Gunakan: {', '.join(PHOTO_EXT)}")
+
+    content = await file.read()
+    if len(content) > 5 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Ukuran foto maksimal 5 MB.")
+
+    # Hapus foto lama jika ada
+    if employee.photo_url:
+        old_path = os.path.join(PHOTO_DIR, employee.photo_url)
+        if os.path.exists(old_path):
+            os.remove(old_path)
+
+    stored_name = f"{uuid.uuid4().hex}{ext}"
+    with open(os.path.join(PHOTO_DIR, stored_name), "wb") as f:
+        f.write(content)
+
+    employee.photo_url = stored_name
+    db.commit()
+    db.refresh(employee)
+
+    log_audit(db, user_id=user.id, username=user.username, action="UPDATE",
+              entity_type="employee", entity_id=employee_id, employee_id=employee_id,
+              description=f"Upload foto profil: {employee.nama}",
+              ip_address=get_client_ip(request) if request else None)
+
+    return employee
+
+
+@router.get("/{employee_id}/photo")
+def get_photo(employee_id: int, token: str = Query(None), db: Session = Depends(get_db)):
+    """Serve foto profil (token via query param untuk <img src>)."""
+    from app.auth import verify_token
+    if token:
+        payload = verify_token(token)
+        if not payload:
+            raise HTTPException(status_code=401, detail="Token tidak valid.")
+    employee = crud.get_employee(db, employee_id)
+    if not employee or not employee.photo_url:
+        raise HTTPException(status_code=404, detail="Foto tidak ditemukan.")
+    filepath = os.path.join(PHOTO_DIR, employee.photo_url)
+    if not os.path.exists(filepath):
+        raise HTTPException(status_code=404, detail="File foto tidak ditemukan.")
+    return FileResponse(path=filepath, media_type="image/jpeg")

@@ -487,3 +487,16 @@ export async function fetchAuditLogs(params: Record<string, string | number>): P
   return getJSON(`/audit-logs?${qs}`);
 }
 
+// ===================== Foto Profil =====================
+export function photoUrl(employeeId: number): string {
+  return `${BASE}/employees/${employeeId}/photo${authToken ? "?token=" + encodeURIComponent(authToken) : ""}`;
+}
+export async function uploadPhoto(employeeId: number, file: File): Promise<unknown> {
+  const fd = new FormData();
+  fd.append("file", file);
+  const res = await fetch(`${BASE}/employees/${employeeId}/photo`, { method: "POST", headers: authToken ? { Authorization: `Bearer ${authToken}` } : {}, body: fd });
+  if (res.status === 401) { onUnauthorized?.(); throw new Error("Sesi berakhir."); }
+  if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.detail || `Upload gagal: ${res.status}`); }
+  return res.json();
+}
+

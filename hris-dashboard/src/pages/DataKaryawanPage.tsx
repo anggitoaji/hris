@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, Fragment, type ReactNode } from "react";
-import { Search, X, Loader2, Plus, Pencil, Building2, Trash2, Check, Upload, Download, Eye, FileText } from "lucide-react";
+import { Search, X, Loader2, Plus, Pencil, Building2, Trash2, Check, Upload, Download, Eye, FileText, Camera } from "lucide-react";
 import {
   fetchEmployees, createEmployee, updateEmployee,
   fetchDivisions, createDivision, updateDivision, deleteDivision, type Division,
@@ -10,6 +10,7 @@ import {
   fetchTraining, createTraining, updateTraining, deleteTraining, type TrainingRecord,
   fetchDocuments, uploadDocument, docPreviewUrl, docDownloadUrl, deleteDocument, type DocumentRecord,
   fetchAuditLogs, type AuditLogRecord,
+  photoUrl, uploadPhoto,
 } from "../services/api";
 import type { Role } from "../components/Sidebar";
 import type { Employee } from "../types";
@@ -1151,10 +1152,17 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
     }
   }
 
-  const COLS = 9;
+  const COLS = 10;
   function Row({ e }: { e: Employee }) {
     return (
       <tr onClick={() => setSel(e)} className="border-b border-slate-50 hover:bg-slate-50 cursor-pointer">
+        <td className="py-2 px-1">
+          {e.photo_url ? (
+            <img src={photoUrl(e.id)} alt="" className="w-7 h-7 rounded-full object-cover" />
+          ) : (
+            <div className="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center text-[10px] text-slate-500 font-bold">{e.nama.split(" ").map(w=>w[0]).slice(0,2).join("").toUpperCase()}</div>
+          )}
+        </td>
         <td className="py-2 px-2 text-slate-500">{e.nik}</td>
         <td className="py-2 px-2 font-medium text-slate-800">{e.nama}</td>
         <td className="py-2 px-2 text-slate-600">{e.department}</td>
@@ -1226,18 +1234,20 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
           <div className="overflow-x-auto">
             <table className="w-full text-sm table-fixed">
               <colgroup>
+                <col style={{ width: "3%" }} />
                 <col style={{ width: "7%" }} />
-                <col style={{ width: "12%" }} />
-                <col style={{ width: "9%" }} />
                 <col style={{ width: "11%" }} />
-                <col style={{ width: "18%" }} />
+                <col style={{ width: "9%" }} />
                 <col style={{ width: "10%" }} />
-                <col style={{ width: "12%" }} />
+                <col style={{ width: "17%" }} />
+                <col style={{ width: "10%" }} />
+                <col style={{ width: "11%" }} />
                 <col style={{ width: "5%" }} />
-                <col style={{ width: "16%" }} />
+                <col style={{ width: "17%" }} />
               </colgroup>
               <thead>
                 <tr className="text-left text-slate-500 border-b border-slate-100">
+                  <th className="py-2 px-1"></th>
                   <th className="py-2 px-2 font-bold">NIK</th>
                   <th className="py-2 px-2 font-bold">Nama</th>
                   <th className="py-2 px-2 font-bold">Divisi</th>
@@ -1278,10 +1288,23 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
           <div className="fixed top-0 right-0 h-full bg-white shadow-2xl z-50 overflow-y-auto" style={{ width: "50vw", minWidth: 460, maxWidth: "96vw" }}>
             <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 sticky top-0 bg-white">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
-                  style={{ width: 40, height: 40, background: "linear-gradient(135deg,#818cf8,#6366f1)" }}>
-                  {initials(sel.nama)}
-                </div>
+                <label className="relative rounded-full shrink-0 cursor-pointer group" style={{ width: 44, height: 44 }}>
+                  {sel.photo_url ? (
+                    <img src={photoUrl(sel.id)} alt="" className="w-11 h-11 rounded-full object-cover" />
+                  ) : (
+                    <div className="w-11 h-11 rounded-full flex items-center justify-center text-white text-sm font-bold"
+                      style={{ background: "linear-gradient(135deg,#818cf8,#6366f1)" }}>
+                      {initials(sel.nama)}
+                    </div>
+                  )}
+                  <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Camera size={16} className="text-white" />
+                  </div>
+                  <input type="file" accept=".jpg,.jpeg,.png,.webp" className="hidden" onChange={async (ev) => {
+                    const f = ev.target.files?.[0]; if (!f) return;
+                    try { await uploadPhoto(sel.id, f); await load(); } catch {}
+                  }} />
+                </label>
                 <div className="min-w-0">
                   <div className="font-bold text-slate-800 truncate">{sel.nama}</div>
                   <div className="text-xs text-slate-400 truncate">{sel.position} - {sel.department}</div>
