@@ -9,6 +9,7 @@ import {
   fetchFamily, createFamily, updateFamily, deleteFamily, type FamilyRecord,
   fetchTraining, createTraining, updateTraining, deleteTraining, type TrainingRecord,
   fetchDocuments, uploadDocument, docPreviewUrl, docDownloadUrl, deleteDocument, type DocumentRecord,
+  fetchAuditLogs, type AuditLogRecord,
 } from "../services/api";
 import type { Role } from "../components/Sidebar";
 import type { Employee } from "../types";
@@ -69,6 +70,7 @@ const PROFILE_TABS: { key: string; label: string }[] = [
   { key: "keluarga", label: "Keluarga" },
   { key: "training", label: "Training" },
   { key: "dokumen", label: "Dokumen" },
+  { key: "audit", label: "Audit Log" },
 ];
 
 function ComingSoonTab({ name }: { name: string }) {
@@ -626,6 +628,89 @@ function DocumentsTab({ employeeId }: { employeeId: number }) {
   );
 }
 
+const ACTION_COLOR: Record<string, string> = {
+  CREATE: "bg-emerald-100 text-emerald-700",
+  UPDATE: "bg-sky-100 text-sky-700",
+  DELETE: "bg-red-100 text-red-700",
+};
+
+function DiffView({ label, old_data, new_data }: { label: string; old_data: string | null; new_data: string | null }) {
+  const [open, setOpen] = useState(false);
+  if (!old_data && !new_data) return null;
+  let oldObj: Record<string, unknown> = {};
+  let newObj: Record<string, unknown> = {};
+  try { if (old_data) oldObj = JSON.parse(old_data); } catch {}
+  try { if (new_data) newObj = JSON.parse(new_data); } catch {}
+  const allKeys = [...new Set([...Object.keys(oldObj), ...Object.keys(newObj)])];
+  const changed = allKeys.filter(k => JSON.stringify(oldObj[k]) !== JSON.stringify(newObj[k]));
+  if (changed.length === 0) return null;
+  return (
+    <div>
+      <button onClick={() => setOpen(!open)} className="text-[11px] text-sky-600 hover:text-sky-700">{open ? "Sembunyikan" : `Lihat ${changed.length} perubahan`}</button>
+      {open && (
+        <div className="mt-1 text-[11px] bg-slate-50 rounded-lg p-2 space-y-1">
+          {changed.map(k => (
+            <div key={k} className="flex gap-2">
+              <span className="font-medium text-slate-500 w-28 shrink-0">{k}</span>
+              <span className="text-red-500 line-through">{String(oldObj[k] ?? "-")}</span>
+              <span className="text-slate-400">→</span>
+              <span className="text-emerald-600">{String(newObj[k] ?? "-")}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AuditTab({ employeeId }: { employeeId: number }) {
+  const [rows, setRows] = useState<AuditLogRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  async function load() {
+    setLoading(true);
+    try { setRows(await fetchAuditLogs({ employee_id: employeeId, limit: 100 })); } catch {}
+    setLoading(false);
+  }
+  useEffect(() => { load(); }, [employeeId]);
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-3">
+        <div className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Audit Log</div>
+        <div className="text-[11px] text-slate-400">{rows.length} entri</div>
+      </div>
+      {loading ? (
+        <div className="flex items-center gap-2 text-slate-400 text-sm py-6 justify-center"><Loader2 size={16} className="animate-spin" /> Memuat...</div>
+      ) : rows.length === 0 ? (
+        <div className="text-center text-slate-400 py-8">Belum ada riwayat perubahan.</div>
+      ) : (
+        <div className="flex flex-col gap-2">
+          {rows.map(r => (
+            <div key={r.id} className="bg-white border border-slate-100 rounded-lg px-4 py-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${ACTION_COLOR[r.action] ?? "bg-slate-100 text-slate-600"}`}>{r.action}</span>
+                    <span className="text-[11px] text-slate-400">{r.entity_type}</span>
+                  </div>
+                  <div className="text-sm text-slate-700">{r.description || "-"}</div>
+                  <DiffView label="Perubahan" old_data={r.old_data} new_data={r.new_data} />
+                </div>
+                <div className="text-right shrink-0">
+                  <div className="text-[11px] font-medium text-slate-600">{r.username}</div>
+                  <div className="text-[10px] text-slate-400">{new Date(r.created_at).toLocaleString("id-ID")}</div>
+                  <div className="text-[10px] text-slate-300">{r.ip_address}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function EmployeeProfile({ e }: { e: Employee }) {
   const [tab, setTab] = useState("overview");
   return (
@@ -761,6 +846,8 @@ function EmployeeProfile({ e }: { e: Employee }) {
         {tab === "training" && <TrainingTab employeeId={e.id} />}
 
         {tab === "dokumen" && <DocumentsTab employeeId={e.id} />}
+
+        {tab === "audit" && <AuditTab employeeId={e.id} />}
       </div>
     </div>
   );

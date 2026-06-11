@@ -16,6 +16,7 @@ from app.job_history import router as job_history_router
 from app.family import router as family_router
 from app.training import router as training_router
 from app.documents import router as documents_router
+from app.audit import router as audit_router
 from app.auth import router as auth_router, ensure_default_admin, get_current_user, require_roles
 from app.core.config import settings
 from app.core.database import Base, engine
@@ -63,6 +64,7 @@ app.include_router(certification_router, prefix=settings.API_PREFIX, dependencie
 app.include_router(job_history_router, prefix=settings.API_PREFIX, dependencies=login_required)
 app.include_router(family_router, prefix=settings.API_PREFIX, dependencies=login_required)
 app.include_router(training_router, prefix=settings.API_PREFIX, dependencies=login_required)
+app.include_router(audit_router, prefix=settings.API_PREFIX, dependencies=login_required)
 # Documents: auth per-endpoint (download/preview pakai token query param)
 app.include_router(documents_router, prefix=settings.API_PREFIX)
 # Auth: login terbuka; kelola user sudah dibatasi Super Admin di dalam router.

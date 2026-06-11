@@ -467,3 +467,23 @@ export function docPreviewUrl(id: number): string { return `${BASE}/documents/${
 export function docDownloadUrl(id: number): string { return `${BASE}/documents/${id}/download${authToken ? "?token=" + encodeURIComponent(authToken) : ""}`; }
 export async function deleteDocument(id: number): Promise<unknown> { return sendJSON(`/documents/${id}`, "DELETE"); }
 
+// ===================== Audit Trail =====================
+export interface AuditLogRecord {
+  id: number;
+  user_id: number | null;
+  username: string;
+  action: string;
+  entity_type: string;
+  entity_id: number | null;
+  employee_id: number | null;
+  description: string | null;
+  old_data: string | null;
+  new_data: string | null;
+  ip_address: string | null;
+  created_at: string;
+}
+export async function fetchAuditLogs(params: Record<string, string | number>): Promise<AuditLogRecord[]> {
+  const qs = Object.entries(params).filter(([,v]) => v != null && v !== "").map(([k,v]) => `${k}=${encodeURIComponent(v)}`).join("&");
+  return getJSON(`/audit-logs?${qs}`);
+}
+
