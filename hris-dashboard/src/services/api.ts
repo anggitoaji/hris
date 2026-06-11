@@ -439,3 +439,31 @@ export async function createTraining(d: Record<string, unknown>): Promise<Traini
 export async function updateTraining(id: number, d: Record<string, unknown>): Promise<TrainingRecord> { return sendJSON(`/training/${id}`, "PATCH", d); }
 export async function deleteTraining(id: number): Promise<unknown> { return sendJSON(`/training/${id}`, "DELETE"); }
 
+// ===================== Dokumen Karyawan =====================
+export interface DocumentRecord {
+  id: number;
+  employee_id: number;
+  category: string;
+  sub_category: string | null;
+  filename_original: string;
+  file_size: number;
+  mime_type: string;
+  uploaded_at: string;
+}
+export const DOC_CATEGORIES = ["Identitas", "Pendidikan", "Kepegawaian", "Sertifikasi", "Kesehatan", "Lainnya"];
+export async function fetchDocuments(eid: number): Promise<DocumentRecord[]> { return getJSON(`/documents?employee_id=${eid}`); }
+export async function uploadDocument(file: File, employee_id: number, category: string, sub_category: string): Promise<DocumentRecord> {
+  const fd = new FormData();
+  fd.append("file", file);
+  fd.append("employee_id", String(employee_id));
+  fd.append("category", category);
+  fd.append("sub_category", sub_category);
+  const res = await fetch(`${BASE}/documents`, { method: "POST", headers: authToken ? { Authorization: `Bearer ${authToken}` } : {}, body: fd });
+  if (res.status === 401) { onUnauthorized?.(); throw new Error("Sesi berakhir."); }
+  if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.detail || `Upload gagal: ${res.status}`); }
+  return res.json();
+}
+export function docPreviewUrl(id: number): string { return `${BASE}/documents/${id}/preview`; }
+export function docDownloadUrl(id: number): string { return `${BASE}/documents/${id}/download`; }
+export async function deleteDocument(id: number): Promise<unknown> { return sendJSON(`/documents/${id}`, "DELETE"); }
+

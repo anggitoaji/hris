@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, Fragment, type ReactNode } from "react";
-import { Search, X, Loader2, Plus, Pencil, Building2, Trash2, Check } from "lucide-react";
+import { Search, X, Loader2, Plus, Pencil, Building2, Trash2, Check, Upload, Download, Eye, FileText } from "lucide-react";
 import { fetchEmployees, createEmployee, updateEmployee, fetchDivisions, createDivision, updateDivision, deleteDivision, type Division } from "../services/api";
 import type { Role } from "../components/Sidebar";
 import type { Employee } from "../types";
@@ -59,6 +59,7 @@ const PROFILE_TABS: { key: string; label: string }[] = [
   { key: "riwayat", label: "Riwayat Jabatan" },
   { key: "keluarga", label: "Keluarga" },
   { key: "training", label: "Training" },
+  { key: "dokumen", label: "Dokumen" },
 ];
 
 function ComingSoonTab({ name }: { name: string }) {
@@ -476,6 +477,118 @@ function TrainingTab({ employeeId }: { employeeId: number }) {
   </div>);
 }
 
+function formatSize(bytes: number): string {
+  if (bytes < 1024) return bytes + " B";
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+  return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+}
+
+function DocumentsTab({ employeeId }: { employeeId: number }) {
+  const [rows, setRows] = useState<DocumentRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showUpload, setShowUpload] = useState(false);
+  const [category, setCategory] = useState("Identitas");
+  const [subCat, setSubCat] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  async function load() { setLoading(true); try { setRows(await fetchDocuments(employeeId)); } catch {} setLoading(false); }
+  useEffect(() => { load(); }, [employeeId]);
+
+  async function doUpload() {
+    if (!file) { setErr("Pilih file terlebih dahulu."); return; }
+    setUploading(true); setErr(null);
+    try {
+      await uploadDocument(file, employeeId, category, subCat.trim());
+      setFile(null); setSubCat(""); setShowUpload(false); await load();
+    } catch (e) { setErr(e instanceof Error ? e.message : "Upload gagal."); }
+    setUploading(false);
+  }
+
+  async function remove(id: number) {
+    if (!window.confirm("Hapus dokumen ini?")) return;
+    try { await deleteDocument(id); await load(); } catch {}
+  }
+
+  const grouped = DOC_CATEGORIES.map(cat => ({ cat, docs: rows.filter(r => r.category === cat) })).filter(g => g.docs.length > 0);
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-3">
+        <div className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Dokumen Karyawan</div>
+        <button onClick={() => { setShowUpload(!showUpload); setErr(null); }} className="flex items-center gap-1 text-sm text-sky-600 hover:text-sky-700">
+          <Upload size={15} /> Upload Dokumen
+        </button>
+      </div>
+
+      {showUpload && (
+        <div className="bg-sky-50/50 border border-sky-100 rounded-xl p-4 mb-4">
+          <div className="grid grid-cols-2 gap-3 mb-3">
+            <div>
+              <label className="text-[11px] text-slate-500 font-medium block mb-1">Kategori</label>
+              <select className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-lg outline-none focus:border-sky-300" value={category} onChange={ev => setCategory(ev.target.value)}>
+                {DOC_CATEGORIES.map(c => <option key={c}>{c}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-[11px] text-slate-500 font-medium block mb-1">Jenis Dokumen</label>
+              <input className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-lg outline-none focus:border-sky-300" value={subCat} onChange={ev => setSubCat(ev.target.value)} placeholder="mis. KTP, Ijazah, Kontrak Kerja" />
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <label className="flex items-center gap-2 px-3 py-2 text-sm border border-slate-200 rounded-lg cursor-pointer hover:bg-white">
+              <FileText size={15} className="text-slate-400" />
+              <span className="text-slate-600">{file ? file.name : "Pilih file (PDF/JPG/PNG, maks 10MB)"}</span>
+              <input type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden" onChange={ev => { if (ev.target.files?.[0]) setFile(ev.target.files[0]); }} />
+            </label>
+            <button onClick={doUpload} disabled={uploading} className="px-4 py-2 text-sm rounded-lg bg-sky-600 text-white hover:bg-sky-700 disabled:opacity-60 flex items-center gap-2">
+              {uploading && <Loader2 size={14} className="animate-spin" />} Upload
+            </button>
+            <button onClick={() => { setShowUpload(false); setFile(null); setErr(null); }} className="text-sm text-slate-400 hover:text-slate-600">Batal</button>
+          </div>
+          {err && <div className="text-sm text-red-600 mt-2">{err}</div>}
+        </div>
+      )}
+
+      {loading ? (
+        <div className="flex items-center gap-2 text-slate-400 text-sm py-6 justify-center"><Loader2 size={16} className="animate-spin" /> Memuat...</div>
+      ) : rows.length === 0 ? (
+        <div className="text-center text-slate-400 py-8">Belum ada dokumen.</div>
+      ) : (
+        <div className="flex flex-col gap-4">
+          {grouped.map(g => (
+            <div key={g.cat}>
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">{g.cat}</div>
+              <div className="flex flex-col gap-1">
+                {g.docs.map(d => (
+                  <div key={d.id} className="flex items-center justify-between bg-white border border-slate-100 rounded-lg px-3 py-2 hover:border-slate-200">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <FileText size={18} className={d.mime_type.includes("pdf") ? "text-red-400" : "text-sky-400"} />
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium text-slate-700 truncate">{d.filename_original}</div>
+                        <div className="text-[11px] text-slate-400">
+                          {d.sub_category && <span className="mr-2">{d.sub_category}</span>}
+                          {formatSize(d.file_size)} — {new Date(d.uploaded_at).toLocaleDateString("id-ID")}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <a href={docPreviewUrl(d.id)} target="_blank" rel="noreferrer" className="p-1.5 rounded-md hover:bg-slate-50 text-slate-400 hover:text-sky-600" title="Preview"><Eye size={16} /></a>
+                      <a href={docDownloadUrl(d.id)} className="p-1.5 rounded-md hover:bg-slate-50 text-slate-400 hover:text-emerald-600" title="Download"><Download size={16} /></a>
+                      <button onClick={() => remove(d.id)} className="p-1.5 rounded-md hover:bg-red-50 text-slate-400 hover:text-red-600" title="Hapus"><Trash2 size={16} /></button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function EmployeeProfile({ e }: { e: Employee }) {
   const [tab, setTab] = useState("overview");
   return (
@@ -609,6 +722,8 @@ function EmployeeProfile({ e }: { e: Employee }) {
         {tab === "riwayat" && <JobHistoryTab employeeId={e.id} />}
         {tab === "keluarga" && <FamilyTab employeeId={e.id} />}
         {tab === "training" && <TrainingTab employeeId={e.id} />}
+
+        {tab === "dokumen" && <DocumentsTab employeeId={e.id} />}
       </div>
     </div>
   );
