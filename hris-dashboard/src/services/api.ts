@@ -489,7 +489,7 @@ export async function fetchAuditLogs(params: Record<string, string | number>): P
 
 // ===================== Foto Profil =====================
 export function photoUrl(employeeId: number): string {
-  return `${BASE}/employees/${employeeId}/photo${authToken ? "?token=" + encodeURIComponent(authToken) : ""}`;
+  return `${BASE}/photos/${employeeId}${authToken ? "?token=" + encodeURIComponent(authToken) : ""}`;
 }
 export async function uploadPhoto(employeeId: number, file: File): Promise<unknown> {
   const fd = new FormData();

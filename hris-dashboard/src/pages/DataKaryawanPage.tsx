@@ -36,6 +36,23 @@ function Group({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
+
+function Avatar({ name, src, size = 28, gradient }: { name: string; src?: string; size?: number; gradient?: boolean }) {
+  const [failed, setFailed] = useState(false);
+  const ini = name.split(" ").filter(Boolean).map(w => w[0]).slice(0, 2).join("").toUpperCase();
+  if (src && !failed) {
+    return <img src={src} alt="" onError={() => setFailed(true)} className="rounded-full object-cover" style={{ width: size, height: size }} />;
+  }
+  return (
+    <div className="rounded-full flex items-center justify-center font-bold" style={{
+      width: size, height: size,
+      fontSize: size < 32 ? 10 : 14,
+      background: gradient ? "linear-gradient(135deg,#818cf8,#6366f1)" : "#e2e8f0",
+      color: gradient ? "#fff" : "#64748b",
+    }}>{ini}</div>
+  );
+}
+
 function initials(nama: string): string {
   return nama.split(" ").filter(Boolean).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
 }
@@ -1157,11 +1174,7 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
     return (
       <tr onClick={() => setSel(e)} className="border-b border-slate-50 hover:bg-slate-50 cursor-pointer">
         <td className="py-2 px-1">
-          {e.photo_url ? (
-            <img src={photoUrl(e.id)} alt="" className="w-7 h-7 rounded-full object-cover" />
-          ) : (
-            <div className="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center text-[10px] text-slate-500 font-bold">{e.nama.split(" ").map(w=>w[0]).slice(0,2).join("").toUpperCase()}</div>
-          )}
+          <Avatar name={e.nama} src={e.photo_url ? photoUrl(e.id) : undefined} size={28} />
         </td>
         <td className="py-2 px-2 text-slate-500">{e.nik}</td>
         <td className="py-2 px-2 font-medium text-slate-800">{e.nama}</td>
@@ -1289,14 +1302,7 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
             <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 sticky top-0 bg-white">
               <div className="flex items-center gap-3 min-w-0">
                 <label className="relative rounded-full shrink-0 cursor-pointer group" style={{ width: 44, height: 44 }}>
-                  {sel.photo_url ? (
-                    <img src={photoUrl(sel.id)} alt="" className="w-11 h-11 rounded-full object-cover" />
-                  ) : (
-                    <div className="w-11 h-11 rounded-full flex items-center justify-center text-white text-sm font-bold"
-                      style={{ background: "linear-gradient(135deg,#818cf8,#6366f1)" }}>
-                      {initials(sel.nama)}
-                    </div>
-                  )}
+                  <Avatar name={sel.nama} src={sel.photo_url ? photoUrl(sel.id) : undefined} size={44} gradient />
                   <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <Camera size={16} className="text-white" />
                   </div>
