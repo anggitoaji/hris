@@ -91,7 +91,7 @@ def delete_employee(employee_id: int, request: Request, db: Session = Depends(ge
 
 
 # ===================== Foto Profil =====================
-PHOTO_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads", "photos")
+PHOTO_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "uploads", "photos")
 os.makedirs(PHOTO_DIR, exist_ok=True)
 PHOTO_EXT = {".jpg", ".jpeg", ".png", ".webp"}
 
@@ -136,20 +136,3 @@ async def upload_photo(
               ip_address=get_client_ip(request) if request else None)
 
     return employee
-
-
-@router.get("/{employee_id}/photo")
-def get_photo(employee_id: int, token: str = Query(None), db: Session = Depends(get_db)):
-    """Serve foto profil (token via query param untuk <img src>)."""
-    from app.auth import verify_token
-    if token:
-        payload = verify_token(token)
-        if not payload:
-            raise HTTPException(status_code=401, detail="Token tidak valid.")
-    employee = crud.get_employee(db, employee_id)
-    if not employee or not employee.photo_url:
-        raise HTTPException(status_code=404, detail="Foto tidak ditemukan.")
-    filepath = os.path.join(PHOTO_DIR, employee.photo_url)
-    if not os.path.exists(filepath):
-        raise HTTPException(status_code=404, detail="File foto tidak ditemukan.")
-    return FileResponse(path=filepath, media_type="image/jpeg")

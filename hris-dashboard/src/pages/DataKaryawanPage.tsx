@@ -1308,7 +1308,11 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
                   </div>
                   <input type="file" accept=".jpg,.jpeg,.png,.webp" className="hidden" onChange={async (ev) => {
                     const f = ev.target.files?.[0]; if (!f) return;
-                    try { await uploadPhoto(sel.id, f); await load(); } catch {}
+                    try {
+                      const updated = await uploadPhoto(sel.id, f) as Employee;
+                      await load();
+                      setSel(updated);
+                    } catch {}
                   }} />
                 </label>
                 <div className="min-w-0">
