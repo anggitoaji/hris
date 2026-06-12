@@ -1174,7 +1174,7 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
     return (
       <tr onClick={() => setSel(e)} className="border-b border-slate-50 hover:bg-slate-50 cursor-pointer">
         <td className="py-2 px-1">
-          <Avatar name={e.nama} src={e.photo_url ? photoUrl(e.id) : undefined} size={28} />
+          <Avatar name={e.nama} src={e.photo_url ? photoUrl(e.id) : undefined} size={36} />
         </td>
         <td className="py-2 px-2 text-slate-500">{e.nik}</td>
         <td className="py-2 px-2 font-medium text-slate-800">{e.nama}</td>
@@ -1247,7 +1247,7 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
           <div className="overflow-x-auto">
             <table className="w-full text-sm table-fixed">
               <colgroup>
-                <col style={{ width: "3%" }} />
+                <col style={{ width: "4%" }} />
                 <col style={{ width: "7%" }} />
                 <col style={{ width: "11%" }} />
                 <col style={{ width: "9%" }} />
