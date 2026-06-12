@@ -1095,6 +1095,7 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
   const [filterStatus, setFilterStatus] = useState("");
   const [groupByDiv, setGroupByDiv] = useState(false);
   const [sel, setSel] = useState<Employee | null>(null);
+  const [photoViewOpen, setPhotoViewOpen] = useState(false);
 
   const [formOpen, setFormOpen] = useState(false);
   const [formMode, setFormMode] = useState<"create" | "edit">("create");
@@ -1174,7 +1175,7 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
     return (
       <tr onClick={() => setSel(e)} className="border-b border-slate-50 hover:bg-slate-50 cursor-pointer">
         <td className="py-2 px-1">
-          <Avatar name={e.nama} src={e.photo_url ? photoUrl(e.id) : undefined} size={36} />
+          <Avatar name={e.nama} src={e.photo_url ? photoUrl(e.id) : undefined} size={44} />
         </td>
         <td className="py-2 px-2 text-slate-500">{e.nik}</td>
         <td className="py-2 px-2 font-medium text-slate-800">{e.nama}</td>
@@ -1294,27 +1295,69 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
         )}
       </div>
 
+      {/* Modal lihat foto full */}
+      {photoViewOpen && sel && sel.photo_url && (
+        <div className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center" onClick={() => setPhotoViewOpen(false)}>
+          <div className="relative" onClick={(e) => e.stopPropagation()}>
+            <img src={photoUrl(sel.id)} alt={sel.nama}
+              className="max-h-[80vh] max-w-[80vw] rounded-2xl shadow-2xl object-contain" />
+            <button onClick={() => setPhotoViewOpen(false)}
+              className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1.5 transition-colors">
+              <X size={18} />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Drawer detail */}
       {sel && (
         <>
-          <div className="fixed inset-0 bg-black/20 z-40" onClick={() => setSel(null)} />
+          <div className="fixed inset-0 bg-black/20 z-40" onClick={() => { setSel(null); setPhotoViewOpen(false); }} />
           <div className="fixed top-0 right-0 h-full bg-white shadow-2xl z-50 overflow-y-auto" style={{ width: "50vw", minWidth: 460, maxWidth: "96vw" }}>
             <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 sticky top-0 bg-white">
               <div className="flex items-center gap-3 min-w-0">
-                <label className="relative rounded-full shrink-0 cursor-pointer group" style={{ width: 44, height: 44 }}>
-                  <Avatar name={sel.nama} src={sel.photo_url ? photoUrl(sel.id) : undefined} size={44} gradient />
-                  <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Camera size={16} className="text-white" />
-                  </div>
-                  <input type="file" accept=".jpg,.jpeg,.png,.webp" className="hidden" onChange={async (ev) => {
-                    const f = ev.target.files?.[0]; if (!f) return;
-                    try {
-                      const updated = await uploadPhoto(sel.id, f) as Employee;
-                      await load();
-                      setSel(updated);
-                    } catch {}
-                  }} />
-                </label>
+                <div className="relative shrink-0 group" style={{ width: 56, height: 56 }}>
+                  {/* avatar bulat — klik view jika ada foto, klik upload jika belum */}
+                  {sel.photo_url ? (
+                    <button type="button" onClick={() => setPhotoViewOpen(true)}
+                      className="relative rounded-full overflow-hidden cursor-pointer block w-full h-full">
+                      <Avatar name={sel.nama} src={photoUrl(sel.id)} size={56} gradient />
+                      <div className="absolute inset-0 rounded-full bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity gap-0.5">
+                        <Eye size={14} className="text-white" />
+                        <span className="text-white text-[9px] font-semibold tracking-wide">View</span>
+                      </div>
+                    </button>
+                  ) : (
+                    <label className="relative rounded-full overflow-hidden cursor-pointer block w-full h-full">
+                      <Avatar name={sel.nama} src={undefined} size={56} gradient />
+                      <div className="absolute inset-0 rounded-full bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity gap-0.5">
+                        <Upload size={14} className="text-white" />
+                        <span className="text-white text-[9px] font-semibold tracking-wide">Upload</span>
+                      </div>
+                      <input type="file" accept=".jpg,.jpeg,.png,.webp" className="hidden" onChange={async (ev) => {
+                        const f = ev.target.files?.[0]; if (!f) return;
+                        try {
+                          const updated = await uploadPhoto(sel.id, f) as Employee;
+                          await load(); setSel(updated);
+                        } catch {}
+                      }} />
+                    </label>
+                  )}
+                  {/* tombol "Edit" kecil untuk ganti foto — hanya muncul jika sudah ada foto */}
+                  {sel.photo_url && (
+                    <label className="absolute -bottom-1 -right-1 bg-white border border-slate-200 rounded-full px-1.5 py-0.5 flex items-center gap-0.5 cursor-pointer shadow-sm hover:bg-slate-50 transition-colors">
+                      <Pencil size={9} className="text-slate-500" />
+                      <span className="text-[9px] text-slate-500 font-medium leading-none">Edit</span>
+                      <input type="file" accept=".jpg,.jpeg,.png,.webp" className="hidden" onChange={async (ev) => {
+                        const f = ev.target.files?.[0]; if (!f) return;
+                        try {
+                          const updated = await uploadPhoto(sel.id, f) as Employee;
+                          await load(); setSel(updated);
+                        } catch {}
+                      }} />
+                    </label>
+                  )}
+                </div>
                 <div className="min-w-0">
                   <div className="font-bold text-slate-800 truncate">{sel.nama}</div>
                   <div className="text-xs text-slate-400 truncate">{sel.position} - {sel.department}</div>
@@ -1324,7 +1367,7 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
                 <button onClick={() => openEdit(sel)} className="flex items-center gap-1 text-sm text-sky-600 hover:text-sky-700 px-2 py-1 rounded-md hover:bg-sky-50">
                   <Pencil size={15} /> Edit
                 </button>
-                <button onClick={() => setSel(null)} className="text-slate-400 hover:text-slate-600 p-1"><X size={20} /></button>
+                <button onClick={() => { setSel(null); setPhotoViewOpen(false); }} className="text-slate-400 hover:text-slate-600 p-1"><X size={20} /></button>
               </div>
             </div>
 
