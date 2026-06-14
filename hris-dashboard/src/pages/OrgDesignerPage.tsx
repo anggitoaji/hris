@@ -337,16 +337,20 @@ export default function OrgDesignerPage({ divisi, role }: { divisi: string; role
     try {
       const [ns, es] = await Promise.all([fetchOrgNodes(divisi), fetchOrgEdges(divisi)]);
       setNodes(ns.map(toFlowNode));
-      setEdges(es.map(e => ({
-        id: `e${e.id}`, source: e.source_id, target: e.target_id,
-        type: "custom",
-        markerEnd: e.arrow_end === "arrow"
-          ? { type: MarkerType.ArrowClosed, color: "#475569", width: 16, height: 16 } : undefined,
-        data: {
-          dbId: e.id, line_type: e.line_type, arrow_end: e.arrow_end,
-          edge_type: e.edge_type || "reporting", routing_type: e.routing_type || "smoothstep",
-        },
-      })));
+      setEdges(es.map(e => {
+        const et = e.edge_type || "reporting";
+        const arrowColor = et === "connection" ? "#0ea5e9" : "#334155";
+        return {
+          id: `e${e.id}`, source: e.source_id, target: e.target_id,
+          type: "custom",
+          markerEnd: e.arrow_end === "arrow"
+            ? { type: MarkerType.ArrowClosed, color: arrowColor, width: 16, height: 16 } : undefined,
+          data: {
+            dbId: e.id, line_type: e.line_type, arrow_end: e.arrow_end,
+            edge_type: et, routing_type: e.routing_type || "smoothstep",
+          },
+        };
+      }));
     } catch(e) { console.error(e); }
     setLoading(false);
   }
@@ -362,7 +366,7 @@ export default function OrgDesignerPage({ divisi, role }: { divisi: string; role
       const e = await createOrgEdge({ division_key: divisi, source_id: params.source, target_id: params.target });
       setEdges(eds => addEdge({
         ...params, id: `e${e.id}`, type: "custom",
-        markerEnd: { type: MarkerType.ArrowClosed, color: "#475569", width: 16, height: 16 },
+        markerEnd: { type: MarkerType.ArrowClosed, color: "#334155", width: 16, height: 16 },
         data: { dbId: e.id, line_type: "solid", arrow_end: "arrow", edge_type: "reporting", routing_type: "smoothstep" },
       }, eds));
     } catch(err) { console.error(err); }
@@ -401,10 +405,11 @@ export default function OrgDesignerPage({ divisi, role }: { divisi: string; role
   async function changeEdgeType(edge: Edge, newEdgeType: string) {
     await updateOrgEdge(edge.data!.dbId, { edge_type: newEdgeType }).catch(() => {});
     const arrow = newEdgeType === "reference" ? "none" : "arrow";
+    const arrowColor = newEdgeType === "connection" ? "#0ea5e9" : "#334155";
     setEdges(es => es.map(e => e.id !== edge.id ? e : {
       ...e,
       markerEnd: arrow === "arrow"
-        ? { type: MarkerType.ArrowClosed, color: "#475569", width: 16, height: 16 } : undefined,
+        ? { type: MarkerType.ArrowClosed, color: arrowColor, width: 16, height: 16 } : undefined,
       data: { ...e.data, edge_type: newEdgeType, arrow_end: arrow },
     }));
     setEdgeMenu(null);

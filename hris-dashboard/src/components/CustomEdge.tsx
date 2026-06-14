@@ -1,4 +1,4 @@
-import { EdgeProps, getBezierPath, MarkerType, BaseEdge } from "reactflow";
+import { EdgeProps, getSmoothStepPath, BaseEdge } from "reactflow";
 
 export interface CustomEdgeData {
   dbId?: number;
@@ -17,26 +17,26 @@ export function CustomEdge({
   const edgeType = data.edge_type || "reporting";
   const lineType = data.line_type || "solid";
 
-  // Determine path (smoothstep by default)
-  const [path] = getBezierPath({
+  const [path] = getSmoothStepPath({
     sourceX, sourceY, sourcePosition,
     targetX, targetY, targetPosition,
+    borderRadius: 8,
   });
 
   // Style based on edge type
-  let stroke = "#475569";
+  let stroke = "#334155";   // default: dark slate (reporting = hierarki)
   let strokeWidth = 1.8;
   let opacity = 1;
 
   if (edgeType === "reporting") {
-    stroke = "#e11d48"; // Red untuk reporting (ada panah)
-    strokeWidth = 2.2;
+    stroke = "#334155";      // Slate gelap — garis perintah standar
+    strokeWidth = 2;
   } else if (edgeType === "reference") {
-    stroke = "#94a3b8"; // Gray untuk reference (tanpa panah)
+    stroke = "#94a3b8";      // Gray — garis koordinasi/referensi (tanpa panah)
     strokeWidth = 1.5;
     opacity = 0.7;
   } else if (edgeType === "connection") {
-    stroke = "#06b6d4"; // Cyan untuk connection
+    stroke = "#0ea5e9";      // Biru — koneksi lintas divisi
     strokeWidth = 1.8;
   }
 
