@@ -26,15 +26,16 @@ interface OrgBoxData {
   text_align: string; notes: string; dbId: number;
 }
 
+// Warna aksen (border-left) per level hierarki — persis referensi VPN chart
 const COLOR_TEMPLATES = [
-  { label: "Direksi",    bg: "#ffffff", text: "#1e293b" },
-  { label: "Head",       bg: "#4ade80", text: "#14532d" },
-  { label: "Manager",    bg: "#86efac", text: "#166534" },
-  { label: "SPV",        bg: "#fbbf24", text: "#7c2d12" },
-  { label: "Staff",      bg: "#d1fae5", text: "#065f46" },
-  { label: "Tim Khusus", bg: "#64748b", text: "#f1f5f9" },
-  { label: "IT/Cloud",   bg: "#93c5fd", text: "#1e3a8a" },
-  { label: "Project",    bg: "#e2e8f0", text: "#334155" },
+  { label: "Direksi",  accent: "#1F4E78" },
+  { label: "Head",     accent: "#2F5496" },
+  { label: "Manager",  accent: "#4472C4" },
+  { label: "SPV",      accent: "#ED7D31" },
+  { label: "Staff",    accent: "#70AD47" },
+  { label: "Khusus",   accent: "#64748b" },
+  { label: "Merah",    accent: "#e11d48" },
+  { label: "Abu",      accent: "#94a3b8" },
 ];
 
 const DIVISI_LABELS: Record<string, string> = {
@@ -57,18 +58,20 @@ const HANDLE_CSS = `
 `;
 
 function OrgBoxNode({ data, selected }: NodeProps<OrgBoxData>) {
-  const people  = (data.employee_name || "").split("\n").filter(Boolean);
-  const align   = (data.text_align || "center") as "left" | "center" | "right";
-  const titleCl = data.title_color || data.text_color;
-  const nameCl  = data.name_color  || data.text_color;
+  const people     = (data.employee_name || "").split("\n").filter(Boolean);
+  const align      = (data.text_align || "center") as "left" | "center" | "right";
+  const accentCol  = data.color || "#334155";  // color field = warna aksen border kiri
+  const titleCl    = data.title_color || data.text_color || "#1e293b";
+  const nameCl     = data.name_color  || data.text_color || "#555555";
 
   return (
     <div style={{
-      background: data.color, borderRadius: 8, minWidth: 160,
-      border: selected ? "2.5px solid #0ea5e9" : "1.5px solid rgba(0,0,0,.14)",
+      background: "#ffffff", minWidth: 120, borderRadius: 6,
+      border: "1px solid #d4d8de",
+      borderLeft: `4px solid ${accentCol}`,
       boxShadow: selected
-        ? "0 0 0 3px rgba(14,165,233,.18), 0 4px 14px rgba(0,0,0,.12)"
-        : "0 2px 8px rgba(0,0,0,.10)",
+        ? `0 0 0 2px #0ea5e9, 0 4px 14px rgba(0,0,0,.12)`
+        : "0 1px 3px rgba(0,0,0,.08)",
       overflow: "hidden", userSelect: "none",
     }}>
       {/* 4 handles — atas/bawah/kiri/kanan, muncul saat hover */}
@@ -219,15 +222,16 @@ function EditModal({ node, onClose, onSave, onDelete, canEdit }: {
 
               {/* Color template */}
               <div>
-                <label className="text-[11px] text-slate-500 font-semibold uppercase tracking-wide">Template Warna</label>
+                <label className="text-[11px] text-slate-500 font-semibold uppercase tracking-wide">Template Warna Aksen</label>
                 <div className="mt-1.5 flex flex-wrap gap-1.5">
                   {COLOR_TEMPLATES.map(ct => (
                     <button key={ct.label} title={ct.label}
-                      onClick={() => setF(p => ({ ...p, color: ct.bg, text_color: ct.text, title_color: "", name_color: "" }))}
-                      className="px-2 py-1 rounded-md border text-[10px] font-semibold transition-all"
+                      onClick={() => setF(p => ({ ...p, color: ct.accent, title_color: "", name_color: "" }))}
+                      className="px-2 py-1 rounded-md text-[10px] font-semibold transition-all"
                       style={{
-                        background: ct.bg, color: ct.text,
-                        border: f.color === ct.bg ? "2px solid #0ea5e9" : "1.5px solid rgba(0,0,0,.12)",
+                        background: "#fff", color: "#334155",
+                        border: f.color === ct.accent ? "2px solid #0ea5e9" : `1.5px solid #d1d5db`,
+                        borderLeft: `4px solid ${ct.accent}`,
                       }}>
                       {ct.label}
                     </button>
@@ -238,7 +242,7 @@ function EditModal({ node, onClose, onSave, onDelete, canEdit }: {
               {/* Color pickers */}
               <div className="grid grid-cols-2 gap-2">
                 {([
-                  ["color",       "BG Kotak"],
+                  ["color",       "Warna Aksen"],
                   ["text_color",  "Teks Default"],
                   ["title_color", "Warna Jabatan"],
                   ["name_color",  "Warna Nama"],
@@ -257,23 +261,27 @@ function EditModal({ node, onClose, onSave, onDelete, canEdit }: {
           {/* Preview */}
           <div>
             <label className="text-[11px] text-slate-500 font-semibold uppercase tracking-wide">Preview</label>
-            <div className="mt-1 rounded-xl overflow-hidden border border-slate-100 shadow-sm"
-              style={{ background: f.color }}>
+            <div className="mt-1 overflow-hidden shadow-sm"
+              style={{
+                background: "#ffffff", borderRadius: 6,
+                border: "1px solid #d4d8de",
+                borderLeft: `4px solid ${f.color || "#334155"}`,
+              }}>
               <div style={{
-                padding: "8px 12px", textAlign: f.text_align as "left"|"center"|"right",
-                color: f.title_color || f.text_color,
+                padding: "7px 10px", textAlign: f.text_align as "left"|"center"|"right",
+                color: f.title_color || f.text_color || "#1e293b",
                 fontWeight: 700, fontSize: 11, textTransform: "uppercase", letterSpacing: ".5px",
-                borderBottom: f.employee_name ? `1.5px solid ${(f.title_color || f.text_color)}40` : "none",
+                borderBottom: f.employee_name ? `1px solid rgba(0,0,0,.08)` : "none",
               }}>
                 {f.title || "Jabatan"}
               </div>
               {f.employee_name && (
-                <div style={{ padding: "5px 12px 8px" }}>
+                <div style={{ padding: "5px 10px 8px" }}>
                   {f.employee_name.split("\n").filter(Boolean).map((p, i, arr) => (
                     <div key={i} style={{
                       textAlign: f.text_align as "left"|"center"|"right",
-                      color: f.name_color || f.text_color,
-                      fontSize: 11, fontWeight: 500, lineHeight: 1.55,
+                      color: f.name_color || f.text_color || "#555",
+                      fontSize: 10, lineHeight: 1.55,
                     }}>
                       {arr.length > 1 ? `- ${p}` : p}
                     </div>
@@ -339,7 +347,7 @@ export default function OrgDesignerPage({ divisi, role }: { divisi: string; role
       setNodes(ns.map(toFlowNode));
       setEdges(es.map(e => {
         const et = e.edge_type || "reporting";
-        const arrowColor = et === "connection" ? "#0ea5e9" : "#334155";
+        const arrowColor = et === "connection" ? "#0ea5e9" : "#1F4E78";
         return {
           id: `e${e.id}`, source: e.source_id, target: e.target_id,
           type: "custom",
@@ -366,7 +374,7 @@ export default function OrgDesignerPage({ divisi, role }: { divisi: string; role
       const e = await createOrgEdge({ division_key: divisi, source_id: params.source, target_id: params.target });
       setEdges(eds => addEdge({
         ...params, id: `e${e.id}`, type: "custom",
-        markerEnd: { type: MarkerType.ArrowClosed, color: "#334155", width: 16, height: 16 },
+        markerEnd: { type: MarkerType.ArrowClosed, color: "#1F4E78", width: 16, height: 16 },
         data: { dbId: e.id, line_type: "solid", arrow_end: "arrow", edge_type: "reporting", routing_type: "smoothstep" },
       }, eds));
     } catch(err) { console.error(err); }
@@ -405,7 +413,7 @@ export default function OrgDesignerPage({ divisi, role }: { divisi: string; role
   async function changeEdgeType(edge: Edge, newEdgeType: string) {
     await updateOrgEdge(edge.data!.dbId, { edge_type: newEdgeType }).catch(() => {});
     const arrow = newEdgeType === "reference" ? "none" : "arrow";
-    const arrowColor = newEdgeType === "connection" ? "#0ea5e9" : "#334155";
+    const arrowColor = newEdgeType === "connection" ? "#0ea5e9" : "#1F4E78";
     setEdges(es => es.map(e => e.id !== edge.id ? e : {
       ...e,
       markerEnd: arrow === "arrow"

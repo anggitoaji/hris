@@ -23,18 +23,18 @@ export function CustomEdge({
     borderRadius: 8,
   });
 
-  // Style based on edge type
-  let stroke = "#334155";   // default: dark slate (reporting = hierarki)
-  let strokeWidth = 1.8;
+  // Style based on edge type — sesuai referensi VPN chart
+  let stroke = "#1F4E78";
+  let strokeWidth = 2;
   let opacity = 1;
 
   if (edgeType === "reporting") {
-    stroke = "#334155";      // Slate gelap — garis perintah standar
+    stroke = "#1F4E78";      // Navy — garis komando/perintah
     strokeWidth = 2;
   } else if (edgeType === "reference") {
-    stroke = "#94a3b8";      // Gray — garis koordinasi/referensi (tanpa panah)
-    strokeWidth = 1.5;
-    opacity = 0.7;
+    stroke = "#888888";      // Gray — garis koordinasi/dotted-line (tanpa panah)
+    strokeWidth = 1.8;
+    opacity = 0.85;
   } else if (edgeType === "connection") {
     stroke = "#0ea5e9";      // Biru — koneksi lintas divisi
     strokeWidth = 1.8;
