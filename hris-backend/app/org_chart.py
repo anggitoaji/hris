@@ -25,6 +25,9 @@ class OrgNode(Base):
     width         = Column(Float, default=180.0)
     height        = Column(Float, default=80.0)
     notes         = Column(Text,  default="")
+    text_align    = Column(String(10), default="center")  # left | center | right
+    title_color   = Column(String(20), default="")        # kosong = ikut text_color
+    name_color    = Column(String(20), default="")        # kosong = ikut text_color
     updated_at    = Column(DateTime, default=datetime.utcnow)
 
 
@@ -53,6 +56,9 @@ class NodeCreate(BaseModel):
     width: float = 180.0
     height: float = 80.0
     notes: str = ""
+    text_align: str = "center"
+    title_color: str = ""
+    name_color: str = ""
 
 class NodeUpdate(BaseModel):
     title: Optional[str] = None
@@ -65,12 +71,16 @@ class NodeUpdate(BaseModel):
     width: Optional[float] = None
     height: Optional[float] = None
     notes: Optional[str] = None
+    text_align: Optional[str] = None
+    title_color: Optional[str] = None
+    name_color: Optional[str] = None
 
 class NodeOut(BaseModel):
     id: int; division_key: str; title: str; employee_name: str
     department: str; color: str; text_color: str
     x: float; y: float; width: float; height: float
-    notes: str; updated_at: datetime
+    notes: str; text_align: str; title_color: str; name_color: str
+    updated_at: datetime
     class Config: from_attributes = True
 
 class EdgeCreate(BaseModel):

@@ -507,7 +507,8 @@ export interface OrgNodeRecord {
   id: number; division_key: string; title: string; employee_name: string;
   department: string; color: string; text_color: string;
   x: number; y: number; width: number; height: number;
-  notes: string; updated_at: string;
+  notes: string; text_align: string; title_color: string; name_color: string;
+  updated_at: string;
 }
 export interface OrgEdgeRecord {
   id: number; division_key: string; source_id: string; target_id: string;
