@@ -483,36 +483,87 @@ export default function OrgDesignerPage({ divisi, role }: { divisi: string; role
     setExporting(false);
   }
 
-  function exportExcel() {
-    const label = DIVISI_LABELS[divisi] ?? divisi;
-    const rows: (string | number)[][] = [
-      [`Struktur Organisasi — ${label}`],
-      [],
-      ["No", "Jabatan", "Sub-judul / Dept", "Nama Pegawai (| = baris baru)", "Keterangan", "Warna BG"],
-      ...nodes.map((n, i) => [
-        i + 1, n.data.title, n.data.department,
-        n.data.employee_name.replace(/\n/g, " | "),
-        n.data.notes, n.data.color,
-      ]),
-    ];
-    const ws = XLSX.utils.aoa_to_sheet(rows);
-    ws["!cols"] = [{ wch: 4 }, { wch: 28 }, { wch: 22 }, { wch: 45 }, { wch: 22 }, { wch: 10 }];
-    ws["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 5 } }];
+  async function exportExcel() {
+    setExporting(true);
+    try {
+      const ExcelJS = (await import("exceljs")).default;
+      const label = DIVISI_LABELS[divisi] ?? divisi;
 
-    const wsEdge = XLSX.utils.aoa_to_sheet([
-      ["Dari (Jabatan)", "Ke (Jabatan)", "Tipe Garis"],
-      ...edges.map(e => {
+      // Capture canvas as image
+      const el = document.getElementById("org-canvas-wrap");
+      if (!el) throw new Error("Canvas not found");
+
+      const toHide = el.querySelectorAll<HTMLElement>(
+        ".react-flow__controls, .react-flow__minimap, .react-flow__panel"
+      );
+      toHide.forEach(h => { h.style.visibility = "hidden"; });
+      await new Promise(r => setTimeout(r, 100));
+
+      const chartImage = await toPng(el, { backgroundColor: "#f8fafc", pixelRatio: 1.5, cacheBust: true });
+      toHide.forEach(h => { h.style.visibility = ""; });
+
+      // Create workbook
+      const wb = new ExcelJS.Workbook();
+
+      // Sheet 1: Visual Chart
+      const wsChart = wb.addWorksheet("Visual Chart");
+      wsChart.pageSetup = { paperSize: 9, orientation: "landscape" };
+
+      const imageId = wb.addImage({
+        base64: chartImage.split(",")[1],
+        extension: "png",
+      });
+      wsChart.addImage(imageId, "B2:M20");
+      wsChart.getCell("A1").value = `Struktur Organisasi — ${label}`;
+      wsChart.getCell("A1").font = { bold: true, size: 14 };
+      wsChart.mergeCells("A1:M1");
+
+      // Sheet 2: Data Nodes
+      const wsData = wb.addWorksheet("Data Nodes");
+      wsData.columns = [
+        { header: "No", width: 5 },
+        { header: "Jabatan", width: 25 },
+        { header: "Sub-judul/Dept", width: 20 },
+        { header: "Nama Pegawai", width: 40 },
+        { header: "Keterangan", width: 20 },
+        { header: "Warna", width: 12 },
+      ];
+
+      nodes.forEach((n, i) => {
+        wsData.addRow([
+          i + 1, n.data.title, n.data.department,
+          n.data.employee_name.replace(/\n/g, " | "),
+          n.data.notes, n.data.color,
+        ]);
+      });
+
+      wsData.getRow(1).font = { bold: true };
+      wsData.getRow(1).fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE2E8F0" } };
+
+      // Sheet 3: Garis Pelaporan
+      const wsEdges = wb.addWorksheet("Garis Pelaporan");
+      wsEdges.columns = [
+        { header: "Dari (Jabatan)", width: 25 },
+        { header: "Ke (Jabatan)", width: 25 },
+        { header: "Tipe Garis", width: 14 },
+      ];
+
+      edges.forEach(e => {
         const src = nodes.find(n => n.id === e.source)?.data.title ?? e.source;
         const tgt = nodes.find(n => n.id === e.target)?.data.title ?? e.target;
-        return [src, tgt, e.data?.line_type ?? "solid"];
-      }),
-    ]);
-    wsEdge["!cols"] = [{ wch: 28 }, { wch: 28 }, { wch: 14 }];
+        wsEdges.addRow([src, tgt, e.data?.line_type ?? "solid"]);
+      });
 
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Struktur Org");
-    XLSX.utils.book_append_sheet(wb, wsEdge, "Garis Pelaporan");
-    XLSX.writeFile(wb, `struktur-org-${divisi}.xlsx`);
+      wsEdges.getRow(1).font = { bold: true };
+      wsEdges.getRow(1).fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE2E8F0" } };
+
+      // Save
+      await wb.xlsx.writeFile(`struktur-org-${divisi}.xlsx`);
+    } catch (e) {
+      console.error(e);
+      alert("Export Excel gagal. Coba lagi.");
+    }
+    setExporting(false);
   }
 
   return (
