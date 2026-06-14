@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   Home, Users, BarChart3, FolderKanban, CalendarDays, Radio,
-  Building2, Wallet, FileText, FileBarChart, Settings,
+  Building2, Wallet, FileText, FileBarChart, Settings, Network,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -24,6 +24,14 @@ const MENU: Item[] = [
       { label: "Cuti & Izin", roles: ["HR", "Manager", "Karyawan"] },
       { label: "KPI Karyawan", roles: ["Direksi", "HR", "Manager", "Karyawan"], built: true },
       { label: "Rekrutmen", roles: ["HR"] },
+    ] },
+
+  { key: "orgchart", label: "Struktur Organisasi", Icon: Network, group: "Utama", built: true,
+    roles: ["Super Admin", "Direksi", "HR", "Manager", "Finance", "NOC", "Karyawan"], sub: [
+      { label: "Divisi IT VPN",  roles: ["Super Admin", "Direksi", "HR", "Manager", "NOC", "Karyawan"], built: true },
+      { label: "Divisi Finance", roles: ["Super Admin", "Direksi", "HR", "Manager", "Finance", "Karyawan"], built: true },
+      { label: "Marketing",      roles: ["Super Admin", "Direksi", "HR", "Manager", "Karyawan"], built: true },
+      { label: "HRD & GA",       roles: ["Super Admin", "Direksi", "HR", "Manager", "Karyawan"], built: true },
     ] },
 
   { key: "kpi", label: "KPI & Performance", Icon: BarChart3, group: "Utama", built: true,
@@ -146,6 +154,10 @@ function Flyout({ item, role, onPick }: { item: Item; role: Role; onPick: (sub?:
 // Peta submenu -> route aplikasi. Yang belum dibangun jatuh ke "soon:".
 function routeFor(moduleKey: string, sub?: Sub): string {
   if (moduleKey === "dashboard") return "dashboard";
+  if (moduleKey === "orgchart" && sub && sub.label === "Divisi IT VPN")  return "orgchart.itvpn";
+  if (moduleKey === "orgchart" && sub && sub.label === "Divisi Finance") return "orgchart.finance";
+  if (moduleKey === "orgchart" && sub && sub.label === "Marketing")      return "orgchart.marketing";
+  if (moduleKey === "orgchart" && sub && sub.label === "HRD & GA")       return "orgchart.hrdga";
   if (moduleKey === "karyawan" && sub && sub.label === "Data Karyawan") return "karyawan.data";
   if (moduleKey === "karyawan" && sub && sub.label === "KPI Karyawan") return "kpi.karyawan";
   if (moduleKey === "karyawan" && sub && sub.label === "Kehadiran & Absensi") return "kehadiran.absensi";

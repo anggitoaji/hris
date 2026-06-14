@@ -22,6 +22,7 @@ import KpiDivisiPage from "./pages/KpiDivisiPage";
 import LoginPage from "./pages/LoginPage";
 import UserManagementPage from "./pages/UserManagementPage";
 import ChangePasswordPage from "./pages/ChangePasswordPage";
+import OrgChartPage from "./pages/OrgChartPage";
 import {
   fetchMe, setAuthToken, getAuthToken, setOnUnauthorized,
   type AuthUser, type LoginResult,
@@ -163,6 +164,11 @@ export default function App() {
           {route === "users.manage" && <UserManagementPage />}
 
           {route === "settings.password" && <ChangePasswordPage />}
+
+          {route === "orgchart.itvpn"    && <OrgChartPage divisi="itvpn" role={role} />}
+          {route === "orgchart.finance"  && <OrgChartPage divisi="finance" role={role} />}
+          {route === "orgchart.marketing" && <OrgChartPage divisi="marketing" role={role} />}
+          {route === "orgchart.hrdga"    && <OrgChartPage divisi="hrdga" role={role} />}
 
           {route.startsWith("soon:") && <ComingSoon name={route.slice(5)} />}
         </main>
