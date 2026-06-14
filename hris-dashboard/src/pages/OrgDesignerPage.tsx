@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import ReactFlow, {
   useNodesState, useEdgesState, addEdge,
   Controls, MiniMap, Background, BackgroundVariant, Panel,
-  Handle, Position, MarkerType,
+  Handle, Position, MarkerType, ConnectionMode, ConnectionLineType,
   type NodeProps, type Edge, type Node, type Connection,
 } from "reactflow";
 import "reactflow/dist/style.css";
@@ -41,10 +41,18 @@ const DIVISI_LABELS: Record<string, string> = {
 };
 
 // ─── Custom Node ──────────────────────────────────────────────────────────────
+// Handles hanya muncul saat hover (via CSS di bawah), bukan selalu terlihat
 const HANDLE_STYLE: React.CSSProperties = {
   background: "#22c55e", border: "2px solid #fff",
-  width: 10, height: 10, opacity: 1, zIndex: 10,
+  width: 11, height: 11, zIndex: 10,
 };
+
+// CSS global agar handle muncul hanya saat node di-hover / selected
+const HANDLE_CSS = `
+  .react-flow__node .react-flow__handle { opacity: 0; transition: opacity .15s; }
+  .react-flow__node:hover .react-flow__handle,
+  .react-flow__node.selected .react-flow__handle { opacity: 1; }
+`;
 
 function OrgBoxNode({ data, selected }: NodeProps<OrgBoxData>) {
   const people  = (data.employee_name || "").split("\n").filter(Boolean);
@@ -61,13 +69,11 @@ function OrgBoxNode({ data, selected }: NodeProps<OrgBoxData>) {
         : "0 2px 8px rgba(0,0,0,.10)",
       overflow: "hidden", userSelect: "none",
     }}>
-      {/* Handles — selalu terlihat */}
-      <Handle type="target"  position={Position.Top}    style={HANDLE_STYLE} />
-      <Handle type="target"  position={Position.Left}   id="tl" style={{ ...HANDLE_STYLE, top: "35%" }} />
-      <Handle type="source"  position={Position.Left}   id="sl" style={{ ...HANDLE_STYLE, top: "65%" }} />
-      <Handle type="source"  position={Position.Bottom} style={HANDLE_STYLE} />
-      <Handle type="source"  position={Position.Right}  id="sr" style={{ ...HANDLE_STYLE, top: "35%" }} />
-      <Handle type="target"  position={Position.Right}  id="tr" style={{ ...HANDLE_STYLE, top: "65%" }} />
+      {/* 4 handles — atas/bawah/kiri/kanan, muncul saat hover */}
+      <Handle type="source" position={Position.Top}    style={HANDLE_STYLE} />
+      <Handle type="source" position={Position.Bottom} style={HANDLE_STYLE} />
+      <Handle type="source" position={Position.Left}   style={HANDLE_STYLE} />
+      <Handle type="source" position={Position.Right}  style={HANDLE_STYLE} />
 
       {/* ── Jabatan (header) ── */}
       <div style={{
@@ -530,11 +536,12 @@ export default function OrgDesignerPage({ divisi, role }: { divisi: string; role
 
       {canEdit && (
         <div className="text-[11px] text-slate-400 shrink-0 -mt-1 bg-amber-50 border border-amber-100 rounded-lg px-3 py-1.5">
-          <b>Tips:</b> Drag kotak untuk pindah • Hover kotak → titik <span className="text-green-600 font-bold">●</span> hijau muncul → drag ke kotak lain untuk buat garis • Double-click untuk edit isi • Pilih lalu <kbd className="bg-white border border-slate-200 px-1 rounded text-[10px]">Delete</kbd> untuk hapus
+          <b>Tips:</b> Drag kotak untuk pindah (snap ke grid 20px) • Hover kotak → 4 titik <span className="text-green-600 font-bold">●</span> hijau → drag ke kotak lain untuk buat garis • Double-click untuk edit isi • Pilih lalu <kbd className="bg-white border border-slate-200 px-1 rounded text-[10px]">Delete</kbd> untuk hapus
         </div>
       )}
 
       {/* Canvas */}
+      <style>{HANDLE_CSS}</style>
       <div id="org-canvas-wrap" className="flex-1 rounded-2xl border border-slate-100 shadow-sm overflow-hidden bg-slate-50/40 min-h-0">
         {loading ? (
           <div className="h-full flex items-center justify-center text-slate-400 text-sm">Memuat bagan…</div>
@@ -551,7 +558,11 @@ export default function OrgDesignerPage({ divisi, role }: { divisi: string; role
             nodeTypes={nodeTypes}
             nodesDraggable={canEdit} nodesConnectable={canEdit}
             deleteKeyCode={canEdit ? "Delete" : null}
+            connectionMode={ConnectionMode.Loose}
+            connectionLineType={ConnectionLineType.SmoothStep}
             connectionLineStyle={{ stroke: "#475569", strokeWidth: 1.8 }}
+            snapToGrid={canEdit} snapGrid={[20, 20]}
+            defaultEdgeOptions={{ type: "smoothstep" }}
             fitView fitViewOptions={{ padding: 0.3 }}>
             <Controls showInteractive={false}/>
             <MiniMap nodeColor={n => n.data?.color ?? "#e2e8f0"} maskColor="rgba(241,245,249,.7)"/>
