@@ -10,6 +10,7 @@ import { Plus, Trash2, FileSpreadsheet, Printer, X, AlignLeft, AlignCenter, Alig
 import { toPng } from "html-to-image";
 import jsPDF from "jspdf";
 import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 import { CustomEdge } from "../components/CustomEdge";
 import {
   fetchOrgNodes, createOrgNode, updateOrgNode, deleteOrgNode,
@@ -563,8 +564,10 @@ export default function OrgDesignerPage({ divisi, role }: { divisi: string; role
       wsEdges.getRow(1).font = { bold: true };
       wsEdges.getRow(1).fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE2E8F0" } };
 
-      // Save
-      await wb.xlsx.writeFile(`struktur-org-${divisi}.xlsx`);
+      // Save - browser compatible
+      const excelBuffer = await wb.xlsx.writeBuffer();
+      const blob = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      saveAs(blob, `struktur-org-${divisi}.xlsx`);
     } catch (e) {
       console.error("Export error:", e);
       alert(`Export Excel gagal: ${(e as Error).message}`);
