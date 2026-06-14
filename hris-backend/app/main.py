@@ -18,6 +18,7 @@ from app.training import router as training_router
 from app.documents import router as documents_router
 from app.photo_serve import router as photo_serve_router
 from app.audit import router as audit_router
+from app.org_chart import router as org_chart_router
 from app.auth import router as auth_router, ensure_default_admin, get_current_user, require_roles
 from app.core.config import settings
 from app.core.database import Base, engine
@@ -65,6 +66,7 @@ app.include_router(certification_router, prefix=settings.API_PREFIX, dependencie
 app.include_router(job_history_router, prefix=settings.API_PREFIX, dependencies=login_required)
 app.include_router(family_router, prefix=settings.API_PREFIX, dependencies=login_required)
 app.include_router(training_router, prefix=settings.API_PREFIX, dependencies=login_required)
+app.include_router(org_chart_router, prefix=settings.API_PREFIX, dependencies=login_required)
 # Audit Trail: hanya Super Admin
 app.include_router(audit_router, prefix=settings.API_PREFIX, dependencies=[Depends(require_roles())])
 # Foto profil: auth via token query param

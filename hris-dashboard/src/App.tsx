@@ -23,6 +23,7 @@ import LoginPage from "./pages/LoginPage";
 import UserManagementPage from "./pages/UserManagementPage";
 import ChangePasswordPage from "./pages/ChangePasswordPage";
 import OrgChartPage from "./pages/OrgChartPage";
+import OrgDesignerPage from "./pages/OrgDesignerPage";
 import {
   fetchMe, setAuthToken, getAuthToken, setOnUnauthorized,
   type AuthUser, type LoginResult,
@@ -166,10 +167,10 @@ export default function App() {
           {route === "settings.password" && <ChangePasswordPage />}
 
           {route === "orgchart.overview"  && <OrgChartPage divisi="overview" role={role} />}
-          {route === "orgchart.itvpn"    && <OrgChartPage divisi="itvpn" role={role} />}
-          {route === "orgchart.finance"  && <OrgChartPage divisi="finance" role={role} />}
-          {route === "orgchart.marketing" && <OrgChartPage divisi="marketing" role={role} />}
-          {route === "orgchart.hrdga"    && <OrgChartPage divisi="hrdga" role={role} />}
+          {route === "orgchart.itvpn"     && <OrgDesignerPage divisi="itvpn"    role={role} />}
+          {route === "orgchart.finance"  && <OrgDesignerPage divisi="finance"   role={role} />}
+          {route === "orgchart.marketing"&& <OrgDesignerPage divisi="marketing" role={role} />}
+          {route === "orgchart.hrdga"    && <OrgDesignerPage divisi="hrdga"     role={role} />}
 
           {route.startsWith("soon:") && <ComingSoon name={route.slice(5)} />}
         </main>

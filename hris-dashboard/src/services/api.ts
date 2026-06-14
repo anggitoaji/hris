@@ -500,3 +500,24 @@ export async function uploadPhoto(employeeId: number, file: File): Promise<unkno
   return res.json();
 }
 
+
+
+// ===================== Org Chart Designer =====================
+export interface OrgNodeRecord {
+  id: number; division_key: string; title: string; employee_name: string;
+  department: string; color: string; text_color: string;
+  x: number; y: number; width: number; height: number;
+  notes: string; updated_at: string;
+}
+export interface OrgEdgeRecord {
+  id: number; division_key: string; source_id: string; target_id: string;
+  line_type: string; arrow_end: string; label: string;
+}
+export async function fetchOrgNodes(key: string): Promise<OrgNodeRecord[]> { return getJSON(`/orgchart/nodes/${key}`); }
+export async function createOrgNode(d: Record<string, unknown>): Promise<OrgNodeRecord> { return sendJSON("/orgchart/nodes", "POST", d); }
+export async function updateOrgNode(id: number, d: Record<string, unknown>): Promise<OrgNodeRecord> { return sendJSON(`/orgchart/nodes/${id}`, "PATCH", d); }
+export async function deleteOrgNode(id: number): Promise<unknown> { return sendJSON(`/orgchart/nodes/${id}`, "DELETE"); }
+export async function fetchOrgEdges(key: string): Promise<OrgEdgeRecord[]> { return getJSON(`/orgchart/edges/${key}`); }
+export async function createOrgEdge(d: Record<string, unknown>): Promise<OrgEdgeRecord> { return sendJSON("/orgchart/edges", "POST", d); }
+export async function updateOrgEdge(id: number, d: Record<string, unknown>): Promise<OrgEdgeRecord> { return sendJSON(`/orgchart/edges/${id}`, "PATCH", d); }
+export async function deleteOrgEdge(id: number): Promise<unknown> { return sendJSON(`/orgchart/edges/${id}`, "DELETE"); }
