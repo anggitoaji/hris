@@ -6,7 +6,10 @@ import ReactFlow, {
   type NodeProps, type Edge, type Node, type Connection,
 } from "reactflow";
 import "reactflow/dist/style.css";
-import { Plus, Trash2, FileSpreadsheet, Printer, X, AlignLeft, AlignCenter, AlignRight } from "lucide-react";
+import { Plus, Trash2, FileSpreadsheet, Printer, X, AlignLeft, AlignCenter, AlignRight, Loader2 } from "lucide-react";
+import { toPng } from "html-to-image";
+import jsPDF from "jspdf";
+import * as XLSX from "xlsx";
 import {
   fetchOrgNodes, createOrgNode, updateOrgNode, deleteOrgNode,
   fetchOrgEdges, createOrgEdge, updateOrgEdge, deleteOrgEdge,
@@ -314,8 +317,9 @@ export default function OrgDesignerPage({ divisi, role }: { divisi: string; role
   const canEdit = role === "Super Admin";
   const [nodes, setNodes, onNodesChange] = useNodesState<OrgBoxData>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const [loading, setLoading]   = useState(true);
-  const [saving,  setSaving]    = useState(false);
+  const [loading,    setLoading]    = useState(true);
+  const [saving,     setSaving]     = useState(false);
+  const [exporting,  setExporting]  = useState(false);
   const [editNode, setEditNode] = useState<Node<OrgBoxData> | null>(null);
   const [edgeMenu, setEdgeMenu] = useState<{ edge: Edge; x: number; y: number } | null>(null);
 
@@ -427,28 +431,72 @@ export default function OrgDesignerPage({ divisi, role }: { divisi: string; role
     setEditNode(null);
   }
 
-  function exportCSV() {
-    const hdr = ["Jabatan","Dept","Nama (satu per baris)","Keterangan","X","Y","Warna BG"];
-    const rows = nodes.map(n => [
-      n.data.title, n.data.department,
-      n.data.employee_name.replace(/\n/g, " | "),
-      n.data.notes, String(Math.round(n.position.x)), String(Math.round(n.position.y)), n.data.color,
-    ]);
-    const csv = [hdr, ...rows].map(r => r.map(v=>`"${(v??"").replace(/"/g,'""')}"`).join(",")).join("\n");
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(new Blob(["﻿"+csv], { type:"text/csv;charset=utf-8" }));
-    a.download = `org-${divisi}.csv`; a.click();
+  async function exportPDF() {
+    const el = document.getElementById("org-canvas-wrap");
+    if (!el) return;
+    setExporting(true);
+    try {
+      // Sembunyikan kontrol UI sebelum capture
+      const hide = el.querySelectorAll<HTMLElement>(
+        ".react-flow__controls, .react-flow__minimap, .react-flow__panel"
+      );
+      hide.forEach(h => { h.style.visibility = "hidden"; });
+
+      const dataUrl = await toPng(el, {
+        backgroundColor: "#f8fafc",
+        pixelRatio: 2,
+        cacheBust: true,
+      });
+
+      hide.forEach(h => { h.style.visibility = ""; });
+
+      const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: "a3" });
+      const W = pdf.internal.pageSize.getWidth();
+      const H = pdf.internal.pageSize.getHeight();
+
+      pdf.setFontSize(12);
+      pdf.setTextColor(51, 65, 85);
+      pdf.text(`Struktur Organisasi — ${DIVISI_LABELS[divisi] ?? divisi}`, W / 2, 8, { align: "center" });
+
+      pdf.addImage(dataUrl, "PNG", 0, 13, W, H - 13);
+      pdf.save(`struktur-org-${divisi}.pdf`);
+    } catch (e) {
+      console.error(e);
+      alert("Export PDF gagal. Coba lagi.");
+    }
+    setExporting(false);
   }
 
-  function exportPDF() {
-    const st = document.createElement("style");
-    st.innerHTML = `@media print{@page{size:A3 landscape;margin:10mm}body>*{display:none!important}#org-print-area{display:block!important;position:fixed;inset:0;z-index:9999}.react-flow__minimap,.react-flow__controls,.react-flow__panel{display:none!important}}`;
-    document.head.appendChild(st);
-    const el = document.getElementById("org-canvas-wrap");
-    if(el) el.id="org-print-area";
-    window.print();
-    if(el) el.id="org-canvas-wrap";
-    document.head.removeChild(st);
+  function exportExcel() {
+    const label = DIVISI_LABELS[divisi] ?? divisi;
+    const rows: (string | number)[][] = [
+      [`Struktur Organisasi — ${label}`],
+      [],
+      ["No", "Jabatan", "Sub-judul / Dept", "Nama Pegawai (| = baris baru)", "Keterangan", "Warna BG"],
+      ...nodes.map((n, i) => [
+        i + 1, n.data.title, n.data.department,
+        n.data.employee_name.replace(/\n/g, " | "),
+        n.data.notes, n.data.color,
+      ]),
+    ];
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    ws["!cols"] = [{ wch: 4 }, { wch: 28 }, { wch: 22 }, { wch: 45 }, { wch: 22 }, { wch: 10 }];
+    ws["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 5 } }];
+
+    const wsEdge = XLSX.utils.aoa_to_sheet([
+      ["Dari (Jabatan)", "Ke (Jabatan)", "Tipe Garis"],
+      ...edges.map(e => {
+        const src = nodes.find(n => n.id === e.source)?.data.title ?? e.source;
+        const tgt = nodes.find(n => n.id === e.target)?.data.title ?? e.target;
+        return [src, tgt, e.data?.line_type ?? "solid"];
+      }),
+    ]);
+    wsEdge["!cols"] = [{ wch: 28 }, { wch: 28 }, { wch: 14 }];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Struktur Org");
+    XLSX.utils.book_append_sheet(wb, wsEdge, "Garis Pelaporan");
+    XLSX.writeFile(wb, `struktur-org-${divisi}.xlsx`);
   }
 
   return (
@@ -468,13 +516,14 @@ export default function OrgDesignerPage({ divisi, role }: { divisi: string; role
               <Plus size={15}/> Tambah Node
             </button>
           )}
-          <button onClick={exportCSV}
+          <button onClick={exportExcel}
             className="flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50">
             <FileSpreadsheet size={15}/> Excel
           </button>
-          <button onClick={exportPDF}
-            className="flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50">
-            <Printer size={15}/> PDF
+          <button onClick={exportPDF} disabled={exporting}
+            className="flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-60">
+            {exporting ? <Loader2 size={15} className="animate-spin"/> : <Printer size={15}/>}
+            {exporting ? "Mengekspor…" : "PDF"}
           </button>
         </div>
       </div>
