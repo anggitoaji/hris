@@ -1195,7 +1195,7 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h1 className="text-lg font-bold text-slate-800">Data Karyawan</h1>
-          <p className="text-sm text-slate-400">Biodata lengkap karyawan - data langsung dari database.</p>
+
         </div>
         <div className="flex items-center gap-3">
           {!loading && !err && <span className="text-sm text-slate-500">{filtered.length} karyawan</span>}
