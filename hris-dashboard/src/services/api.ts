@@ -512,7 +512,7 @@ export interface OrgNodeRecord {
 }
 export interface OrgEdgeRecord {
   id: number; division_key: string; source_id: string; target_id: string;
-  line_type: string; arrow_end: string; label: string;
+  line_type: string; arrow_end: string; edge_type: string; routing_type: string; label: string;
 }
 export async function fetchOrgNodes(key: string): Promise<OrgNodeRecord[]> { return getJSON(`/orgchart/nodes/${key}`); }
 export async function createOrgNode(d: Record<string, unknown>): Promise<OrgNodeRecord> { return sendJSON("/orgchart/nodes", "POST", d); }

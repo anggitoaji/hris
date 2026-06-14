@@ -39,6 +39,8 @@ class OrgEdge(Base):
     target_id    = Column(String(50), nullable=False)
     line_type    = Column(String(20), default="solid")   # solid | dashed
     arrow_end    = Column(String(20), default="arrow")   # arrow | none
+    edge_type    = Column(String(20), default="reporting")  # reporting | reference | connection
+    routing_type = Column(String(20), default="smoothstep")  # smoothstep | straight
     label        = Column(String(200), default="")
 
 
@@ -85,16 +87,19 @@ class NodeOut(BaseModel):
 
 class EdgeCreate(BaseModel):
     division_key: str; source_id: str; target_id: str
-    line_type: str = "solid"; arrow_end: str = "arrow"; label: str = ""
+    line_type: str = "solid"; arrow_end: str = "arrow"
+    edge_type: str = "reporting"; routing_type: str = "smoothstep"; label: str = ""
 
 class EdgeUpdate(BaseModel):
     line_type: Optional[str] = None
     arrow_end: Optional[str] = None
+    edge_type: Optional[str] = None
+    routing_type: Optional[str] = None
     label: Optional[str] = None
 
 class EdgeOut(BaseModel):
     id: int; division_key: str; source_id: str; target_id: str
-    line_type: str; arrow_end: str; label: str
+    line_type: str; arrow_end: str; edge_type: str; routing_type: str; label: str
     class Config: from_attributes = True
 
 

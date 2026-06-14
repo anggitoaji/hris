@@ -10,6 +10,7 @@ import { Plus, Trash2, FileSpreadsheet, Printer, X, AlignLeft, AlignCenter, Alig
 import { toPng } from "html-to-image";
 import jsPDF from "jspdf";
 import * as XLSX from "xlsx";
+import { CustomEdge } from "../components/CustomEdge";
 import {
   fetchOrgNodes, createOrgNode, updateOrgNode, deleteOrgNode,
   fetchOrgEdges, createOrgEdge, updateOrgEdge, deleteOrgEdge,
@@ -127,6 +128,7 @@ function OrgBoxNode({ data, selected }: NodeProps<OrgBoxData>) {
 }
 
 const nodeTypes = { orgBox: OrgBoxNode };
+const edgeTypes = { custom: CustomEdge };
 
 // ─── Edit Modal ───────────────────────────────────────────────────────────────
 interface EditForm {
@@ -336,13 +338,13 @@ export default function OrgDesignerPage({ divisi, role }: { divisi: string; role
       setNodes(ns.map(toFlowNode));
       setEdges(es.map(e => ({
         id: `e${e.id}`, source: e.source_id, target: e.target_id,
-        type: "smoothstep",
-        style: e.line_type === "dashed"
-          ? { strokeDasharray: "6,4", stroke: "#475569", strokeWidth: 1.8 }
-          : { stroke: "#475569", strokeWidth: 1.8 },
+        type: "custom",
         markerEnd: e.arrow_end === "arrow"
           ? { type: MarkerType.ArrowClosed, color: "#475569", width: 16, height: 16 } : undefined,
-        data: { dbId: e.id, line_type: e.line_type, arrow_end: e.arrow_end },
+        data: {
+          dbId: e.id, line_type: e.line_type, arrow_end: e.arrow_end,
+          edge_type: e.edge_type || "reporting", routing_type: e.routing_type || "smoothstep",
+        },
       })));
     } catch(e) { console.error(e); }
     setLoading(false);
@@ -358,10 +360,9 @@ export default function OrgDesignerPage({ divisi, role }: { divisi: string; role
     try {
       const e = await createOrgEdge({ division_key: divisi, source_id: params.source, target_id: params.target });
       setEdges(eds => addEdge({
-        ...params, id: `e${e.id}`, type: "smoothstep",
-        style: { stroke: "#475569", strokeWidth: 1.8 },
+        ...params, id: `e${e.id}`, type: "custom",
         markerEnd: { type: MarkerType.ArrowClosed, color: "#475569", width: 16, height: 16 },
-        data: { dbId: e.id, line_type: "solid", arrow_end: "arrow" },
+        data: { dbId: e.id, line_type: "solid", arrow_end: "arrow", edge_type: "reporting", routing_type: "smoothstep" },
       }, eds));
     } catch(err) { console.error(err); }
   }, [divisi, setEdges]);
@@ -390,11 +391,20 @@ export default function OrgDesignerPage({ divisi, role }: { divisi: string; role
     const newType = edge.data?.line_type === "dashed" ? "solid" : "dashed";
     await updateOrgEdge(edge.data!.dbId, { line_type: newType }).catch(() => {});
     setEdges(es => es.map(e => e.id !== edge.id ? e : {
+      ...e, data: { ...e.data, line_type: newType },
+    }));
+    setEdgeMenu(null);
+  }
+
+  // Change edge type (reporting/reference/connection)
+  async function changeEdgeType(edge: Edge, newEdgeType: string) {
+    await updateOrgEdge(edge.data!.dbId, { edge_type: newEdgeType }).catch(() => {});
+    const arrow = newEdgeType === "reference" ? "none" : "arrow";
+    setEdges(es => es.map(e => e.id !== edge.id ? e : {
       ...e,
-      style: newType === "dashed"
-        ? { strokeDasharray: "6,4", stroke: "#475569", strokeWidth: 1.8 }
-        : { stroke: "#475569", strokeWidth: 1.8 },
-      data: { ...e.data, line_type: newType },
+      markerEnd: arrow === "arrow"
+        ? { type: MarkerType.ArrowClosed, color: "#475569", width: 16, height: 16 } : undefined,
+      data: { ...e.data, edge_type: newEdgeType, arrow_end: arrow },
     }));
     setEdgeMenu(null);
   }
@@ -556,6 +566,7 @@ export default function OrgDesignerPage({ divisi, role }: { divisi: string; role
             onNodeDoubleClick={onNodeDoubleClick}
             onPaneClick={() => setEdgeMenu(null)}
             nodeTypes={nodeTypes}
+            edgeTypes={edgeTypes}
             nodesDraggable={canEdit} nodesConnectable={canEdit}
             deleteKeyCode={canEdit ? "Delete" : null}
             connectionMode={ConnectionMode.Loose}
@@ -596,8 +607,26 @@ export default function OrgDesignerPage({ divisi, role }: { divisi: string; role
           onClick={e => e.stopPropagation()}
         >
           <div className="px-3 py-1 text-[10px] text-slate-400 font-semibold uppercase tracking-wide border-b border-slate-100 mb-1">
-            Garis Pelaporan
+            Garis
           </div>
+          <div className="text-[10px] text-slate-500 px-3 py-1 font-semibold">Jenis</div>
+          {(["reporting", "reference", "connection"] as const).map(t => (
+            <button
+              key={t}
+              onClick={() => changeEdgeType(edgeMenu.edge, t)}
+              className={`w-full text-left px-3 py-1.5 text-sm flex items-center gap-2 ${
+                edgeMenu.edge.data?.edge_type === t
+                  ? "bg-sky-100 text-sky-700 font-semibold"
+                  : "text-slate-600 hover:bg-slate-50"
+              }`}
+            >
+              <span className={`w-4 h-0.5 ${
+                t === "reporting" ? "bg-red-500" : t === "reference" ? "bg-gray-400" : "bg-cyan-500"
+              }`} />
+              {t === "reporting" ? "Pelaporan (↓)" : t === "reference" ? "Referensi" : "Koneksi"}
+            </button>
+          ))}
+          <div className="border-t border-slate-100 my-1" />
           <button
             onClick={() => toggleEdgeDash(edgeMenu.edge)}
             className="w-full text-left px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2"
