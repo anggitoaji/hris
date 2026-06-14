@@ -486,44 +486,50 @@ export default function OrgDesignerPage({ divisi, role }: { divisi: string; role
   async function exportExcel() {
     setExporting(true);
     try {
-      const ExcelJS = (await import("exceljs")).default;
+      const { Workbook } = await import("exceljs");
       const label = DIVISI_LABELS[divisi] ?? divisi;
 
       // Capture canvas as image
       const el = document.getElementById("org-canvas-wrap");
-      if (!el) throw new Error("Canvas not found");
+      if (!el) throw new Error("Canvas tidak ditemukan");
 
       const toHide = el.querySelectorAll<HTMLElement>(
         ".react-flow__controls, .react-flow__minimap, .react-flow__panel"
       );
       toHide.forEach(h => { h.style.visibility = "hidden"; });
-      await new Promise(r => setTimeout(r, 100));
+      await new Promise(r => setTimeout(r, 150));
 
       const chartImage = await toPng(el, { backgroundColor: "#f8fafc", pixelRatio: 1.5, cacheBust: true });
       toHide.forEach(h => { h.style.visibility = ""; });
 
+      // Convert data URL to buffer
+      const base64Data = chartImage.split(",")[1];
+      const binaryStr = atob(base64Data);
+      const buffer = new Uint8Array(binaryStr.length);
+      for (let i = 0; i < binaryStr.length; i++) {
+        buffer[i] = binaryStr.charCodeAt(i);
+      }
+
       // Create workbook
-      const wb = new ExcelJS.Workbook();
+      const wb = new Workbook();
 
       // Sheet 1: Visual Chart
       const wsChart = wb.addWorksheet("Visual Chart");
       wsChart.pageSetup = { paperSize: 9, orientation: "landscape" };
-
-      const imageId = wb.addImage({
-        base64: chartImage.split(",")[1],
-        extension: "png",
-      });
-      wsChart.addImage(imageId, "B2:M20");
+      wsChart.getRow(1).height = 25;
       wsChart.getCell("A1").value = `Struktur Organisasi — ${label}`;
       wsChart.getCell("A1").font = { bold: true, size: 14 };
       wsChart.mergeCells("A1:M1");
+
+      const imageId = wb.addImage({ buffer: buffer as any, extension: "png" });
+      wsChart.addImage(imageId, "A3:M25");
 
       // Sheet 2: Data Nodes
       const wsData = wb.addWorksheet("Data Nodes");
       wsData.columns = [
         { header: "No", width: 5 },
         { header: "Jabatan", width: 25 },
-        { header: "Sub-judul/Dept", width: 20 },
+        { header: "Sub-judul / Dept", width: 20 },
         { header: "Nama Pegawai", width: 40 },
         { header: "Keterangan", width: 20 },
         { header: "Warna", width: 12 },
@@ -560,8 +566,8 @@ export default function OrgDesignerPage({ divisi, role }: { divisi: string; role
       // Save
       await wb.xlsx.writeFile(`struktur-org-${divisi}.xlsx`);
     } catch (e) {
-      console.error(e);
-      alert("Export Excel gagal. Coba lagi.");
+      console.error("Export error:", e);
+      alert(`Export Excel gagal: ${(e as Error).message}`);
     }
     setExporting(false);
   }
