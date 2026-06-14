@@ -28,6 +28,7 @@ const MENU: Item[] = [
 
   { key: "orgchart", label: "Struktur Organisasi", Icon: Network, group: "Utama", built: true,
     roles: ["Super Admin", "Direksi", "HR", "Manager", "Finance", "NOC", "Karyawan"], sub: [
+      { label: "Overview",       roles: ["Super Admin", "Direksi", "HR", "Manager", "Finance", "NOC", "Karyawan"], built: true },
       { label: "Divisi IT VPN",  roles: ["Super Admin", "Direksi", "HR", "Manager", "NOC", "Karyawan"], built: true },
       { label: "Divisi Finance", roles: ["Super Admin", "Direksi", "HR", "Manager", "Finance", "Karyawan"], built: true },
       { label: "Marketing",      roles: ["Super Admin", "Direksi", "HR", "Manager", "Karyawan"], built: true },
@@ -154,6 +155,7 @@ function Flyout({ item, role, onPick }: { item: Item; role: Role; onPick: (sub?:
 // Peta submenu -> route aplikasi. Yang belum dibangun jatuh ke "soon:".
 function routeFor(moduleKey: string, sub?: Sub): string {
   if (moduleKey === "dashboard") return "dashboard";
+  if (moduleKey === "orgchart" && sub && sub.label === "Overview")       return "orgchart.overview";
   if (moduleKey === "orgchart" && sub && sub.label === "Divisi IT VPN")  return "orgchart.itvpn";
   if (moduleKey === "orgchart" && sub && sub.label === "Divisi Finance") return "orgchart.finance";
   if (moduleKey === "orgchart" && sub && sub.label === "Marketing")      return "orgchart.marketing";

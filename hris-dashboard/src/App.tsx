@@ -165,6 +165,7 @@ export default function App() {
 
           {route === "settings.password" && <ChangePasswordPage />}
 
+          {route === "orgchart.overview"  && <OrgChartPage divisi="overview" role={role} />}
           {route === "orgchart.itvpn"    && <OrgChartPage divisi="itvpn" role={role} />}
           {route === "orgchart.finance"  && <OrgChartPage divisi="finance" role={role} />}
           {route === "orgchart.marketing" && <OrgChartPage divisi="marketing" role={role} />}

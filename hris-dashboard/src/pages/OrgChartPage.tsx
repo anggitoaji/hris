@@ -67,11 +67,43 @@ const ORG_HRD: OrgNode = {
   ]
 };
 
+const ORG_OVERVIEW: OrgNode = {
+  id: "root", nama: "Pak Bonard", jabatan: "Direktur Utama", nik: "340290934",
+  children: [
+    {
+      id: "o1", nama: "Efri Utoro", jabatan: "SPV Produksi VPN", nik: "SMS-005",
+      children: [
+        { id: "o1a", nama: "IhsanYullianta", jabatan: "SPV NOC", nik: "EMP-004" },
+        { id: "o1b", nama: "Pak Be", jabatan: "SPV VPN Modem", nik: "EMP-001" },
+      ]
+    },
+    {
+      id: "o2", nama: "Vinny V", jabatan: "Manager Finance", nik: "EMP-005",
+      children: [
+        { id: "o2a", nama: "-", jabatan: "Staff Keuangan" },
+      ]
+    },
+    {
+      id: "o3", nama: "-", jabatan: "Manager Marketing",
+      children: [
+        { id: "o3a", nama: "-", jabatan: "Staff Marketing" },
+      ]
+    },
+    {
+      id: "o4", nama: "Anggi Kurnianto", jabatan: "Manager HRD", nik: "SMS-001",
+      children: [
+        { id: "o4a", nama: "Desy", jabatan: "HR Staff", nik: "SMS-002" },
+      ]
+    },
+  ]
+};
+
 const DIVISI = [
-  { key: "itvpn",   label: "Divisi IT VPN",  data: ORG_IT_VPN,   color: "#0ea5e9" },
-  { key: "finance", label: "Divisi Finance",  data: ORG_FINANCE,  color: "#10b981" },
-  { key: "marketing", label: "Marketing",     data: ORG_MARKETING, color: "#f59e0b" },
-  { key: "hrdga",   label: "HRD & GA",       data: ORG_HRD,      color: "#8b5cf6" },
+  { key: "overview",  label: "Overview",       data: ORG_OVERVIEW,  color: "#334155" },
+  { key: "itvpn",    label: "Divisi IT VPN",   data: ORG_IT_VPN,    color: "#0ea5e9" },
+  { key: "finance",  label: "Divisi Finance",  data: ORG_FINANCE,   color: "#10b981" },
+  { key: "marketing",label: "Marketing",       data: ORG_MARKETING, color: "#f59e0b" },
+  { key: "hrdga",    label: "HRD & GA",        data: ORG_HRD,       color: "#8b5cf6" },
 ];
 
 // ─── Komponen Node ──────────────────────────────────────────────────────────
