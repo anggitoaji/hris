@@ -9,7 +9,7 @@ import "reactflow/dist/style.css";
 import { Plus, Trash2, FileSpreadsheet, Printer, X, AlignLeft, AlignCenter, AlignRight } from "lucide-react";
 import {
   fetchOrgNodes, createOrgNode, updateOrgNode, deleteOrgNode,
-  fetchOrgEdges, createOrgEdge, deleteOrgEdge,
+  fetchOrgEdges, createOrgEdge, updateOrgEdge, deleteOrgEdge,
   type OrgNodeRecord,
 } from "../services/api";
 
@@ -317,6 +317,7 @@ export default function OrgDesignerPage({ divisi, role }: { divisi: string; role
   const [loading, setLoading]   = useState(true);
   const [saving,  setSaving]    = useState(false);
   const [editNode, setEditNode] = useState<Node<OrgBoxData> | null>(null);
+  const [edgeMenu, setEdgeMenu] = useState<{ edge: Edge; x: number; y: number } | null>(null);
 
   async function load() {
     setLoading(true);
@@ -366,6 +367,34 @@ export default function OrgDesignerPage({ divisi, role }: { divisi: string; role
   const onNodeDoubleClick = useCallback((_: unknown, node: Node<OrgBoxData>) => {
     setEditNode(node);
   }, []);
+
+  // Klik garis → tampilkan menu
+  const onEdgeClick = useCallback((event: React.MouseEvent, edge: Edge) => {
+    if (!canEdit) return;
+    event.stopPropagation();
+    setEdgeMenu({ edge, x: event.clientX, y: event.clientY });
+  }, [canEdit]);
+
+  // Toggle solid ↔ dashed
+  async function toggleEdgeDash(edge: Edge) {
+    const newType = edge.data?.line_type === "dashed" ? "solid" : "dashed";
+    await updateOrgEdge(edge.data!.dbId, { line_type: newType }).catch(() => {});
+    setEdges(es => es.map(e => e.id !== edge.id ? e : {
+      ...e,
+      style: newType === "dashed"
+        ? { strokeDasharray: "6,4", stroke: "#475569", strokeWidth: 1.8 }
+        : { stroke: "#475569", strokeWidth: 1.8 },
+      data: { ...e.data, line_type: newType },
+    }));
+    setEdgeMenu(null);
+  }
+
+  // Hapus garis dari menu
+  async function deleteEdgeFromMenu(edge: Edge) {
+    await deleteOrgEdge(edge.data?.dbId).catch(() => {});
+    setEdges(es => es.filter(e => e.id !== edge.id));
+    setEdgeMenu(null);
+  }
 
   async function addNode() {
     setSaving(true);
@@ -467,7 +496,9 @@ export default function OrgDesignerPage({ divisi, role }: { divisi: string; role
             onNodeDragStop={canEdit ? onNodeDragStop : undefined}
             onNodesDelete={canEdit ? onNodesDelete : undefined}
             onEdgesDelete={canEdit ? onEdgesDelete : undefined}
+            onEdgeClick={canEdit ? onEdgeClick : undefined}
             onNodeDoubleClick={onNodeDoubleClick}
+            onPaneClick={() => setEdgeMenu(null)}
             nodeTypes={nodeTypes}
             nodesDraggable={canEdit} nodesConnectable={canEdit}
             deleteKeyCode={canEdit ? "Delete" : null}
@@ -496,6 +527,41 @@ export default function OrgDesignerPage({ divisi, role }: { divisi: string; role
         <EditModal node={editNode} onClose={() => setEditNode(null)}
           onSave={saveEdit} onDelete={deleteNodeById} canEdit={canEdit}/>
       )}
+
+      {/* Menu klik garis */}
+      {edgeMenu && (
+        <div
+          className="fixed z-[70] bg-white border border-slate-200 rounded-xl shadow-xl py-1.5 min-w-[160px]"
+          style={{ left: edgeMenu.x + 8, top: edgeMenu.y + 8 }}
+          onClick={e => e.stopPropagation()}
+        >
+          <div className="px-3 py-1 text-[10px] text-slate-400 font-semibold uppercase tracking-wide border-b border-slate-100 mb-1">
+            Garis Pelaporan
+          </div>
+          <button
+            onClick={() => toggleEdgeDash(edgeMenu.edge)}
+            className="w-full text-left px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2"
+          >
+            <span className="text-base leading-none">
+              {edgeMenu.edge.data?.line_type === "dashed" ? "— " : "- -"}
+            </span>
+            {edgeMenu.edge.data?.line_type === "dashed" ? "Ubah ke Solid" : "Ubah ke Dashed"}
+          </button>
+          <button
+            onClick={() => deleteEdgeFromMenu(edgeMenu.edge)}
+            className="w-full text-left px-3 py-1.5 text-sm text-red-500 hover:bg-red-50 flex items-center gap-2"
+          >
+            <Trash2 size={13}/> Hapus Garis
+          </button>
+          <button
+            onClick={() => setEdgeMenu(null)}
+            className="w-full text-left px-3 py-1.5 text-sm text-slate-400 hover:bg-slate-50 border-t border-slate-100 mt-1"
+          >
+            Batal
+          </button>
+        </div>
+      )}
+      {edgeMenu && <div className="fixed inset-0 z-[60]" onClick={() => setEdgeMenu(null)} />}
     </div>
   );
 }
