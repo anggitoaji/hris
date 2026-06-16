@@ -1400,6 +1400,24 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
                           </div>
                         );
                       }
+                      if (cfg.key === "supervisor") {
+                        const candidates = rows.filter((r) =>
+                          r.department === f.department &&
+                          r.id !== formId &&
+                          /supervisor|spv|manager|kepala|kabag|koordinator|direktur|komisaris/i.test(r.position || "")
+                        );
+                        return (
+                          <div key={cfg.key}>
+                            <label className="text-[11px] text-slate-500 font-medium block mb-1">Atasan Langsung</label>
+                            <input className={inputCls} list="supervisor-suggestions" value={f.supervisor}
+                              onChange={(e) => setField("supervisor", e.target.value)}
+                              placeholder={f.department ? "Pilih atau ketik nama atasan" : "Pilih divisi dulu"} />
+                            <datalist id="supervisor-suggestions">
+                              {candidates.map((c) => <option key={c.id} value={c.nama}>{c.position}</option>)}
+                            </datalist>
+                          </div>
+                        );
+                      }
                       return <FormField key={cfg.key} cfg={cfg} value={f[cfg.key] ?? ""} onChange={(v) => setField(cfg.key, v)} />;
                     })}
                   </div>
