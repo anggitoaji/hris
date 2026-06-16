@@ -49,7 +49,17 @@ async function sendJSON<T>(path: string, method: "POST" | "PUT" | "PATCH" | "DEL
     let msg = `Gagal (${res.status})`;
     try {
       const j = await res.json();
-      if (j?.detail) msg = typeof j.detail === "string" ? j.detail : JSON.stringify(j.detail);
+      if (typeof j?.detail === "string") {
+        msg = j.detail;
+      } else if (Array.isArray(j?.detail)) {
+        // Error validasi FastAPI/Pydantic: ringkas jadi pesan yang mudah dibaca.
+        msg = j.detail
+          .map((d: { loc?: unknown[]; msg?: string }) => {
+            const field = Array.isArray(d.loc) ? d.loc[d.loc.length - 1] : "";
+            return field ? `${field}: ${d.msg}` : d.msg;
+          })
+          .join("; ");
+      }
     } catch {
       /* abaikan */
     }

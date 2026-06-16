@@ -121,8 +121,18 @@ export default function KpiAssessmentFormPage() {
   const addAspect = () => setAspects((p) => [...p, { aspect: "", score: "0", target: "80" }]);
   const removeAspect = (i: number) => setAspects((p) => p.filter((_, idx) => idx !== i));
 
-  const setQualField = (i: number, key: "managerScore" | "hrdScore", v: string) =>
-    setQualScores((p) => p.map((q, idx) => (idx === i ? { ...q, [key]: v } : q)));
+  const setQualField = (i: number, key: "managerScore" | "hrdScore", v: string) => {
+    // Skala wajib 1-5 (bukan 0-100 seperti KPI Jabatan) - cegah input di luar rentang.
+    let clamped = v;
+    if (v !== "") {
+      const n = Number(v);
+      if (!Number.isNaN(n)) {
+        if (n > 5) clamped = "5";
+        else if (n < 0) clamped = "0";
+      }
+    }
+    setQualScores((p) => p.map((q, idx) => (idx === i ? { ...q, [key]: clamped } : q)));
+  };
 
   const computed = useMemo(() => {
     const scores = aspects.filter((a) => a.aspect.trim()).map((a) => Number(a.score) || 0);
@@ -157,7 +167,8 @@ export default function KpiAssessmentFormPage() {
       })),
       qual_scores: qualScores.map((q) => ({
         category: q.category, parameter: q.parameter,
-        manager_score: Number(q.managerScore) || 0, hrd_score: Number(q.hrdScore) || 0,
+        manager_score: Math.min(5, Math.max(0, Number(q.managerScore) || 0)),
+        hrd_score: Math.min(5, Math.max(0, Number(q.hrdScore) || 0)),
       })),
     };
     if (assessmentId != null) {
