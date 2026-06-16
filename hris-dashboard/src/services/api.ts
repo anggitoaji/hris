@@ -101,6 +101,40 @@ export async function fetchKpiAssessment(id: number): Promise<KpiAssessment> {
   return getJSON<KpiAssessment>(`/kpi/assessments/${id}`);
 }
 
+export async function deleteKpiAssessment(id: number): Promise<unknown> {
+  return sendJSON(`/kpi/assessments/${id}`, "DELETE");
+}
+
+/** People Management Compliance (modul People Management). */
+export interface ComplianceRow {
+  atasan_id: number;
+  atasan_nama: string;
+  atasan_role_hint: string;
+  total_bawahan: number;
+  selesai: number;
+  compliance_pct: number;
+  compliant: boolean;
+}
+export async function fetchKpiCompliance(period: string): Promise<ComplianceRow[]> {
+  return getJSON(`/kpi/periods/${encodeURIComponent(period)}/compliance`);
+}
+export interface KpiPeriodMeta {
+  period: string;
+  deadline: string | null;
+  closed: boolean;
+  closed_at: string | null;
+  closed_by: string | null;
+}
+export async function fetchKpiPeriodMeta(period: string): Promise<KpiPeriodMeta> {
+  return getJSON(`/kpi/periods/${encodeURIComponent(period)}/meta`);
+}
+export async function setKpiPeriodDeadline(period: string, deadline: string | null): Promise<KpiPeriodMeta> {
+  return sendJSON(`/kpi/periods/${encodeURIComponent(period)}/deadline`, "PATCH", { deadline });
+}
+export async function closeKpiPeriod(period: string): Promise<{ period: string; non_compliant_count: number; non_compliant_names: string[] }> {
+  return sendJSON(`/kpi/periods/${encodeURIComponent(period)}/close`, "POST");
+}
+
 export interface Division {
   id: number;
   name: string;

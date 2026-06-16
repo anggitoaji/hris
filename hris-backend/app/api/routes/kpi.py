@@ -1,6 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session
 
+from app.audit import get_client_ip, log_audit
+from app.auth import User, get_current_user, require_roles
 from app.core.database import get_db
 from app.crud import employee as emp_crud
 from app.crud import kpi as crud
@@ -11,9 +13,31 @@ from app.schemas.kpi import (
     AssessmentListOut,
     AssessmentOut,
     AssessmentUpdate,
+    ComplianceRow,
+    KpiPeriodOut,
+    KpiPeriodSetDeadline,
     QualScoreOut,
     StatusUpdate,
 )
+
+ASSESSOR_ROLES = ("Manager", "Supervisor", "HR")
+
+# Aturan transisi workflow: (dari, ke) -> role yang boleh melakukannya (Super Admin selalu boleh).
+TRANSITIONS: dict[tuple[str, str], tuple[str, ...]] = {
+    ("draft", "supervisor_review"): ("Supervisor", "Manager", "HR"),
+    ("supervisor_review", "manager_review"): ("Manager", "HR"),
+    ("manager_review", "hrd_review"): ("Manager", "HR"),
+    ("hrd_review", "calibration"): ("HR",),
+    ("calibration", "final_approved"): ("HR",),
+    # Kirim balik untuk revisi.
+    ("supervisor_review", "draft"): ("Supervisor", "Manager", "HR"),
+    ("manager_review", "draft"): ("Manager", "HR"),
+    ("manager_review", "supervisor_review"): ("Manager", "HR"),
+    ("hrd_review", "draft"): ("HR",),
+    ("hrd_review", "manager_review"): ("HR",),
+    ("calibration", "draft"): ("HR",),
+    ("calibration", "hrd_review"): ("HR",),
+}
 
 router = APIRouter(prefix="/kpi", tags=["KPI & Performa"])
 
@@ -79,6 +103,11 @@ def _to_out(a: KpiAssessment) -> AssessmentOut:
     # final_score tetap dihitung dari data yang tersedia (tidak dipaksa 0 di level ini;
     # aturan People Management Compliance ditegakkan terpisah di modul People Management).
 
+    # People Management Compliance: atasan yang tidak menyelesaikan penilaian bawahannya
+    # sampai periode ditutup -> FINAL KPI dipaksa 0 tanpa pengecualian.
+    if a.compliance_override:
+        final_score = 0.0
+
     return AssessmentOut(
         id=a.id,
         employee_id=a.employee_id,
@@ -86,6 +115,8 @@ def _to_out(a: KpiAssessment) -> AssessmentOut:
         needs_coaching=a.needs_coaching,
         notes=a.notes,
         workflow_status=a.status,
+        compliance_override=a.compliance_override,
+        compliance_reason=a.compliance_reason,
         aspects=[AspectOut.model_validate(x) for x in a.aspects],
         qual_scores=[
             QualScoreOut(
@@ -145,7 +176,10 @@ def get_assessment(assessment_id: int, db: Session = Depends(get_db)):
 @router.post(
     "/assessments", response_model=AssessmentOut, status_code=status.HTTP_201_CREATED
 )
-def create_assessment(payload: AssessmentCreate, db: Session = Depends(get_db)):
+def create_assessment(
+    payload: AssessmentCreate, db: Session = Depends(get_db),
+    user: User = Depends(require_roles(*ASSESSOR_ROLES)),
+):
     if not emp_crud.get_employee(db, payload.employee_id):
         raise HTTPException(status_code=404, detail="Karyawan tidak ditemukan")
     a = crud.create_assessment(db, payload)
@@ -154,7 +188,8 @@ def create_assessment(payload: AssessmentCreate, db: Session = Depends(get_db)):
 
 @router.patch("/assessments/{assessment_id}", response_model=AssessmentOut)
 def update_assessment(
-    assessment_id: int, payload: AssessmentUpdate, db: Session = Depends(get_db)
+    assessment_id: int, payload: AssessmentUpdate, db: Session = Depends(get_db),
+    user: User = Depends(require_roles(*ASSESSOR_ROLES)),
 ):
     a = crud.get_assessment(db, assessment_id)
     if not a:
@@ -165,22 +200,78 @@ def update_assessment(
 
 @router.patch("/assessments/{assessment_id}/status", response_model=AssessmentOut)
 def update_status(
-    assessment_id: int, payload: StatusUpdate, db: Session = Depends(get_db)
+    assessment_id: int, payload: StatusUpdate, request: Request, db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
 ):
     a = crud.get_assessment(db, assessment_id)
     if not a:
         raise HTTPException(status_code=404, detail="Penilaian tidak ditemukan")
+    key = (a.status, payload.status)
+    allowed_roles = TRANSITIONS.get(key)
+    if user.role != "Super Admin":
+        if allowed_roles is None:
+            raise HTTPException(status_code=400, detail=f"Transisi status {a.status} -> {payload.status} tidak diizinkan.")
+        if user.role not in allowed_roles:
+            raise HTTPException(status_code=403, detail=f"Hanya {', '.join(allowed_roles)} yang boleh melakukan transisi ini.")
+    elif allowed_roles is None and key[0] != key[1]:
+        raise HTTPException(status_code=400, detail=f"Transisi status {a.status} -> {payload.status} tidak dikenal.")
+    old_status = a.status
     a = crud.set_workflow_status(db, a, payload.status)
+    log_audit(
+        db, user_id=user.id, username=user.username, action="UPDATE", entity_type="kpi_assessment",
+        entity_id=a.id, employee_id=a.employee_id,
+        description=f"Status KPI {old_status} -> {payload.status}",
+        ip_address=get_client_ip(request),
+    )
     return _to_out(a)
 
 
 @router.delete("/assessments/{assessment_id}", status_code=status.HTTP_200_OK)
-def delete_assessment(assessment_id: int, db: Session = Depends(get_db)):
+def delete_assessment(
+    assessment_id: int, db: Session = Depends(get_db),
+    user: User = Depends(require_roles("HR")),
+):
     a = crud.get_assessment(db, assessment_id)
     if not a:
         raise HTTPException(status_code=404, detail="Penilaian tidak ditemukan")
     crud.delete_assessment(db, a)
     return {"detail": "Penilaian dihapus", "id": assessment_id}
+
+
+@router.get("/periods/{period}/compliance", response_model=list[ComplianceRow])
+def get_compliance(period: str, db: Session = Depends(get_db)):
+    return crud.compliance_for_period(db, period)
+
+
+@router.get("/periods/{period}/meta", response_model=KpiPeriodOut)
+def get_period_meta(period: str, db: Session = Depends(get_db)):
+    return crud.get_or_create_period(db, period)
+
+
+@router.patch("/periods/{period}/deadline", response_model=KpiPeriodOut)
+def set_period_deadline(
+    period: str, payload: KpiPeriodSetDeadline, db: Session = Depends(get_db),
+    user: User = Depends(require_roles("HR")),
+):
+    row = crud.get_or_create_period(db, period)
+    row.deadline = payload.deadline
+    db.commit()
+    db.refresh(row)
+    return row
+
+
+@router.post("/periods/{period}/close")
+def close_period(
+    period: str, request: Request, db: Session = Depends(get_db),
+    user: User = Depends(require_roles("HR")),
+):
+    result = crud.close_period(db, period, closed_by=user.username)
+    log_audit(
+        db, user_id=user.id, username=user.username, action="UPDATE", entity_type="kpi_period",
+        entity_id=None, description=f"Tutup periode KPI {period}: {result['non_compliant_count']} atasan tidak patuh.",
+        ip_address=get_client_ip(request),
+    )
+    return result
 
 
 @router.get("/summary")

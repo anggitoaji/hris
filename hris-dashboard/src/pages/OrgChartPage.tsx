@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Users, ChevronDown, ChevronRight } from "lucide-react";
 
-type Role = "Super Admin" | "Direksi" | "HR" | "Manager" | "Finance" | "NOC" | "Karyawan";
+type Role = "Super Admin" | "Direksi" | "HR" | "Manager" | "Supervisor" | "Finance" | "NOC" | "Karyawan";
 
 interface OrgNode {
   id: string;

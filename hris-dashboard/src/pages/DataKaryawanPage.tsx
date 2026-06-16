@@ -1071,7 +1071,7 @@ const FIELD_KEYS = [
   "bpjs_kesehatan", "bpjs_ketenagakerjaan", "emergency_name", "emergency_phone", "emergency_relation",
   "skills", "job_desc", "catatan",
   "nama_panggilan", "blood_type", "no_kk",
-  "grade", "work_location", "supervisor",
+  "grade", "work_location", "supervisor", "supervisor_id",
 ] as const;
 
 function emptyForm(): FormState {
@@ -1095,6 +1095,7 @@ function buildPayload(f: FormState): Record<string, unknown> {
   FIELD_KEYS.forEach((k) => {
     const v = (f[k] ?? "").trim();
     if (k === "kpi_score") { out[k] = v === "" ? 0 : Number(v); return; }
+    if (k === "supervisor_id") { out[k] = v === "" ? null : Number(v); return; }
     out[k] = v === "" ? null : v;
   });
   return out;
@@ -1597,14 +1598,21 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
                           /supervisor|spv|manager|kepala|kabag|koordinator|direktur|komisaris/i.test(r.position || "")
                         );
                         return (
-                          <div key={cfg.key}>
+                          <div key={cfg.key} className="col-span-2">
                             <label className="text-[11px] text-slate-500 font-medium block mb-1">Atasan Langsung</label>
-                            <input className={inputCls} list="supervisor-suggestions" value={f.supervisor}
-                              onChange={(e) => setField("supervisor", e.target.value)}
-                              placeholder={f.department ? "Pilih atau ketik nama atasan" : "Pilih divisi dulu"} />
-                            <datalist id="supervisor-suggestions">
-                              {candidates.map((c) => <option key={c.id} value={c.nama}>{c.position}</option>)}
-                            </datalist>
+                            <select className={inputCls} value={f.supervisor_id}
+                              onChange={(e) => {
+                                const id = e.target.value;
+                                const cand = candidates.find((c) => String(c.id) === id);
+                                setField("supervisor_id", id);
+                                setField("supervisor", cand ? cand.nama : f.supervisor);
+                              }}>
+                              <option value="">{f.department ? "- pilih atasan dari divisi ini -" : "Pilih divisi dulu"}</option>
+                              {candidates.map((c) => <option key={c.id} value={c.id}>{c.nama} ({c.position})</option>)}
+                            </select>
+                            <input className={`${inputCls} mt-1.5`} value={f.supervisor}
+                              onChange={(e) => { setField("supervisor", e.target.value); setField("supervisor_id", ""); }}
+                              placeholder="Atau ketik nama manual (jika atasan belum ada di sistem)" />
                           </div>
                         );
                       }

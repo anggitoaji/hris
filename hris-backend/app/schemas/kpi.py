@@ -1,6 +1,8 @@
-from datetime import datetime
+from datetime import date as DateType, datetime
 
 from pydantic import BaseModel, ConfigDict, Field
+
+WORKFLOW_STATUSES = ["draft", "supervisor_review", "manager_review", "hrd_review", "calibration", "final_approved"]
 
 
 class AspectBase(BaseModel):
@@ -46,7 +48,7 @@ class AssessmentUpdate(BaseModel):
 
 
 class StatusUpdate(BaseModel):
-    status: str = Field(..., pattern="^(draft|hrd_review|final_approved)$")
+    status: str = Field(..., pattern="^(draft|supervisor_review|manager_review|hrd_review|calibration|final_approved)$")
 
 
 class AssessmentOut(BaseModel):
@@ -57,7 +59,9 @@ class AssessmentOut(BaseModel):
     period: str
     needs_coaching: bool
     notes: str | None = None
-    workflow_status: str = "draft"  # draft | hrd_review | final_approved
+    workflow_status: str = "draft"  # lihat WORKFLOW_STATUSES
+    compliance_override: bool = False
+    compliance_reason: str | None = None
     aspects: list[AspectOut] = Field(default_factory=list)
     qual_scores: list[QualScoreOut] = Field(default_factory=list)
     created_at: datetime
@@ -83,3 +87,26 @@ class AssessmentOut(BaseModel):
 class AssessmentListOut(BaseModel):
     total: int
     items: list[AssessmentOut]
+
+
+class KpiPeriodOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    period: str
+    deadline: DateType | None
+    closed: bool
+    closed_at: datetime | None
+    closed_by: str | None
+
+
+class KpiPeriodSetDeadline(BaseModel):
+    deadline: DateType | None = None
+
+
+class ComplianceRow(BaseModel):
+    atasan_id: int
+    atasan_nama: str
+    atasan_role_hint: str  # "Supervisor" | "Manager" (perkiraan dari jabatan/role)
+    total_bawahan: int
+    selesai: int
+    compliance_pct: float
+    compliant: bool

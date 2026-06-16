@@ -6,8 +6,8 @@ import {
 import type { LucideIcon } from "lucide-react";
 
 // ====== Role & izin ======
-export type Role = "Super Admin" | "Direksi" | "HR" | "Manager" | "Finance" | "NOC" | "Karyawan";
-const ROLES: Role[] = ["Super Admin", "Direksi", "HR", "Manager", "Finance", "NOC", "Karyawan"];
+export type Role = "Super Admin" | "Direksi" | "HR" | "Manager" | "Supervisor" | "Finance" | "NOC" | "Karyawan";
+const ROLES: Role[] = ["Super Admin", "Direksi", "HR", "Manager", "Supervisor", "Finance", "NOC", "Karyawan"];
 
 type Group = "Utama" | "Operasional" | "Sistem";
 interface Sub { label: string; roles: Role[]; built?: boolean }
@@ -15,32 +15,33 @@ interface Item { key: string; label: string; Icon: LucideIcon; group: Group; rol
 
 const MENU: Item[] = [
   { key: "dashboard", label: "Dashboard", Icon: Home, group: "Utama", built: true,
-    roles: ["Direksi", "HR", "Manager", "Finance", "NOC", "Karyawan"] },
+    roles: ["Direksi", "HR", "Manager", "Supervisor", "Finance", "NOC", "Karyawan"] },
 
   { key: "karyawan", label: "Karyawan", Icon: Users, group: "Utama", built: true,
-    roles: ["Direksi", "HR", "Manager", "Karyawan"], sub: [
-      { label: "Data Karyawan", roles: ["Direksi", "HR", "Manager"], built: true },
-      { label: "Kehadiran & Absensi", roles: ["HR", "Manager", "Karyawan"], built: true },
-      { label: "Cuti & Izin", roles: ["HR", "Manager", "Karyawan"] },
-      { label: "KPI Karyawan", roles: ["Direksi", "HR", "Manager", "Karyawan"], built: true },
+    roles: ["Direksi", "HR", "Manager", "Supervisor", "Karyawan"], sub: [
+      { label: "Data Karyawan", roles: ["Direksi", "HR", "Manager", "Supervisor"], built: true },
+      { label: "Kehadiran & Absensi", roles: ["HR", "Manager", "Supervisor", "Karyawan"], built: true },
+      { label: "Cuti & Izin", roles: ["HR", "Manager", "Supervisor", "Karyawan"] },
+      { label: "KPI Karyawan", roles: ["Direksi", "HR", "Manager", "Supervisor", "Karyawan"], built: true },
       { label: "Rekrutmen", roles: ["HR"] },
     ] },
 
   { key: "orgchart", label: "Struktur Organisasi", Icon: Network, group: "Utama", built: true,
-    roles: ["Super Admin", "Direksi", "HR", "Manager", "Finance", "NOC", "Karyawan"], sub: [
-      { label: "Overview",       roles: ["Super Admin", "Direksi", "HR", "Manager", "Finance", "NOC", "Karyawan"], built: true },
-      { label: "Divisi IT VPN",  roles: ["Super Admin", "Direksi", "HR", "Manager", "NOC", "Karyawan"], built: true },
-      { label: "Divisi Finance", roles: ["Super Admin", "Direksi", "HR", "Manager", "Finance", "Karyawan"], built: true },
-      { label: "Marketing",      roles: ["Super Admin", "Direksi", "HR", "Manager", "Karyawan"], built: true },
-      { label: "HRD & GA",       roles: ["Super Admin", "Direksi", "HR", "Manager", "Karyawan"], built: true },
+    roles: ["Super Admin", "Direksi", "HR", "Manager", "Supervisor", "Finance", "NOC", "Karyawan"], sub: [
+      { label: "Overview",       roles: ["Super Admin", "Direksi", "HR", "Manager", "Supervisor", "Finance", "NOC", "Karyawan"], built: true },
+      { label: "Divisi IT VPN",  roles: ["Super Admin", "Direksi", "HR", "Manager", "Supervisor", "NOC", "Karyawan"], built: true },
+      { label: "Divisi Finance", roles: ["Super Admin", "Direksi", "HR", "Manager", "Supervisor", "Finance", "Karyawan"], built: true },
+      { label: "Marketing",      roles: ["Super Admin", "Direksi", "HR", "Manager", "Supervisor", "Karyawan"], built: true },
+      { label: "HRD & GA",       roles: ["Super Admin", "Direksi", "HR", "Manager", "Supervisor", "Karyawan"], built: true },
     ] },
 
   { key: "kpi", label: "KPI & Performance", Icon: BarChart3, group: "Utama", built: true,
-    roles: ["Direksi", "HR", "Manager", "Finance", "NOC", "Karyawan"], sub: [
+    roles: ["Direksi", "HR", "Manager", "Supervisor", "Finance", "NOC", "Karyawan"], sub: [
       { label: "My KPI", roles: ["Karyawan"], built: true },
-      { label: "Form Penilaian KPI", roles: ["Manager", "HR"], built: true },
+      { label: "Form Penilaian KPI", roles: ["Manager", "Supervisor", "HR"], built: true },
       { label: "KPI Perusahaan", roles: ["Direksi", "Finance"], built: true },
-      { label: "KPI Divisi", roles: ["Direksi", "HR", "Manager", "Finance"], built: true },
+      { label: "KPI Divisi", roles: ["Direksi", "HR", "Manager", "Supervisor", "Finance"], built: true },
+      { label: "Dashboard HRD", roles: ["HR"], built: true },
       { label: "KPI Pelanggan (SLA/Uptime)", roles: ["Direksi", "NOC"] },
       { label: "Dashboard Eksekutif", roles: ["Direksi"] },
     ] },
@@ -112,8 +113,8 @@ const MENU: Item[] = [
     ] },
 
   { key: "pengaturan", label: "Pengaturan", Icon: Settings, group: "Sistem",
-    roles: ["Super Admin", "Direksi", "HR", "Manager", "Finance", "NOC", "Karyawan"], sub: [
-      { label: "Ganti Password", roles: ["Super Admin", "Direksi", "HR", "Manager", "Finance", "NOC", "Karyawan"], built: true },
+    roles: ["Super Admin", "Direksi", "HR", "Manager", "Supervisor", "Finance", "NOC", "Karyawan"], sub: [
+      { label: "Ganti Password", roles: ["Super Admin", "Direksi", "HR", "Manager", "Supervisor", "Finance", "NOC", "Karyawan"], built: true },
       { label: "User Management", roles: [], built: true },
       { label: "Role & Permission", roles: [] },
       { label: "Workflow Approval", roles: [] },
@@ -173,6 +174,7 @@ function routeFor(moduleKey: string, sub?: Sub): string {
   if (moduleKey === "kpi" && sub && sub.label === "KPI Divisi") return "kpi.divisi";
   if (moduleKey === "kpi" && sub && sub.label === "My KPI") return "kpi.myself";
   if (moduleKey === "kpi" && sub && sub.label === "Form Penilaian KPI") return "kpi.assessment";
+  if (moduleKey === "kpi" && sub && sub.label === "Dashboard HRD") return "kpi.dashboard_hrd";
   if (moduleKey === "pengaturan" && sub && sub.label === "User Management") return "users.manage";
   if (moduleKey === "pengaturan" && sub && sub.label === "Ganti Password") return "settings.password";
   return "soon:" + (sub ? sub.label : moduleKey);

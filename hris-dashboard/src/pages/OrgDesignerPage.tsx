@@ -18,7 +18,7 @@ import {
   type OrgNodeRecord,
 } from "../services/api";
 
-type Role = "Super Admin" | "Direksi" | "HR" | "Manager" | "Finance" | "NOC" | "Karyawan";
+type Role = "Super Admin" | "Direksi" | "HR" | "Manager" | "Supervisor" | "Finance" | "NOC" | "Karyawan";
 
 interface OrgBoxData {
   title: string; employee_name: string; department: string;

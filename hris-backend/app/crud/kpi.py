@@ -1,8 +1,10 @@
+from datetime import datetime
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
 from app.models.employee import Employee
-from app.models.kpi import KpiAspectScore, KpiAssessment, KpiQualScore
+from app.models.kpi import KpiAspectScore, KpiAssessment, KpiPeriod, KpiQualScore
 from app.schemas.kpi import AssessmentCreate, AssessmentUpdate
 
 
@@ -105,3 +107,97 @@ def set_workflow_status(db: Session, assessment: KpiAssessment, status: str) -> 
 def delete_assessment(db: Session, assessment: KpiAssessment) -> None:
     db.delete(assessment)
     db.commit()
+
+
+def get_or_create_period(db: Session, period: str) -> KpiPeriod:
+    row = db.scalar(select(KpiPeriod).where(KpiPeriod.period == period))
+    if row:
+        return row
+    row = KpiPeriod(period=period)
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return row
+
+
+def list_kpi_periods_meta(db: Session) -> list[KpiPeriod]:
+    return list(db.scalars(select(KpiPeriod).order_by(KpiPeriod.period)).all())
+
+
+def direct_reports(db: Session, atasan_employee_id: int) -> list[Employee]:
+    stmt = select(Employee).where(
+        Employee.supervisor_id == atasan_employee_id, Employee.is_active == True  # noqa: E712
+    )
+    return list(db.scalars(stmt).all())
+
+
+def compliance_for_period(db: Session, period: str) -> list[dict]:
+    """Hitung kepatuhan People Management: tiap atasan (punya >=1 bawahan langsung)
+    wajib menyelesaikan penilaian KPI seluruh bawahannya pada periode tertentu."""
+    all_atasan_ids = set(
+        db.scalars(select(Employee.supervisor_id).where(Employee.supervisor_id.isnot(None))).all()
+    )
+    rows = []
+    for atasan_id in all_atasan_ids:
+        atasan = db.get(Employee, atasan_id)
+        if not atasan:
+            continue
+        reports = direct_reports(db, atasan_id)
+        if not reports:
+            continue
+        report_ids = {r.id for r in reports}
+        done_ids = set(
+            db.scalars(
+                select(KpiAssessment.employee_id).where(
+                    KpiAssessment.period == period,
+                    KpiAssessment.employee_id.in_(report_ids),
+                    KpiAssessment.status != "draft",
+                )
+            ).all()
+        )
+        selesai = len(done_ids)
+        total = len(report_ids)
+        pct = round(selesai / total * 100, 1) if total else 100.0
+        pos = (atasan.position or "").lower()
+        role_hint = "Manager" if ("manager" in pos or "direktur" in pos) else "Supervisor"
+        rows.append({
+            "atasan_id": atasan.id,
+            "atasan_nama": atasan.nama,
+            "atasan_role_hint": role_hint,
+            "total_bawahan": total,
+            "selesai": selesai,
+            "compliance_pct": pct,
+            "compliant": selesai == total,
+        })
+    return sorted(rows, key=lambda r: r["compliance_pct"])
+
+
+def close_period(db: Session, period: str, closed_by: str) -> dict:
+    """Tutup periode: atasan yang belum 100% menilai bawahannya -> FINAL KPI-nya dipaksa 0."""
+    compliance = compliance_for_period(db, period)
+    affected = []
+    for row in compliance:
+        if row["compliant"]:
+            continue
+        atasan_assessment = db.scalar(
+            select(KpiAssessment).where(
+                KpiAssessment.employee_id == row["atasan_id"],
+                KpiAssessment.period == period,
+            )
+        )
+        if atasan_assessment:
+            atasan_assessment.compliance_override = True
+            atasan_assessment.compliance_reason = (
+                f"People Management Compliance: hanya menyelesaikan {row['selesai']}/{row['total_bawahan']} "
+                f"penilaian bawahan pada periode {period}. FINAL KPI otomatis 0 sesuai kebijakan wajib."
+            )
+            db.add(atasan_assessment)
+            affected.append(row["atasan_nama"])
+
+    period_row = get_or_create_period(db, period)
+    period_row.closed = True
+    period_row.closed_at = datetime.utcnow()
+    period_row.closed_by = closed_by
+    db.add(period_row)
+    db.commit()
+    return {"period": period, "non_compliant_count": len(affected), "non_compliant_names": affected}

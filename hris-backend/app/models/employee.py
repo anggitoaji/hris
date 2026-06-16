@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from sqlalchemy import Boolean, Date, DateTime, Float, String, func
+from sqlalchemy import Boolean, Date, DateTime, Float, ForeignKey, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -69,7 +69,10 @@ class Employee(Base):
     probation: Mapped[str | None] = mapped_column(String(64), nullable=True)        # Masa percobaan
     grade: Mapped[str | None] = mapped_column(String(32), nullable=True)
     work_location: Mapped[str | None] = mapped_column(String(128), nullable=True)   # Lokasi kerja
-    supervisor: Mapped[str | None] = mapped_column(String(128), nullable=True)      # Atasan langsung
+    supervisor: Mapped[str | None] = mapped_column(String(128), nullable=True)      # Atasan langsung (nama, tampilan)
+    supervisor_id: Mapped[int | None] = mapped_column(
+        ForeignKey("employees.id", ondelete="SET NULL"), nullable=True, index=True
+    )  # Atasan langsung (link ke employee lain, dipakai workflow KPI/People Management)
 
     # Soft delete: data tidak dihapus permanen, hanya ditandai non-aktif.
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, index=True)

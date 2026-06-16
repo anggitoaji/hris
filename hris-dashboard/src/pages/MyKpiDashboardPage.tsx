@@ -19,15 +19,17 @@ const STATUS_COLOR: Record<string, string> = {
   Poor: "bg-red-100 text-red-700",
 };
 
+const WORKFLOW_ORDER: KpiWorkflowStatus[] = ["draft", "supervisor_review", "manager_review", "hrd_review", "calibration", "final_approved"];
 const WORKFLOW_STEPS: { key: KpiWorkflowStatus; label: string }[] = [
-  { key: "draft", label: "Manager Review" },
+  { key: "supervisor_review", label: "Supervisor Review" },
+  { key: "manager_review", label: "Manager Review" },
   { key: "hrd_review", label: "HR Review" },
+  { key: "calibration", label: "Calibration" },
   { key: "final_approved", label: "Final Approval" },
 ];
 
 function stepDone(current: KpiWorkflowStatus, step: KpiWorkflowStatus): boolean {
-  const order: KpiWorkflowStatus[] = ["draft", "hrd_review", "final_approved"];
-  return order.indexOf(current) >= order.indexOf(step);
+  return WORKFLOW_ORDER.indexOf(current) >= WORKFLOW_ORDER.indexOf(step);
 }
 
 export default function MyKpiDashboardPage({ employeeId }: { employeeId: number | null }) {
@@ -95,6 +97,12 @@ export default function MyKpiDashboardPage({ employeeId }: { employeeId: number 
 
       {!loading && !err && sel && (
         <>
+          {sel.compliance_override && (
+            <div className="text-sm text-red-700 bg-red-50 border border-red-100 rounded-lg p-3">
+              <div className="font-semibold">FINAL KPI = 0 - People Management Compliance</div>
+              <div className="text-red-600 text-[13px]">{sel.compliance_reason}</div>
+            </div>
+          )}
           {/* Overall score */}
           <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 flex items-center gap-6 flex-wrap">
             <div>

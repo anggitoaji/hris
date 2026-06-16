@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import { Loader2, Plus, Trash2, Search, Send, CheckCircle2, Save } from "lucide-react";
+import { Loader2, Plus, Trash2, Search, Send, CheckCircle2, Save, ShieldAlert, X } from "lucide-react";
 import {
   fetchEmployees, fetchKpiAssessments, createKpiAssessment,
   updateKpiAssessment, updateKpiAssessmentStatus,
+  fetchSanksiSummary, fetchSanksi, type SanksiSummary, type SanksiRecord,
 } from "../services/api";
 import type { Employee, KpiWorkflowStatus, QualCategory } from "../types";
+import type { Role } from "../components/Sidebar";
 
 const DEFAULT_ASPECTS = ["Disiplin", "Pencapaian Target", "Kerjasama Tim", "Komunikasi", "Inisiatif"];
 const COMPETENCY_PARAMS = [
@@ -29,19 +31,43 @@ function grade(score: number): string {
 
 const STATUS_LABEL: Record<KpiWorkflowStatus, string> = {
   draft: "Draft",
-  hrd_review: "Menunggu Review HRD",
+  supervisor_review: "Supervisor Review",
+  manager_review: "Manager Review",
+  hrd_review: "HR Review",
+  calibration: "Calibration",
   final_approved: "Final Approved",
 };
 const STATUS_COLOR: Record<KpiWorkflowStatus, string> = {
   draft: "bg-slate-100 text-slate-600",
+  supervisor_review: "bg-sky-100 text-sky-700",
+  manager_review: "bg-indigo-100 text-indigo-700",
   hrd_review: "bg-amber-100 text-amber-700",
+  calibration: "bg-violet-100 text-violet-700",
   final_approved: "bg-emerald-100 text-emerald-700",
+};
+// Workflow: Supervisor Review -> Manager Review -> HR Review -> Calibration -> Final Approval
+// Tiap transisi hanya boleh dilakukan oleh role tertentu (server juga menegakkan aturan ini).
+const NEXT_ACTION: Record<KpiWorkflowStatus, { to: KpiWorkflowStatus; label: string; roles: Role[] } | null> = {
+  draft: { to: "supervisor_review", label: "Kirim ke Supervisor", roles: ["Supervisor", "Manager", "HR", "Super Admin"] },
+  supervisor_review: { to: "manager_review", label: "Kirim ke Manager", roles: ["Manager", "HR", "Super Admin"] },
+  manager_review: { to: "hrd_review", label: "Kirim ke HRD", roles: ["Manager", "HR", "Super Admin"] },
+  hrd_review: { to: "calibration", label: "Mulai Calibration", roles: ["HR", "Super Admin"] },
+  calibration: { to: "final_approved", label: "Final Approval", roles: ["HR", "Super Admin"] },
+  final_approved: null,
+};
+const DISIPLIN_COLOR: Record<string, string> = {
+  CLEAR: "bg-emerald-100 text-emerald-700",
+  Hijau: "bg-emerald-100 text-emerald-700",
+  Kuning: "bg-amber-100 text-amber-700",
+  SP1: "bg-orange-100 text-orange-700",
+  SP2: "bg-red-100 text-red-700",
+  SP3: "bg-red-200 text-red-800",
 };
 
 type AspectForm = { aspect: string; score: string; target: string };
 type QualForm = { category: QualCategory; parameter: string; managerScore: string; hrdScore: string };
 
-export default function KpiAssessmentFormPage() {
+export default function KpiAssessmentFormPage({ role }: { role: Role }) {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [employeeId, setEmployeeId] = useState("");
   const [period, setPeriod] = useState("");
@@ -49,6 +75,8 @@ export default function KpiAssessmentFormPage() {
 
   const [assessmentId, setAssessmentId] = useState<number | null>(null);
   const [workflowStatus, setWorkflowStatus] = useState<KpiWorkflowStatus>("draft");
+  const [complianceOverride, setComplianceOverride] = useState(false);
+  const [complianceReason, setComplianceReason] = useState<string | null>(null);
 
   const [aspects, setAspects] = useState<AspectForm[]>(DEFAULT_ASPECTS.map((a) => ({ aspect: a, score: "0", target: "80" })));
   const [qualScores, setQualScores] = useState<QualForm[]>([
@@ -58,11 +86,25 @@ export default function KpiAssessmentFormPage() {
   const [notes, setNotes] = useState("");
 
   const [loadingExisting, setLoadingExisting] = useState(false);
-  const [saving, setSaving] = useState<"" | "draft" | "hrd_review" | "final_approved">("");
+  const [saving, setSaving] = useState<"" | KpiWorkflowStatus>("");
   const [err, setErr] = useState<string | null>(null);
   const [okMsg, setOkMsg] = useState<string | null>(null);
 
+  const [disiplin, setDisiplin] = useState<SanksiSummary | null>(null);
+  const [disiplinDetail, setDisiplinDetail] = useState<SanksiRecord[] | null>(null);
+  const [disiplinDrawer, setDisiplinDrawer] = useState(false);
+
   useEffect(() => { fetchEmployees().then(setEmployees).catch(() => {}); }, []);
+  useEffect(() => {
+    if (!employeeId) { setDisiplin(null); return; }
+    fetchSanksiSummary(Number(employeeId)).then(setDisiplin).catch(() => setDisiplin(null));
+  }, [employeeId]);
+
+  async function openDisiplinDetail() {
+    if (!employeeId) return;
+    setDisiplinDrawer(true);
+    try { setDisiplinDetail(await fetchSanksi(Number(employeeId))); } catch { setDisiplinDetail([]); }
+  }
   useEffect(() => {
     fetchKpiAssessments().then((rows) => {
       setPeriods(Array.from(new Set(rows.map((r) => r.period))).sort().reverse());
@@ -72,6 +114,8 @@ export default function KpiAssessmentFormPage() {
   function resetForm() {
     setAssessmentId(null);
     setWorkflowStatus("draft");
+    setComplianceOverride(false);
+    setComplianceReason(null);
     setAspects(DEFAULT_ASPECTS.map((a) => ({ aspect: a, score: "0", target: "80" })));
     setQualScores([
       ...COMPETENCY_PARAMS.map((p) => ({ category: "competency" as QualCategory, parameter: p, managerScore: "0", hrdScore: "0" })),
@@ -104,6 +148,8 @@ export default function KpiAssessmentFormPage() {
           }),
         ]);
         setNotes(found.notes ?? "");
+        setComplianceOverride(!!found.compliance_override);
+        setComplianceReason(found.compliance_reason ?? null);
         setOkMsg("Data penilaian existing dimuat - silakan lanjutkan/edit.");
       } else {
         resetForm();
@@ -180,21 +226,29 @@ export default function KpiAssessmentFormPage() {
     return created.id;
   }
 
-  async function handleAction(target: "draft" | "hrd_review" | "final_approved") {
+  async function handleSaveDraft() {
+    if (!employeeId) { setErr("Pilih karyawan terlebih dahulu."); return; }
+    if (!period.trim()) { setErr("Periode wajib diisi."); return; }
+    setSaving("draft"); setErr(null); setOkMsg(null);
+    try {
+      await persist();
+      setOkMsg("Draft tersimpan.");
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Gagal menyimpan.");
+    } finally {
+      setSaving("");
+    }
+  }
+
+  async function handleAdvance(target: KpiWorkflowStatus, label: string) {
     if (!employeeId) { setErr("Pilih karyawan terlebih dahulu."); return; }
     if (!period.trim()) { setErr("Periode wajib diisi."); return; }
     setSaving(target); setErr(null); setOkMsg(null);
     try {
       const id = await persist();
-      if (target !== "draft") {
-        await updateKpiAssessmentStatus(id, target);
-      }
+      await updateKpiAssessmentStatus(id, target);
       setWorkflowStatus(target);
-      setOkMsg(
-        target === "draft" ? "Draft tersimpan." :
-        target === "hrd_review" ? "Penilaian dikirim ke HRD untuk review." :
-        "Penilaian difinalisasi."
-      );
+      setOkMsg(`${label} - status sekarang: ${STATUS_LABEL[target]}.`);
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Gagal menyimpan.");
     } finally {
@@ -210,10 +264,20 @@ export default function KpiAssessmentFormPage() {
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h1 className="text-lg font-bold text-slate-800">Form Penilaian KPI</h1>
-          <p className="text-sm text-slate-400">Untuk Manager &amp; HRD - KPI Jabatan 70%, Kompetensi 20%, Perilaku Kerja 10%.</p>
+          <p className="text-sm text-slate-400">Untuk Supervisor, Manager &amp; HRD - KPI Jabatan 70%, Kompetensi 20%, Perilaku Kerja 10%.</p>
         </div>
         <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${STATUS_COLOR[workflowStatus]}`}>{STATUS_LABEL[workflowStatus]}</span>
       </div>
+
+      {complianceOverride && (
+        <div className="flex items-start gap-2 text-sm text-red-700 bg-red-50 border border-red-100 rounded-lg p-3">
+          <ShieldAlert size={16} className="shrink-0 mt-0.5" />
+          <div>
+            <div className="font-semibold">FINAL KPI dipaksa 0 - People Management Compliance</div>
+            <div className="text-red-600 text-[13px]">{complianceReason}</div>
+          </div>
+        </div>
+      )}
 
       {/* Pemilihan karyawan & periode */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 flex flex-wrap items-end gap-3">
@@ -235,6 +299,21 @@ export default function KpiAssessmentFormPage() {
           {loadingExisting ? <Loader2 size={15} className="animate-spin" /> : <Search size={15} />} Muat Data
         </button>
       </div>
+
+      {/* Discipline Summary - hanya ringkasan, bukan area penilaian KPI (lihat kebijakan integrasi disiplin) */}
+      {employeeId && disiplin && (
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Discipline Summary</div>
+            <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${DISIPLIN_COLOR[disiplin.status_label] ?? "bg-slate-100 text-slate-600"}`}>
+              {disiplin.status_label}
+            </span>
+            <span className="text-[12px] text-slate-500">{disiplin.total_point} discipline point</span>
+            <span className="text-[12px] text-slate-500">{disiplin.active_count} sanksi/pelanggaran aktif</span>
+          </div>
+          <button onClick={openDisiplinDetail} className="text-sm text-sky-600 hover:text-sky-700">Lihat Detail</button>
+        </div>
+      )}
 
       {err && <div className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg p-3">{err}</div>}
       {okMsg && !err && <div className="text-sm text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-lg p-3">{okMsg}</div>}
@@ -304,21 +383,69 @@ export default function KpiAssessmentFormPage() {
         <textarea className={inputCls} rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} />
       </div>
 
-      {/* Aksi */}
+      {/* Aksi - tombol "kirim ke tahap berikutnya" hanya muncul jika role saat ini boleh melakukannya */}
       <div className="flex justify-end gap-2 pb-4">
-        <button onClick={() => handleAction("draft")} disabled={!!saving}
+        <button onClick={handleSaveDraft} disabled={!!saving}
           className="flex items-center gap-1.5 px-4 py-2 text-sm rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-60">
           {saving === "draft" ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />} Simpan Draft
         </button>
-        <button onClick={() => handleAction("hrd_review")} disabled={!!saving}
-          className="flex items-center gap-1.5 px-4 py-2 text-sm rounded-lg border border-sky-200 text-sky-600 hover:bg-sky-50 disabled:opacity-60">
-          {saving === "hrd_review" ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />} Kirim ke HRD
-        </button>
-        <button onClick={() => handleAction("final_approved")} disabled={!!saving}
-          className="flex items-center gap-1.5 px-4 py-2 text-sm rounded-lg bg-sky-600 text-white hover:bg-sky-700 disabled:opacity-60">
-          {saving === "final_approved" ? <Loader2 size={15} className="animate-spin" /> : <CheckCircle2 size={15} />} Finalisasi Penilaian
-        </button>
+        {(() => {
+          const next = NEXT_ACTION[workflowStatus];
+          if (!next || !next.roles.includes(role)) return null;
+          const Icon = next.to === "final_approved" ? CheckCircle2 : Send;
+          return (
+            <button onClick={() => handleAdvance(next.to, next.label)} disabled={!!saving}
+              className={`flex items-center gap-1.5 px-4 py-2 text-sm rounded-lg disabled:opacity-60 ${
+                next.to === "final_approved" ? "bg-sky-600 text-white hover:bg-sky-700" : "border border-sky-200 text-sky-600 hover:bg-sky-50"
+              }`}>
+              {saving === next.to ? <Loader2 size={15} className="animate-spin" /> : <Icon size={15} />} {next.label}
+            </button>
+          );
+        })()}
       </div>
+
+      {/* Drawer Discipline Detail */}
+      {disiplinDrawer && (
+        <>
+          <div className="fixed inset-0 bg-black/20 z-40" onClick={() => setDisiplinDrawer(false)} />
+          <div className="fixed top-0 right-0 h-full bg-white shadow-2xl z-50 overflow-y-auto" style={{ width: 480, maxWidth: "96vw" }}>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 sticky top-0 bg-white">
+              <div className="font-bold text-slate-800">Detail Disiplin</div>
+              <button onClick={() => setDisiplinDrawer(false)} className="text-slate-400 hover:text-slate-600"><X size={20} /></button>
+            </div>
+            <div className="p-5 flex flex-col gap-3">
+              {disiplin && (
+                <div className="flex items-center gap-3 mb-2">
+                  <span className={`text-sm font-semibold px-3 py-1 rounded-full ${DISIPLIN_COLOR[disiplin.status_label] ?? "bg-slate-100 text-slate-600"}`}>{disiplin.status_label}</span>
+                  <span className="text-sm text-slate-500">{disiplin.total_point} discipline point</span>
+                </div>
+              )}
+              {disiplinDetail === null ? (
+                <div className="flex items-center gap-2 text-slate-400 text-sm py-6 justify-center"><Loader2 size={16} className="animate-spin" /> Memuat...</div>
+              ) : disiplinDetail.length === 0 ? (
+                <div className="text-center text-slate-400 py-8">Belum ada riwayat sanksi.</div>
+              ) : (
+                disiplinDetail.map((r) => (
+                  <div key={r.id} className="bg-white border border-slate-100 rounded-lg px-4 py-3">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <span className="text-sm font-semibold text-slate-800">{r.jenis_sanksi}</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-slate-100 text-slate-600">{r.status}</span>
+                      <span className="text-[11px] text-slate-400">{r.kategori_pelanggaran} ({r.point} poin)</span>
+                    </div>
+                    <div className="text-sm text-slate-700 whitespace-pre-line">{r.deskripsi}</div>
+                    <div className="text-[11px] text-slate-400 mt-1">
+                      Pelanggaran: {r.tanggal_pelanggaran} - Diberikan: {r.tanggal_diberikan}
+                      {r.masa_berlaku && ` - Berlaku s.d. ${r.masa_berlaku}`}
+                    </div>
+                    {r.catatan_manager && <div className="text-[11px] text-slate-500 mt-1"><span className="font-medium">Catatan Manager:</span> {r.catatan_manager}</div>}
+                    {r.catatan_hrd && <div className="text-[11px] text-slate-500 mt-1"><span className="font-medium">Catatan HRD:</span> {r.catatan_hrd}</div>}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

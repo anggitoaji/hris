@@ -68,6 +68,7 @@ class EmployeeBase(BaseModel):
     grade: str | None = Field(default=None, max_length=32)
     work_location: str | None = Field(default=None, max_length=128)
     supervisor: str | None = Field(default=None, max_length=128)
+    supervisor_id: int | None = None
 
 
 class EmployeeCreate(EmployeeBase):
@@ -122,6 +123,7 @@ class EmployeeUpdate(BaseModel):
     grade: str | None = Field(default=None, max_length=32)
     work_location: str | None = Field(default=None, max_length=128)
     supervisor: str | None = Field(default=None, max_length=128)
+    supervisor_id: int | None = None
 
 
 class EmployeeOut(EmployeeBase):

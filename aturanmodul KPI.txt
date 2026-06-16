@@ -1,275 +1,221 @@
-APPLIKASI HRIS PT SOLUSI MEDIA SEMESTA
-MODUL KPI PERFORMANCE, PEOPLE MANAGEMENT & DISCIPLINARY ACTION
+APPIKASI HRIS
 
-HRIS SMS Group Versi:1.0
+MODUL KPI PERFORMANCE, PEOPLE MANAGEMENT, REWARD & DISCIPLINARY ACTION
 
-1.	LATAR BELAKANG
-Perusahaan membutuhkan sistem penilaian kinerja yang objektif, terukur, transparan, dan terdokumentasi untuk mendukung pengambilan keputusan terkait:
-•	Promosi Jabatan 
-•	Kenaikan Gaji 
-•	Bonus & Insentif 
-•	Talent Pool 
-•	Succession Planning 
-•	Training & Development 
-•	Reward & Punishment 
-•	Workforce Planning 
-Sistem harus memastikan bahwa setiap karyawan dinilai berdasarkan kinerja aktual, kompetensi, perilaku kerja, dan kedisiplinan.
-Khusus bagi Supervisor, Manager, dan pimpinan yang memiliki bawahan, tanggung jawab melakukan penilaian terhadap bawahan merupakan bagian dari KPI yang wajib dipenuhi.
+A. TUJUAN
 
-2. TUJUAN MODUL
-Tujuan Bisnis
-•	Mengukur performa karyawan secara objektif. 
-•	Mengurangi subjektivitas penilaian. 
-•	Mengidentifikasi top talent. 
-•	Mengidentifikasi future leader. 
-•	Meningkatkan kualitas kepemimpinan. 
-•	Mendorong budaya kerja berbasis kinerja. 
-Tujuan Operasional
-•	Mempermudah proses appraisal. 
-•	Menyediakan histori performa. 
-•	Menyediakan histori disiplin. 
-•	Menyediakan data untuk promosi dan mutasi. 
-________________________________________
-3. STRUKTUR MODUL
-KPI & Performance
+Modul KPI Performance, People Management, Reward & Disciplinary Action digunakan sebagai sistem terintegrasi untuk mengelola performa, kompetensi, perilaku kerja, pengembangan bawahan, reward, dan disiplin karyawan secara objektif, terukur, transparan, dan terdokumentasi.
 
-├── Dashboard KPI
-├── My KPI
-├── Team KPI
-├── KPI Assessment
-├── KPI Review
-├── KPI Approval
-├── KPI Template
-├── KPI Period
-├── Calibration
-├── Reward Management
-├── Disciplinary Action
-├── Talent Review
-├── Succession Planning
-└── Performance Analytics
+Modul ini menjadi dasar pengambilan keputusan terkait:
 
-4. PERIODE PENILAIAN
-Penilaian dilakukan:
-Semester 1
-Periode:
-1 Januari - 30 Juni
-Semester 2
-Periode:
-1 Juli - 31 Desember
-Frekuensi:
-2 kali dalam setahun
-________________________________________
-5. ROLE & HAK AKSES
-Karyawan
-Dapat:
-•	Melihat KPI pribadi 
-•	Melihat target KPI 
-•	Melihat realisasi KPI 
-•	Melihat histori KPI 
-•	Melihat reward 
-•	Melihat status disiplin 
-•	Melihat hasil review 
-Tidak dapat:
-•	Mengubah KPI 
-•	Melakukan penilaian 
-________________________________________
-Supervisor
-Dapat:
-•	Melihat KPI tim 
-•	Menilai bawahan 
-•	Melakukan review KPI staf 
-•	Mengajukan disciplinary action 
+* Promosi Jabatan
+* Kenaikan Gaji
+* Bonus dan Insentif
+* Talent Pool
+* Succession Planning
+* Training & Development
+* Reward & Punishment
+* Workforce Planning
+
+Periode penilaian dilakukan 2 kali dalam setahun:
+
+Semester 1 : Januari – Juni
+
+Semester 2 : Juli – Desember
+
+==================================================
+
+B. HAK AKSES
+
+Karyawan:
+
+* Melihat KPI pribadi
+* Melihat target KPI
+* Melihat realisasi KPI
+* Melihat histori KPI
+* Melihat reward
+* Melihat status disiplin
+* Melihat hasil review
+
+Supervisor:
+
+* Melihat KPI tim
+* Menilai bawahan
+* Review KPI staf
+* Mengajukan disciplinary action
+
 Wajib:
-•	Menilai seluruh staf bawahannya 
-________________________________________
-Manager
-Dapat:
-•	Menilai Supervisor 
-•	Menilai bawahan langsung 
-•	Approval KPI 
-•	Monitoring KPI tim 
+
+* Menilai seluruh staf bawahannya
+
+Manager:
+
+* Menilai Supervisor
+* Menilai bawahan langsung
+* Approval KPI
+* Monitoring KPI tim
+* Mengajukan SP1 dan SP2
+
 Wajib:
-•	Menilai seluruh Supervisor bawahannya 
-________________________________________
-HRD
-Dapat:
-•	Menilai kompetensi 
-•	Menilai perilaku kerja 
-•	Monitoring seluruh KPI 
-•	Finalisasi KPI 
-•	Monitoring seluruh disciplinary action 
-________________________________________
-Direksi
-View Only
-Dapat melihat:
-•	KPI perusahaan 
-•	KPI divisi 
-•	KPI individu 
-•	Talent Review 
-•	Disciplinary Action 
-________________________________________
-Superadmin
-Full Access
-________________________________________
-6. DASHBOARD MY KPI
-Khusus karyawan.
-Menampilkan:
-KPI Score
-Overall KPI Score
-KPI Breakdown
-Menampilkan:
-•	KPI 
-•	Target 
-•	Aktual 
-•	Achievement 
-•	Score 
-KPI Trend
-Perbandingan:
-•	Semester berjalan 
-•	Semester sebelumnya 
-Review Status
-•	Manager Review 
-•	HR Review 
-•	Final Approval 
-Reward
-Riwayat reward yang diterima.
-Status Disiplin
-Menampilkan:
-•	Discipline Point 
-•	SP Aktif 
-•	Status Disiplin 
-Catatan Atasan
-Feedback hasil review.
-________________________________________
-7. DASHBOARD TEAM KPI
-Khusus Supervisor dan Manager.
-Menampilkan:
-•	KPI Tim 
-•	KPI Rata-rata Tim 
-•	Progress Penilaian 
-•	Review Pending 
-•	Monitoring Review 
-•	Distribusi Nilai KPI 
-________________________________________
-8. STRUKTUR PENILAIAN KPI
-Penilaian terdiri dari:
-A. KPI Jabatan
-Bobot:
-70%
-________________________________________
-B. Kompetensi
-Bobot:
-20%
-Penilai:
-•	Manager 
-•	HRD 
-Nilai akhir:
-Rata-rata Manager + HRD
-Parameter:
-•	Technical Knowledge 
-•	Problem Solving 
-•	Communication 
-•	Collaboration 
-•	Initiative 
-•	Leadership 
-________________________________________
-C. Perilaku Kerja
-Bobot:
-10%
-Penilai:
-•	Manager 
-•	HRD 
-Nilai akhir:
-Rata-rata Manager + HRD
-Parameter:
-•	Disiplin 
-•	Integritas 
-•	Tanggung Jawab 
-•	Kepatuhan SOP 
-•	Orientasi Hasil 
-________________________________________
-9. PEOPLE MANAGEMENT KPI
-Tujuan
-Mengukur kepatuhan atasan dalam melakukan review bawahan.
-________________________________________
-Berlaku Untuk
-•	Supervisor 
-•	Manager 
-•	General Manager 
-•	Direktur yang memiliki bawahan 
-________________________________________
-Nama KPI
-People Management Compliance
-atau
-Kepatuhan Penilaian Bawahan
-________________________________________
-Supervisor
-Wajib menilai seluruh staf bawahannya.
-________________________________________
-Manager
-Wajib menilai seluruh Supervisor bawahannya.
-________________________________________
-General Manager
-Wajib menilai seluruh Manager bawahannya.
-________________________________________
-10. FORMULA PEOPLE MANAGEMENT
-Jumlah Review Selesai
-÷
-Jumlah Review Wajib
-× 100%
-________________________________________
-11. HARD RULE
-Apabila review bawahan belum selesai hingga periode KPI ditutup:
-Final KPI Atasan = 0
-Tidak peduli berapa nilai KPI teknis yang dimiliki.
-________________________________________
-12. ALASAN HARD RULE
-Perusahaan menganggap:
-•	Coaching 
-•	Feedback 
-•	Penilaian 
-•	Pengembangan Tim 
-merupakan tugas utama seorang pemimpin.
-Kegagalan menjalankan fungsi tersebut dianggap kegagalan menjalankan jabatan.
-________________________________________
-13. FORM PENILAIAN KPI
-KPI Jabatan
-Diambil dari pencapaian KPI.
-________________________________________
-Kompetensi
+
+* Menilai seluruh Supervisor bawahannya
+
+HRD:
+
+* Menilai kompetensi
+* Menilai perilaku kerja
+* Monitoring seluruh KPI
+* Finalisasi KPI
+* Monitoring reward
+* Monitoring disciplinary action
+
+Direksi:
+
+* View Only
+* Melihat KPI perusahaan
+* Melihat KPI divisi
+* Melihat KPI individu
+* Melihat reward
+* Melihat disciplinary action
+* Melihat talent review
+* Melihat progress penilaian KPI seluruh organisasi
+* Melihat atasan yang belum menyelesaikan penilaian bawahan
+
+Superadmin:
+
+* Full Access
+
+==================================================
+
+C. DASHBOARD MY KPI
+
+Dashboard KPI karyawan menampilkan:
+
+* Overall KPI Score
+* KPI Breakdown
+* KPI Trend
+* Riwayat KPI
+* Review Status
+* Status Disiplin
+* Reward
+* Catatan Atasan
+
+Dashboard tidak menampilkan:
+
+* Top Performer
+* Ranking Karyawan
+* KPI Karyawan Lain
+* Team KPI
+
+==================================================
+
+D. STRUKTUR PENILAIAN KPI
+
+1. KPI Jabatan (70%)
+
+Contoh SPV Network:
+
+* Availability Network : 25%
+* Incident Resolution : 20%
+* Security Management : 20%
+* Anomaly Investigation : 15%
+* Backup & Disaster Recovery : 10%
+* Documentation & Inventory : 10%
+
+2. Kompetensi (20%)
+
 Dinilai oleh:
-•	Manager 
-•	HRD 
-Menggunakan skala:
-1 - 5
-________________________________________
-Perilaku Kerja
+
+* Manager
+* HRD
+
+Nilai akhir menggunakan rata-rata penilaian Manager dan HRD.
+
+Parameter:
+
+* Technical Knowledge
+* Problem Solving
+* Communication
+* Collaboration
+* Initiative
+* Leadership
+
+Skala nilai: 1 – 5
+
+3. Perilaku Kerja (10%)
+
 Dinilai oleh:
-•	Manager 
-•	HRD 
-Menggunakan skala:
-1 - 5
-________________________________________
-14. RUMUS NILAI AKHIR
+
+* Manager
+* HRD
+
+Nilai akhir menggunakan rata-rata penilaian Manager dan HRD.
+
+Parameter:
+
+* Disiplin
+* Integritas
+* Tanggung Jawab
+* Kepatuhan SOP
+* Orientasi Hasil
+
+Skala nilai: 1 – 5
+
+Rumus Nilai Akhir:
+
 (KPI Jabatan × 70%)
-
 +
 (Kompetensi × 20%)
-
 +
-(Perilaku × 10%)
-________________________________________
-15. GRADE KPI
-Nilai	Grade
-95 - 100	A+
-90 - 94	A
-85 - 89	B+
-80 - 84	B
-75 - 79	C+
-70 - 74	C
-< 70	D
-________________________________________
-16. WORKFLOW KPI
+(Perilaku Kerja × 10%)
+
+Grade KPI:
+
+95 – 100 = A+
+90 – 94 = A
+85 – 89 = B+
+80 – 84 = B
+75 – 79 = C+
+70 – 74 = C
+< 70 = D
+
+==================================================
+
+E. PEOPLE MANAGEMENT KPI
+
+People Management Compliance merupakan KPI wajib bagi seluruh atasan yang memiliki bawahan.
+
+Berlaku untuk:
+
+* Supervisor
+* Manager
+
+Tujuan:
+
+Mengukur kepatuhan atasan dalam melakukan coaching, review, evaluasi, dan pengembangan bawahan.
+
+Supervisor wajib menilai seluruh staf bawahannya.
+
+Manager wajib menilai seluruh Supervisor bawahannya.
+
+Formula:
+
+Jumlah Review Selesai ÷ Jumlah Review Wajib × 100%
+
+Kebijakan Wajib:
+
+Apabila penilaian bawahan tidak diselesaikan sampai periode KPI ditutup, maka:
+
+FINAL KPI ATASAN = 0 (NOL)
+
+Tanpa pengecualian.
+
+Kebijakan ini berlaku walaupun KPI teknis yang bersangkutan mencapai nilai tinggi.
+
+==================================================
+
+F. WORKFLOW PENILAIAN
+
 Supervisor Review
 
 ↓
@@ -287,173 +233,241 @@ Calibration
 ↓
 
 Final Approval
-________________________________________
-17. REWARD MANAGEMENT
+
+==================================================
+
+G. REWARD MANAGEMENT
+
 Jenis Reward:
-•	Employee of The Semester 
-•	Best Attendance 
-•	Best Performance 
-•	Innovation Award 
-•	Leadership Award 
-•	Special Achievement Award 
-________________________________________
-18. DISCIPLINARY ACTION
-Prinsip
-Riwayat pelanggaran bersifat permanen.
+
+* Employee of The Semester
+* Best Attendance
+* Best Performance
+* Innovation Award
+* Leadership Award
+* Special Achievement Award
+
+Seluruh reward tersimpan pada profil karyawan.
+
+==================================================
+
+H. DISCIPLINARY ACTION
+
+Prinsip:
+
+Seluruh riwayat pelanggaran bersifat permanen.
+
 Tidak dapat:
-•	Dihapus 
-•	Hard Delete 
-•	Dimodifikasi setelah final 
-________________________________________
-19. JENIS SANKSI
-•	Teguran Lisan 
-•	Teguran Tertulis 
-•	SP1 
-•	SP2 
-•	SP3 
-•	Skorsing 
-•	PHK 
-________________________________________
-20. FORM SANKSI
-Field:
-•	Nama Karyawan 
-•	NIK 
-•	Jabatan 
-•	Divisi 
-•	Jenis Sanksi 
-•	Kategori Pelanggaran 
-•	Tanggal Pelanggaran 
-•	Tanggal Diberikan 
-•	Masa Berlaku 
-•	Deskripsi Pelanggaran 
-•	Lampiran Bukti 
-•	Catatan Manager 
-•	Catatan HRD 
-________________________________________
-21. STATUS SANKSI
-•	Draft 
-•	Aktif 
-•	Expired 
-•	Dicabut 
-________________________________________
-22. MASA BERLAKU
-Default:
-Jenis	Masa Berlaku
-SP1	6 Bulan
-SP2	6 Bulan
-SP3	6 Bulan
-________________________________________
-23. DISCIPLINE POINT SYSTEM
-Pelanggaran	Point
-Terlambat Berulang	5
-Pelanggaran SOP	10
-Mangkir	20
-Manipulasi Data	25
-Pelanggaran Security	30
-________________________________________
-24. STATUS DISCIPLINE
-Point	Status
-0-10	Hijau
-11-20	Kuning
-21-40	SP1
-41-60	SP2
->60	SP3
-________________________________________
-25. RULE STATUS CLEAR
-Jika:
-Tidak ada pelanggaran baru
-selama 3 tahun berturut-turut
-Maka:
-Status Disiplin = CLEAR
+
+* Dihapus
+* Hard Delete
+* Dimodifikasi setelah finalisasi
+
+Jenis Sanksi:
+
+* Teguran Lisan
+* Teguran Tertulis
+* SP1
+* SP2
+* SP3
+* Skorsing
+* PHK
+
+Form Sanksi:
+
+* Nama Karyawan
+* NIK
+* Jabatan
+* Divisi
+* Jenis Sanksi
+* Kategori Pelanggaran
+* Tanggal Pelanggaran
+* Tanggal Diberikan
+* Masa Berlaku
+* Deskripsi Pelanggaran
+* Lampiran Bukti
+* Catatan Manager
+* Catatan HRD
+
+Status Sanksi:
+
+* Draft
+* Aktif
+* Expired
+* Dicabut
+
+Masa Berlaku Default:
+
+SP1 = 6 Bulan
+SP2 = 6 Bulan
+SP3 = 6 Bulan
+
+Setelah masa berlaku berakhir, status berubah otomatis menjadi Expired.
+
 Riwayat tetap tersimpan permanen.
-________________________________________
-26. INTEGRASI KPI & DISIPLIN
-Saat penilaian KPI:
-Manager dan HRD dapat melihat:
-•	Discipline Point 
-•	Reward 
-•	SP Aktif 
-•	Riwayat Pelanggaran 
-Sebagai bahan pertimbangan penilaian.
-________________________________________
-27. TALENT REVIEW MATRIX
+
+==================================================
+
+I. DISCIPLINE POINT SYSTEM
+
+Terlambat Berulang = 5 Point
+
+Pelanggaran SOP = 10 Point
+
+Mangkir = 20 Point
+
+Manipulasi Data = 25 Point
+
+Pelanggaran Security = 30 Point
+
+Status Discipline:
+
+0 – 10 = Hijau
+
+11 – 20 = Kuning
+
+21 – 40 = SP1
+
+41 – 60 = SP2
+
+> 60 = SP3
+
+Rule Status Clear:
+
+Apabila tidak ada pelanggaran baru selama 3 tahun berturut-turut maka status disiplin berubah menjadi CLEAR.
+
+Riwayat pelanggaran tetap tersimpan permanen untuk kebutuhan audit.
+
+==================================================
+
+J. INTEGRASI STATUS DISIPLIN PADA KPI
+
+Dashboard KPI hanya menampilkan:
+
+* Status Disiplin
+* Reward
+
+Tidak menampilkan:
+
+* Riwayat SP
+* Riwayat Pelanggaran
+* Detail Discipline Point
+* Lampiran Sanksi
+
+Pada Form Penilaian KPI, Manager dan HRD hanya melihat Discipline Summary:
+
+* Status Disiplin
+* Discipline Point
+* Pelanggaran Aktif
+* Reward Aktif
+
+Tersedia tombol "Lihat Detail".
+
+Saat tombol ditekan, sistem membuka drawer atau modal yang menampilkan:
+
+* Status Disiplin
+* Discipline Point
+* Riwayat Pelanggaran
+* Riwayat SP
+* Lampiran
+* Catatan Manager
+* Catatan HRD
+* Masa Berlaku SP
+
+Discipline Summary hanya berfungsi sebagai informasi pendukung dan bukan bagian dari area penilaian KPI.
+
+==================================================
+
+K. TALENT REVIEW MATRIX
+
 Variabel:
-•	KPI Score 
-•	Competency Score 
-•	Discipline Score 
+
+* KPI Score
+* Competency Score
+* Discipline Score
+
 Output:
-•	High Performer 
-•	Future Leader 
-•	Core Talent 
-•	Need Development 
-•	Under Performer 
-________________________________________
-28. INTEGRASI PROMOSI
-Kandidat promosi harus memenuhi:
-KPI ≥ 85
 
-Tidak memiliki SP aktif
+* High Performer
+* Future Leader
+* Core Talent
+* Need Development
+* Under Performer
 
-Kompetensi memenuhi standar
+==================================================
 
-Masa kerja memenuhi syarat
-________________________________________
-29. INTEGRASI PAYROLL
+L. INTEGRASI PROMOSI
+
+Syarat kandidat promosi:
+
+* KPI minimal 85
+* Tidak memiliki SP aktif
+* Kompetensi memenuhi standar jabatan
+* Masa kerja memenuhi syarat
+
+==================================================
+
+M. INTEGRASI PAYROLL
+
 Nilai KPI dapat digunakan sebagai dasar:
-•	Performance Bonus 
-•	Merit Increase 
-•	Bonus Semester 
-•	Bonus Tahunan 
-•	Incentive Program 
-________________________________________
-30. DASHBOARD HRD
+
+* Performance Bonus
+* Merit Increase
+* Bonus Semester
+* Bonus Tahunan
+* Incentive Program
+
+==================================================
+
+N. DASHBOARD HRD
+
 Menampilkan:
-•	KPI Progress 
-•	Review Pending 
-•	Atasan Belum Menilai Bawahan 
-•	Distribusi KPI 
-•	Talent Pool 
-•	Top Talent 
-•	Need Development 
-•	Status Disiplin Perusahaan 
-________________________________________
-31. REMINDER OTOMATIS
-H-15
-Mulai Penilaian KPI 
 
+* KPI Progress
+* Review Pending
+* Atasan Belum Menilai Bawahan
+* Distribusi KPI Per Divisi
+* Talent Pool
+* Top Talent
+* Need Development
+* Status Disiplin Perusahaan
 
-h-7 Sisa waktu 7 hari.
-H-1
+==================================================
+
+O. REMINDER OTOMATIS
+
+H-14:
+Penilaian KPI bawahan belum selesai.
+
+H-7:
+Sisa waktu 7 hari.
+
+H-1:
 Batas waktu review KPI akan berakhir.
-________________________________________
-32. AUDIT TRAIL
+
+==================================================
+
+P. AUDIT TRAIL
+
 Seluruh aktivitas dicatat:
-•	User 
-•	Role 
-•	Aktivitas 
-•	Tanggal 
-•	Jam 
-•	IP Address 
-•	Data Sebelum 
-•	Data Sesudah 
+
+* User
+* Role
+* Aktivitas
+* Tanggal
+* Jam
+* IP Address
+* Data Sebelum
+* Data Sesudah
+
 Audit Trail bersifat permanen dan tidak dapat dihapus.
-________________________________________
-33. MANFAAT BISNIS
-Transparansi
-Seluruh proses dapat ditelusuri.
-Objektivitas
-Promosi dan bonus berbasis data.
-Leadership Accountability
-Atasan wajib melakukan penilaian bawahan.
-Talent Management
-Mengidentifikasi future leader secara objektif.
-Compliance
-Mendukung audit dan kepatuhan ketenagakerjaan.
-Produktivitas
-Mendorong budaya kerja berbasis kinerja dan disiplin.
-________________________________________
-KEBIJAKAN FINAL
-Setiap Supervisor, Manager, General Manager, dan pimpinan yang memiliki bawahan wajib menyelesaikan proses penilaian KPI bawahan pada periode yang ditentukan. Apabila penilaian tidak diselesaikan hingga periode KPI ditutup, maka nilai KPI atasan otomatis menjadi 0 (nol) tanpa pengecualian.
 
-Kebijakan ini memastikan bahwa pengembangan SDM, coaching, feedback, dan evaluasi kinerja menjadi tanggung jawab utama setiap pemimpin di dalam organisasi
+==================================================
 
+Q. KEBIJAKAN FINAL
+
+Setiap Supervisor dan Manager yang memiliki bawahan wajib menyelesaikan proses penilaian KPI bawahan pada periode yang ditentukan.
+
+Apabila penilaian tidak diselesaikan hingga periode KPI ditutup maka nilai KPI atasan otomatis menjadi 0 (nol) tanpa pengecualian.
+
+Kebijakan ini memastikan bahwa coaching, feedback, pengembangan SDM, dan evaluasi kinerja menjadi tanggung jawab utama setiap pemimpin dalam organisasi.

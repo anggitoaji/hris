@@ -32,7 +32,7 @@ from app.core.database import Base, SessionLocal, get_db
 from app.models.employee import Employee
 
 
-ROLES = ["Super Admin", "Direksi", "HR", "Manager", "Finance", "NOC", "Karyawan"]
+ROLES = ["Super Admin", "Direksi", "HR", "Manager", "Supervisor", "Finance", "NOC", "Karyawan"]
 
 
 # ===================== Model =====================

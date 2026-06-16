@@ -100,6 +100,7 @@ export interface Employee {
   grade: string | null;
   work_location: string | null;
   supervisor: string | null;
+  supervisor_id: number | null;
 }
 
 export interface EmployeeListResponse {
@@ -127,7 +128,7 @@ export interface KpiQualScore {
   final: number; // rata-rata manager+hrd
 }
 
-export type KpiWorkflowStatus = "draft" | "hrd_review" | "final_approved";
+export type KpiWorkflowStatus = "draft" | "supervisor_review" | "manager_review" | "hrd_review" | "calibration" | "final_approved";
 
 export interface KpiAssessment {
   id: number;
@@ -136,6 +137,8 @@ export interface KpiAssessment {
   needs_coaching: boolean;
   notes?: string | null;
   workflow_status: KpiWorkflowStatus;
+  compliance_override?: boolean;
+  compliance_reason?: string | null;
   aspects: KpiAspect[];
   qual_scores: KpiQualScore[];
   employee_nama: string | null;

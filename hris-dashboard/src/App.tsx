@@ -20,6 +20,7 @@ import ActionItemsPage from "./pages/ActionItemsPage";
 import KpiPerusahaanPage from "./pages/KpiPerusahaanPage";
 import KpiDivisiPage from "./pages/KpiDivisiPage";
 import KpiAssessmentFormPage from "./pages/KpiAssessmentFormPage";
+import KpiDashboardHrdPage from "./pages/KpiDashboardHrdPage";
 import MyKpiDashboardPage from "./pages/MyKpiDashboardPage";
 import LoginPage from "./pages/LoginPage";
 import UserManagementPage from "./pages/UserManagementPage";
@@ -164,7 +165,9 @@ export default function App() {
 
           {route === "kpi.divisi" && <KpiDivisiPage />}
 
-          {route === "kpi.assessment" && <KpiAssessmentFormPage />}
+          {route === "kpi.assessment" && <KpiAssessmentFormPage role={role} />}
+
+          {route === "kpi.dashboard_hrd" && <KpiDashboardHrdPage />}
 
           {route === "kpi.myself" && <MyKpiDashboardPage employeeId={user.employee_id} />}
 
