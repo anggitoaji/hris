@@ -9,6 +9,8 @@ import {
   fetchFamily, createFamily, updateFamily, deleteFamily, type FamilyRecord,
   fetchTraining, createTraining, updateTraining, deleteTraining, type TrainingRecord,
   fetchDocuments, uploadDocument, docPreviewUrl, docDownloadUrl, deleteDocument, type DocumentRecord,
+  fetchSanksi, createSanksi, cabutSanksi, sanksiLampiranUrl, type SanksiRecord,
+  JENIS_SANKSI_OPTS, KATEGORI_PELANGGARAN_OPTS,
   fetchAuditLogs, type AuditLogRecord,
   photoUrl, uploadPhoto,
 } from "../services/api";
@@ -88,6 +90,7 @@ const PROFILE_TABS: { key: string; label: string }[] = [
   { key: "keluarga", label: "Keluarga" },
   { key: "training", label: "Training" },
   { key: "dokumen", label: "Dokumen" },
+  { key: "sanksi", label: "Sanksi" },
   { key: "audit", label: "Audit Log" },
 ];
 
@@ -646,6 +649,191 @@ function DocumentsTab({ employeeId }: { employeeId: number }) {
   );
 }
 
+const SANKSI_STATUS_COLOR: Record<string, string> = {
+  Aktif: "bg-red-100 text-red-700",
+  Expired: "bg-slate-100 text-slate-500",
+  Dicabut: "bg-slate-100 text-slate-400 line-through",
+};
+const sanksiBlank = {
+  jenis_sanksi: "Teguran Lisan", kategori_pelanggaran: "Lainnya",
+  tanggal_pelanggaran: "", tanggal_diberikan: "", masa_berlaku: "",
+  deskripsi: "", catatan_manager: "", catatan_hrd: "",
+};
+
+function SanksiTab({ employeeId, role }: { employeeId: number; role: string }) {
+  const [rows, setRows] = useState<SanksiRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showAdd, setShowAdd] = useState(false);
+  const [form, setForm] = useState(sanksiBlank);
+  const [file, setFile] = useState<File | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [cabutId, setCabutId] = useState<number | null>(null);
+  const [cabutNote, setCabutNote] = useState("");
+
+  const canCreate = role === "Manager" || role === "HR" || role === "Super Admin";
+  const isHrd = role === "HR" || role === "Super Admin";
+
+  async function load() { setLoading(true); try { setRows(await fetchSanksi(employeeId)); } catch {} setLoading(false); }
+  useEffect(() => { load(); }, [employeeId]);
+
+  function openAdd() { setForm(sanksiBlank); setFile(null); setErr(null); setShowAdd(true); }
+  function cancel() { setShowAdd(false); setErr(null); }
+
+  async function save() {
+    if (!form.tanggal_pelanggaran || !form.tanggal_diberikan || !form.deskripsi.trim()) {
+      setErr("Tanggal pelanggaran, tanggal diberikan, dan deskripsi wajib diisi.");
+      return;
+    }
+    setSaving(true); setErr(null);
+    try {
+      await createSanksi({
+        employee_id: employeeId,
+        jenis_sanksi: form.jenis_sanksi,
+        kategori_pelanggaran: form.kategori_pelanggaran,
+        tanggal_pelanggaran: form.tanggal_pelanggaran,
+        tanggal_diberikan: form.tanggal_diberikan,
+        masa_berlaku: form.masa_berlaku || undefined,
+        deskripsi: form.deskripsi.trim(),
+        catatan_manager: form.catatan_manager.trim() || undefined,
+        catatan_hrd: isHrd ? (form.catatan_hrd.trim() || undefined) : undefined,
+        file,
+      });
+      setShowAdd(false);
+      await load();
+    } catch (e) { setErr(e instanceof Error ? e.message : "Gagal menyimpan."); }
+    setSaving(false);
+  }
+
+  async function doCabut(id: number) {
+    if (!cabutNote.trim()) return;
+    try { await cabutSanksi(id, cabutNote.trim()); setCabutId(null); setCabutNote(""); await load(); }
+    catch (e) { setErr(e instanceof Error ? e.message : "Gagal mencabut sanksi."); }
+  }
+
+  const ic = "w-full px-2 py-1.5 text-sm border border-slate-200 rounded-lg outline-none focus:border-sky-300";
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-3">
+        <div className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Riwayat Sanksi / Disciplinary Action</div>
+        {canCreate && !showAdd && (
+          <button onClick={openAdd} className="flex items-center gap-1 text-sm text-sky-600 hover:text-sky-700">
+            <Plus size={15} /> Tambah Sanksi
+          </button>
+        )}
+      </div>
+
+      {showAdd && (
+        <div className="bg-sky-50/50 border border-sky-100 rounded-xl p-4 mb-4">
+          <div className="grid grid-cols-2 gap-3 mb-3">
+            <div>
+              <label className="text-[11px] text-slate-500 font-medium block mb-1">Jenis Sanksi</label>
+              <select className={ic} value={form.jenis_sanksi} onChange={(ev) => setForm({ ...form, jenis_sanksi: ev.target.value })}>
+                {JENIS_SANKSI_OPTS.map((o) => <option key={o}>{o}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-[11px] text-slate-500 font-medium block mb-1">Kategori Pelanggaran</label>
+              <select className={ic} value={form.kategori_pelanggaran} onChange={(ev) => setForm({ ...form, kategori_pelanggaran: ev.target.value })}>
+                {KATEGORI_PELANGGARAN_OPTS.map((o) => <option key={o}>{o}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-[11px] text-slate-500 font-medium block mb-1">Tanggal Pelanggaran</label>
+              <input type="date" className={ic} value={form.tanggal_pelanggaran} onChange={(ev) => setForm({ ...form, tanggal_pelanggaran: ev.target.value })} />
+            </div>
+            <div>
+              <label className="text-[11px] text-slate-500 font-medium block mb-1">Tanggal Diberikan</label>
+              <input type="date" className={ic} value={form.tanggal_diberikan} onChange={(ev) => setForm({ ...form, tanggal_diberikan: ev.target.value })} />
+            </div>
+            <div>
+              <label className="text-[11px] text-slate-500 font-medium block mb-1">Masa Berlaku (opsional)</label>
+              <input type="date" className={ic} value={form.masa_berlaku} onChange={(ev) => setForm({ ...form, masa_berlaku: ev.target.value })} placeholder="Default 6 bln untuk SP1/SP2/SP3" />
+            </div>
+            <div>
+              <label className="text-[11px] text-slate-500 font-medium block mb-1">Lampiran Bukti (opsional)</label>
+              <input type="file" accept=".pdf,.jpg,.jpeg,.png" className={ic} onChange={(ev) => setFile(ev.target.files?.[0] ?? null)} />
+            </div>
+            <div className="col-span-2">
+              <label className="text-[11px] text-slate-500 font-medium block mb-1">Deskripsi Pelanggaran</label>
+              <textarea className={ic} rows={2} value={form.deskripsi} onChange={(ev) => setForm({ ...form, deskripsi: ev.target.value })} />
+            </div>
+            <div>
+              <label className="text-[11px] text-slate-500 font-medium block mb-1">Catatan Manager</label>
+              <textarea className={ic} rows={2} value={form.catatan_manager} onChange={(ev) => setForm({ ...form, catatan_manager: ev.target.value })} />
+            </div>
+            {isHrd && (
+              <div>
+                <label className="text-[11px] text-slate-500 font-medium block mb-1">Catatan HRD</label>
+                <textarea className={ic} rows={2} value={form.catatan_hrd} onChange={(ev) => setForm({ ...form, catatan_hrd: ev.target.value })} />
+              </div>
+            )}
+          </div>
+          {err && <div className="text-sm text-red-600 mb-2">{err}</div>}
+          <div className="flex items-center gap-2">
+            <button onClick={save} disabled={saving} className="px-4 py-2 text-sm rounded-lg bg-sky-600 text-white hover:bg-sky-700 disabled:opacity-60 flex items-center gap-2">
+              {saving && <Loader2 size={14} className="animate-spin" />} Simpan
+            </button>
+            <button onClick={cancel} className="text-sm text-slate-400 hover:text-slate-600">Batal</button>
+          </div>
+        </div>
+      )}
+
+      {!showAdd && err && <div className="text-sm text-red-600 mb-2">{err}</div>}
+
+      {loading ? (
+        <div className="flex items-center gap-2 text-slate-400 text-sm py-6 justify-center"><Loader2 size={16} className="animate-spin" /> Memuat...</div>
+      ) : rows.length === 0 ? (
+        <div className="text-center text-slate-400 py-8">Belum ada riwayat sanksi.</div>
+      ) : (
+        <div className="flex flex-col gap-2">
+          {rows.map((r) => (
+            <div key={r.id} className="bg-white border border-slate-100 rounded-lg px-4 py-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <span className="text-sm font-semibold text-slate-800">{r.jenis_sanksi}</span>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${SANKSI_STATUS_COLOR[r.status] ?? "bg-slate-100 text-slate-600"}`}>{r.status}</span>
+                    <span className="text-[11px] text-slate-400">{r.kategori_pelanggaran} ({r.point} poin)</span>
+                  </div>
+                  <div className="text-sm text-slate-700 whitespace-pre-line">{r.deskripsi}</div>
+                  <div className="text-[11px] text-slate-400 mt-1">
+                    Pelanggaran: {r.tanggal_pelanggaran} — Diberikan: {r.tanggal_diberikan}
+                    {r.masa_berlaku && ` — Berlaku s.d. ${r.masa_berlaku}`}
+                  </div>
+                  {r.catatan_manager && <div className="text-[11px] text-slate-500 mt-1"><span className="font-medium">Catatan Manager:</span> {r.catatan_manager}</div>}
+                  {r.catatan_hrd && isHrd && <div className="text-[11px] text-slate-500 mt-1"><span className="font-medium">Catatan HRD:</span> {r.catatan_hrd}</div>}
+                  {r.lampiran_original && (
+                    <a href={sanksiLampiranUrl(r.id)} target="_blank" rel="noreferrer" className="text-[11px] text-sky-600 hover:text-sky-700 mt-1 inline-flex items-center gap-1">
+                      <FileText size={12} /> {r.lampiran_original}
+                    </a>
+                  )}
+                  {isHrd && r.status === "Aktif" && (
+                    cabutId === r.id ? (
+                      <div className="flex items-center gap-2 mt-2">
+                        <input className="px-2 py-1 text-xs border border-slate-200 rounded-lg flex-1" placeholder="Alasan pencabutan (wajib)" value={cabutNote} onChange={(ev) => setCabutNote(ev.target.value)} />
+                        <button onClick={() => doCabut(r.id)} className="text-xs text-red-600 hover:text-red-700">Konfirmasi</button>
+                        <button onClick={() => { setCabutId(null); setCabutNote(""); }} className="text-xs text-slate-400 hover:text-slate-600">Batal</button>
+                      </div>
+                    ) : (
+                      <button onClick={() => setCabutId(r.id)} className="text-[11px] text-red-500 hover:text-red-600 mt-2">Cabut Sanksi</button>
+                    )
+                  )}
+                </div>
+                <div className="text-right shrink-0">
+                  <div className="text-[11px] font-medium text-slate-600">{r.created_by_username}</div>
+                  <div className="text-[10px] text-slate-400">{r.created_by_role}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 const ACTION_COLOR: Record<string, string> = {
   CREATE: "bg-emerald-100 text-emerald-700",
   UPDATE: "bg-sky-100 text-sky-700",
@@ -865,6 +1053,8 @@ function EmployeeProfile({ e, role }: { e: Employee; role: string }) {
         {tab === "training" && <TrainingTab employeeId={e.id} />}
 
         {tab === "dokumen" && <DocumentsTab employeeId={e.id} />}
+
+        {tab === "sanksi" && <SanksiTab employeeId={e.id} role={role} />}
 
         {tab === "audit" && <AuditTab employeeId={e.id} />}
       </div>

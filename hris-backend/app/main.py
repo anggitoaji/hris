@@ -16,6 +16,7 @@ from app.job_history import router as job_history_router
 from app.family import router as family_router
 from app.training import router as training_router
 from app.documents import router as documents_router
+from app.disciplinary import router as disciplinary_router
 from app.photo_serve import router as photo_serve_router
 from app.audit import router as audit_router
 from app.org_chart import router as org_chart_router
@@ -73,6 +74,8 @@ app.include_router(audit_router, prefix=settings.API_PREFIX, dependencies=[Depen
 app.include_router(photo_serve_router, prefix=settings.API_PREFIX)
 # Documents: auth per-endpoint (download/preview pakai token query param)
 app.include_router(documents_router, prefix=settings.API_PREFIX)
+# Disciplinary Action (Sanksi): auth per-endpoint (POST/cabut dibatasi role di dalam router, lampiran pakai token query param)
+app.include_router(disciplinary_router, prefix=settings.API_PREFIX)
 # Auth: login terbuka; kelola user sudah dibatasi Super Admin di dalam router.
 app.include_router(auth_router, prefix=settings.API_PREFIX)
 

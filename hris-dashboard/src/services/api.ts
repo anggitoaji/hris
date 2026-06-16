@@ -488,6 +488,68 @@ export function docPreviewUrl(id: number): string { return `${BASE}/documents/${
 export function docDownloadUrl(id: number): string { return `${BASE}/documents/${id}/download${authToken ? "?token=" + encodeURIComponent(authToken) : ""}`; }
 export async function deleteDocument(id: number): Promise<unknown> { return sendJSON(`/documents/${id}`, "DELETE"); }
 
+// ===================== Disciplinary Action (Sanksi) =====================
+export interface SanksiRecord {
+  id: number;
+  employee_id: number;
+  jenis_sanksi: string;
+  kategori_pelanggaran: string;
+  point: number;
+  tanggal_pelanggaran: string;
+  tanggal_diberikan: string;
+  masa_berlaku: string | null;
+  deskripsi: string;
+  lampiran_original: string | null;
+  catatan_manager: string | null;
+  catatan_hrd: string | null;
+  status: string;
+  created_by_username: string;
+  created_by_role: string;
+  created_at: string;
+}
+export interface SanksiSummary {
+  employee_id: number;
+  total_point: number;
+  status_label: string;
+  active_count: number;
+  active_items: { jenis_sanksi: string; tanggal_diberikan: string; masa_berlaku: string | null }[];
+}
+export const JENIS_SANKSI_OPTS = ["Teguran Lisan", "Teguran Tertulis", "SP1", "SP2", "SP3", "Skorsing", "PHK"];
+export const KATEGORI_PELANGGARAN_OPTS = ["Terlambat Berulang", "Pelanggaran SOP", "Mangkir", "Manipulasi Data", "Pelanggaran Security", "Lainnya"];
+
+export async function fetchSanksi(eid: number): Promise<SanksiRecord[]> { return getJSON(`/disciplinary?employee_id=${eid}`); }
+export async function fetchSanksiSummary(eid: number): Promise<SanksiSummary> { return getJSON(`/disciplinary/summary?employee_id=${eid}`); }
+export async function createSanksi(d: {
+  employee_id: number; jenis_sanksi: string; kategori_pelanggaran: string;
+  tanggal_pelanggaran: string; tanggal_diberikan: string; masa_berlaku?: string;
+  deskripsi: string; catatan_manager?: string; catatan_hrd?: string; file?: File | null;
+}): Promise<SanksiRecord> {
+  const fd = new FormData();
+  fd.append("employee_id", String(d.employee_id));
+  fd.append("jenis_sanksi", d.jenis_sanksi);
+  fd.append("kategori_pelanggaran", d.kategori_pelanggaran);
+  fd.append("tanggal_pelanggaran", d.tanggal_pelanggaran);
+  fd.append("tanggal_diberikan", d.tanggal_diberikan);
+  if (d.masa_berlaku) fd.append("masa_berlaku", d.masa_berlaku);
+  fd.append("deskripsi", d.deskripsi);
+  if (d.catatan_manager) fd.append("catatan_manager", d.catatan_manager);
+  if (d.catatan_hrd) fd.append("catatan_hrd", d.catatan_hrd);
+  if (d.file) fd.append("file", d.file);
+  const res = await fetch(`${BASE}/disciplinary`, { method: "POST", headers: authToken ? { Authorization: `Bearer ${authToken}` } : {}, body: fd });
+  if (res.status === 401) { onUnauthorized?.(); throw new Error("Sesi berakhir."); }
+  if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.detail || `Gagal (${res.status})`); }
+  return res.json();
+}
+export async function cabutSanksi(id: number, catatan_hrd: string): Promise<SanksiRecord> {
+  const fd = new FormData();
+  fd.append("catatan_hrd", catatan_hrd);
+  const res = await fetch(`${BASE}/disciplinary/${id}/cabut`, { method: "PATCH", headers: authToken ? { Authorization: `Bearer ${authToken}` } : {}, body: fd });
+  if (res.status === 401) { onUnauthorized?.(); throw new Error("Sesi berakhir."); }
+  if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.detail || `Gagal (${res.status})`); }
+  return res.json();
+}
+export function sanksiLampiranUrl(id: number): string { return `${BASE}/disciplinary/${id}/lampiran${authToken ? "?token=" + encodeURIComponent(authToken) : ""}`; }
+
 // ===================== Audit Trail =====================
 export interface AuditLogRecord {
   id: number;

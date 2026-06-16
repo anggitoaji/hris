@@ -1,7 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { Loader2, AlertTriangle, Award, ShieldCheck, CheckCircle2, Circle } from "lucide-react";
-import { fetchKpiAssessments } from "../services/api";
+import { fetchKpiAssessments, fetchSanksiSummary, type SanksiSummary } from "../services/api";
 import type { KpiAssessment, KpiWorkflowStatus } from "../types";
+
+const DISIPLIN_COLOR: Record<string, string> = {
+  CLEAR: "bg-emerald-100 text-emerald-700",
+  Hijau: "bg-emerald-100 text-emerald-700",
+  Kuning: "bg-amber-100 text-amber-700",
+  SP1: "bg-orange-100 text-orange-700",
+  SP2: "bg-red-100 text-red-700",
+  SP3: "bg-red-200 text-red-800",
+};
 
 const STATUS_COLOR: Record<string, string> = {
   Excellent: "bg-emerald-100 text-emerald-700",
@@ -26,6 +35,7 @@ export default function MyKpiDashboardPage({ employeeId }: { employeeId: number 
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [period, setPeriod] = useState("");
+  const [disiplin, setDisiplin] = useState<SanksiSummary | null>(null);
 
   useEffect(() => {
     if (!employeeId) { setLoading(false); return; }
@@ -34,6 +44,7 @@ export default function MyKpiDashboardPage({ employeeId }: { employeeId: number 
       .then((data) => { setRows(data); setErr(null); })
       .catch((e) => setErr(e instanceof Error ? e.message : "Gagal memuat data"))
       .finally(() => setLoading(false));
+    fetchSanksiSummary(employeeId).then(setDisiplin).catch(() => setDisiplin(null));
   }, [employeeId]);
 
   const periods = useMemo(() => Array.from(new Set(rows.map((r) => r.period))).sort().reverse(), [rows]);
@@ -177,7 +188,18 @@ export default function MyKpiDashboardPage({ employeeId }: { employeeId: number 
               <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">
                 <ShieldCheck size={14} /> Status Disiplin
               </div>
-              <div className="text-sm text-slate-400">Belum ada data disiplin. Modul Disciplinary Action segera tersedia.</div>
+              {disiplin ? (
+                <div className="flex items-center gap-3">
+                  <span className={`text-sm font-semibold px-3 py-1 rounded-full ${DISIPLIN_COLOR[disiplin.status_label] ?? "bg-slate-100 text-slate-600"}`}>
+                    {disiplin.status_label}
+                  </span>
+                  {disiplin.active_count > 0 && (
+                    <span className="text-[12px] text-slate-500">{disiplin.active_count} sanksi aktif</span>
+                  )}
+                </div>
+              ) : (
+                <div className="text-sm text-slate-400">Tidak ada data disiplin.</div>
+              )}
             </div>
           </div>
 
