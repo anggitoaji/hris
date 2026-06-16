@@ -1,5 +1,7 @@
 ﻿import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { Search, X, Loader2, AlertTriangle, Plus, Pencil, Trash2 } from "lucide-react";
+import { Search, X, Loader2, AlertTriangle, Plus, Pencil, Trash2, FileSpreadsheet, FileDown } from "lucide-react";
+import jsPDF from "jspdf";
+import { saveAs } from "file-saver";
 import { fetchKpiAssessments, fetchEmployees, createKpiAssessment, updateKpiAssessment } from "../services/api";
 import type { KpiAssessment, Employee } from "../types";
 
@@ -106,6 +108,125 @@ export default function KpiKaryawanPage() {
     return { n, avg, coaching };
   }, [filtered]);
 
+  const [exporting, setExporting] = useState(false);
+
+  async function exportExcel() {
+    setExporting(true);
+    try {
+      const { Workbook } = await import("exceljs");
+      const wb = new Workbook();
+      const ws = wb.addWorksheet("Rekap KPI");
+
+      ws.columns = [
+        { header: "Nama", key: "nama", width: 26 },
+        { header: "Divisi", key: "div", width: 20 },
+        { header: "Periode", key: "periode", width: 18 },
+        { header: "Skor", key: "skor", width: 10 },
+        { header: "Target", key: "target", width: 10 },
+        { header: "Delta", key: "delta", width: 10 },
+        { header: "Status", key: "status", width: 12 },
+        { header: "Coaching", key: "coaching", width: 12 },
+        { header: "Catatan", key: "notes", width: 30 },
+      ];
+      ws.getRow(1).font = { bold: true };
+      ws.getRow(1).fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE2E8F0" } };
+
+      filtered.forEach((r) => {
+        const target = r.overall_target ?? 0;
+        const delta = r.delta ?? (r.overall_score - target);
+        ws.addRow({
+          nama: r.employee_nama ?? "-",
+          div: r.employee_department ?? "-",
+          periode: r.period,
+          skor: r.overall_score,
+          target,
+          delta,
+          status: r.status,
+          coaching: r.needs_coaching ? "Perlu" : "-",
+          notes: r.notes ?? "",
+        });
+      });
+
+      // Sheet rincian per aspek
+      const wsDetail = wb.addWorksheet("Rincian Aspek");
+      wsDetail.columns = [
+        { header: "Nama", key: "nama", width: 26 },
+        { header: "Periode", key: "periode", width: 18 },
+        { header: "Aspek", key: "aspek", width: 24 },
+        { header: "Skor", key: "skor", width: 10 },
+        { header: "Target", key: "target", width: 10 },
+      ];
+      wsDetail.getRow(1).font = { bold: true };
+      wsDetail.getRow(1).fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE2E8F0" } };
+      filtered.forEach((r) => {
+        r.aspects.forEach((a) => {
+          wsDetail.addRow({
+            nama: r.employee_nama ?? "-",
+            periode: r.period,
+            aspek: a.aspect,
+            skor: a.score,
+            target: a.target,
+          });
+        });
+      });
+
+      const buffer = await wb.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      saveAs(blob, `rekap-kpi-${activePeriod || "all"}.xlsx`);
+    } catch (e) {
+      alert(`Export Excel gagal: ${(e as Error).message}`);
+    }
+    setExporting(false);
+  }
+
+  function exportPDF(r: KpiRow) {
+    const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    const target = r.overall_target ?? 0;
+    const delta = r.delta ?? (r.overall_score - target);
+
+    pdf.setFontSize(14);
+    pdf.setTextColor(30, 41, 59);
+    pdf.text("LAPORAN PENILAIAN KPI KARYAWAN", 105, 18, { align: "center" });
+
+    pdf.setFontSize(10);
+    pdf.setTextColor(100, 116, 139);
+    pdf.text(`Periode: ${r.period}`, 105, 25, { align: "center" });
+
+    let y = 38;
+    pdf.setFontSize(11);
+    pdf.setTextColor(30, 41, 59);
+    pdf.text(`Nama: ${r.employee_nama ?? "-"}`, 15, y); y += 6;
+    pdf.text(`Divisi: ${r.employee_department ?? "-"}`, 15, y); y += 6;
+    pdf.text(`Skor Keseluruhan: ${r.overall_score.toFixed(1)}  (Target: ${target.toFixed(0)}, Delta: ${delta >= 0 ? "+" : ""}${delta.toFixed(1)})`, 15, y); y += 6;
+    pdf.text(`Status: ${r.status}${r.needs_coaching ? "  -  Perlu Coaching" : ""}`, 15, y); y += 10;
+
+    pdf.setFontSize(11);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("Rincian per Aspek", 15, y); y += 6;
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(10);
+
+    pdf.setDrawColor(226, 232, 240);
+    pdf.line(15, y, 195, y); y += 6;
+
+    r.aspects.forEach((a) => {
+      pdf.text(a.aspect, 15, y);
+      pdf.text(`${a.score.toFixed(0)} / target ${a.target.toFixed(0)}`, 150, y);
+      y += 6;
+    });
+
+    if (r.notes) {
+      y += 6;
+      pdf.setFont("helvetica", "bold");
+      pdf.text("Catatan:", 15, y); y += 6;
+      pdf.setFont("helvetica", "normal");
+      const lines = pdf.splitTextToSize(r.notes, 175);
+      pdf.text(lines, 15, y);
+    }
+
+    pdf.save(`kpi-${(r.employee_nama ?? "karyawan").replace(/\s+/g, "-")}-${r.period}.pdf`);
+  }
+
   function openCreate() {
     setFormMode("create"); setFormId(null); setF(emptyForm(activePeriod));
     setFormErr(null); setSel(null); setFormOpen(true);
@@ -170,6 +291,10 @@ export default function KpiKaryawanPage() {
               {periods.map((p) => <option key={p} value={p}>{p}</option>)}
             </select>
           )}
+          <button onClick={exportExcel} disabled={exporting || filtered.length === 0}
+            className="flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50">
+            {exporting ? <Loader2 size={16} className="animate-spin" /> : <FileSpreadsheet size={16} />} Export Excel
+          </button>
           <button onClick={openCreate} className="flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg bg-sky-600 text-white hover:bg-sky-700">
             <Plus size={16} /> Tambah Penilaian
           </button>
@@ -265,6 +390,9 @@ export default function KpiKaryawanPage() {
                 </div>
               </div>
               <div className="flex items-center gap-1 shrink-0">
+                <button onClick={() => exportPDF(sel)} className="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 px-2 py-1 rounded-md hover:bg-slate-50">
+                  <FileDown size={15} /> PDF
+                </button>
                 <button onClick={() => openEdit(sel)} className="flex items-center gap-1 text-sm text-sky-600 hover:text-sky-700 px-2 py-1 rounded-md hover:bg-sky-50">
                   <Pencil size={15} /> Edit
                 </button>
