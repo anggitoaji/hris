@@ -1,0 +1,608 @@
+APPIKASI HRIS
+
+SUMMARY MASTER BLUEPRINT
+HASIL DISKUSI 15–16 JUNI
+
+==================================================
+
+1. VISI PRODUK
+
+APPIKASI HRIS tidak dibangun sebagai HRIS tradisional yang hanya berisi:
+
+* Data Karyawan
+* Absensi
+* Payroll
+
+Tetapi dibangun sebagai:
+
+People Management Platform
+
+yang mengintegrasikan:
+
+* Employee Management
+* Organization Structure
+* Performance Management
+* Talent Management
+* Succession Planning
+* Reward & Discipline
+* Workforce Planning
+
+Konsep utama mengadopsi:
+
+* HiBob (People Experience)
+* BambooHR (Simplicity)
+* Enterprise HCM Architecture
+
+==================================================
+
+2. FILOSOFI ARSITEKTUR
+
+Single Source of Truth
+
+Semua modul harus mengambil referensi dari master yang sama.
+
+Struktur utama:
+
+Organization Structure
+↓
+Position
+↓
+Job Profile
+↓
+Employee
+↓
+KPI
+↓
+Performance
+↓
+Talent
+↓
+Succession
+
+Tidak boleh ada:
+
+* Reporting Line terpisah
+* KPI terpisah
+* Approval Hierarchy terpisah
+* Career Path terpisah
+
+di modul lain.
+
+==================================================
+
+3. MODUL UTAMA
+
+A. People (Employee Profile Center)
+
+B. Organization Structure
+
+C. Position Management
+
+D. Job Profile
+
+E. KPI Performance
+
+F. People Management
+
+G. Reward Management
+
+H. Disciplinary Action
+
+I. Talent Management
+
+J. Succession Planning
+
+K. Recruitment
+
+L. Training
+
+M. Payroll
+
+N. Approval Workflow
+
+O. Workforce Planning
+
+P. Organization Analytics
+
+==================================================
+
+4. EMPLOYEE PROFILE CENTER
+
+Mengadopsi konsep HiBob.
+
+Setiap karyawan memiliki satu Employee Profile.
+
+Tab utama:
+
+* Overview
+* Employment
+* Organization
+* Compensation
+* Performance
+* Reward
+* Discipline
+* Training
+* Career
+* Documents
+* Audit History
+
+Employee Profile menjadi pusat seluruh informasi karyawan.
+
+==================================================
+
+5. ORGANIZATION STRUCTURE
+
+Terdiri dari:
+
+Global Organization Structure
+
+dan
+
+Division Organization Structure
+
+Contoh:
+
+Direksi
+↓
+Manager
+↓
+Supervisor
+↓
+Staff
+
+Mendukung:
+
+* Effective Date
+* Versioning
+* Audit Trail
+
+==================================================
+
+6. POSITION MANAGEMENT
+
+Position dipisahkan dari Employee.
+
+Contoh:
+
+Position:
+SPV-NET-001
+
+Status:
+Filled
+
+Employee:
+Budi
+
+Jika Budi resign:
+
+Position tetap ada.
+
+Status menjadi:
+
+Vacant
+
+==================================================
+
+7. JOB PROFILE
+
+Setiap Position wajib memiliki:
+
+* Tujuan Jabatan
+* Tugas
+* Tanggung Jawab
+* Wewenang
+* KPI Template
+* Kompetensi
+* Persyaratan Jabatan
+* Training Matrix
+* Career Path
+
+Job Profile menjadi engine utama HRIS.
+
+==================================================
+
+8. KPI PERFORMANCE
+
+Periode:
+
+Semester 1
+(Jan–Jun)
+
+Semester 2
+(Jul–Des)
+
+==================================================
+
+9. STRUKTUR KPI
+
+STAFF
+
+KPI Jabatan = 70%
+
+Kompetensi = 20%
+
+Perilaku = 10%
+
+---
+
+SUPERVISOR
+
+KPI Jabatan = 60%
+
+Kompetensi = 20%
+
+Perilaku = 10%
+
+People Management = 10%
+
+---
+
+MANAGER
+
+KPI Jabatan = 60%
+
+Kompetensi = 20%
+
+Perilaku = 10%
+
+People Management = 10%
+
+==================================================
+
+10. ALUR PENILAIAN KPI
+
+Staff
+Dinilai Supervisor
+
+Supervisor
+Dinilai Manager
+
+Manager
+Dinilai Direksi
+
+Kompetensi dan Perilaku:
+
+Dinilai oleh Penilai Utama + HRD
+
+==================================================
+
+11. PEOPLE MANAGEMENT KPI
+
+Wajib untuk:
+
+* Supervisor
+* Manager
+
+Supervisor wajib menilai seluruh Staff.
+
+Manager wajib menilai seluruh Supervisor.
+
+Formula:
+
+Review Selesai
+÷
+Review Wajib
+× 100%
+
+Hard Rule:
+
+Jika tidak menyelesaikan penilaian bawahan:
+
+Final KPI = 0
+
+==================================================
+
+12. DASHBOARD KPI KARYAWAN
+
+Menampilkan:
+
+* KPI Score
+* KPI Grade
+* KPI Trend
+* KPI History
+* Reward
+* Status Disiplin
+* Catatan Atasan
+
+Tidak menampilkan:
+
+* Ranking
+* Top Performer
+* KPI Karyawan Lain
+
+==================================================
+
+13. REWARD MANAGEMENT
+
+Jenis Reward:
+
+* Employee of The Semester
+* Best Attendance
+* Best Performance
+* Innovation Award
+* Leadership Award
+* Special Achievement Award
+
+Reward tersimpan permanen.
+
+==================================================
+
+14. DISCIPLINARY ACTION
+
+Jenis:
+
+* Teguran Lisan
+* Teguran Tertulis
+* SP1
+* SP2
+* SP3
+* Skorsing
+* PHK
+
+Riwayat tidak dapat dihapus.
+
+==================================================
+
+15. DISCIPLINE POINT SYSTEM
+
+Terlambat = 5
+
+Pelanggaran SOP = 10
+
+Mangkir = 20
+
+Manipulasi Data = 25
+
+Pelanggaran Security = 30
+
+==================================================
+
+16. STATUS DISIPLIN
+
+0–10 = Hijau
+
+11–20 = Kuning
+
+21–40 = SP1
+
+41–60 = SP2
+
+> 60 = SP3
+
+==================================================
+
+17. CLEAR STATUS
+
+Jika tidak ada pelanggaran baru selama 3 tahun:
+
+Status = CLEAR
+
+Riwayat tetap tersimpan permanen.
+
+==================================================
+
+18. HUBUNGAN DISIPLIN DENGAN KPI
+
+Dashboard KPI hanya menampilkan:
+
+* Status Disiplin
+* Reward
+
+Detail pelanggaran hanya muncul ketika klik:
+
+Lihat Detail
+
+==================================================
+
+19. TALENT MANAGEMENT
+
+Menggunakan:
+
+* KPI Score
+* Competency Score
+* Discipline Score
+* Leadership Assessment
+
+==================================================
+
+20. TALENT MATRIX
+
+Output:
+
+* High Performer
+* Future Leader
+* Core Talent
+* Need Development
+* Under Performer
+
+==================================================
+
+21. SUCCESSION PLANNING
+
+Setiap posisi kritikal wajib memiliki successor.
+
+Kategori:
+
+* Ready Now
+* Ready < 1 Year
+* Ready 1–2 Years
+* Not Ready
+
+==================================================
+
+22. CAREER PATH
+
+Contoh:
+
+Staff
+↓
+Supervisor
+↓
+Manager
+↓
+Direksi
+
+Terhubung dengan:
+
+* Talent
+* Succession
+* Promosi
+
+==================================================
+
+23. TRAINING MANAGEMENT
+
+Setiap Job Profile memiliki:
+
+* Mandatory Training
+* Recommended Training
+* Certification Requirement
+
+==================================================
+
+24. RECRUITMENT
+
+Lowongan otomatis mengambil:
+
+* Job Description
+* Kompetensi
+* Persyaratan
+* Pendidikan
+* Pengalaman
+
+dari Job Profile.
+
+==================================================
+
+25. APPROVAL MATRIX
+
+Approval mengikuti struktur organisasi.
+
+Digunakan untuk:
+
+* Cuti
+* Izin
+* Lembur
+* Reimbursement
+* Training
+* KPI
+* Disciplinary Action
+
+==================================================
+
+26. PAYROLL INTEGRATION
+
+Job Profile menentukan:
+
+* Job Grade
+* Salary Grade
+* Benefit
+* Tunjangan
+
+KPI mempengaruhi:
+
+* Bonus
+* Merit Increase
+* Incentive
+
+==================================================
+
+27. WORKFORCE PLANNING
+
+Menampilkan:
+
+* Headcount
+* Vacant Position
+* Planned Position
+* Growth Projection
+
+==================================================
+
+28. ORGANIZATION ANALYTICS
+
+Dashboard Direksi dan HRD:
+
+* Headcount
+* Talent Distribution
+* Succession Readiness
+* Performance Distribution
+* Promotion Readiness
+* Organization Growth
+
+==================================================
+
+29. AUDIT TRAIL
+
+Semua perubahan wajib dicatat:
+
+* User
+* Role
+* Tanggal
+* Jam
+* Data Sebelum
+* Data Sesudah
+
+Tidak dapat dihapus.
+
+==================================================
+
+30. REFERENSI PRODUK
+
+Mengadopsi:
+
+HiBob
+→ Employee Experience
+→ People Hub
+
+BambooHR
+→ Simplicity
+→ Ease of Use
+
+Enterprise HCM
+→ Position Driven
+→ Talent Driven
+→ Succession Driven
+
+==================================================
+
+31. ARAH UI/UX
+
+Gaya visual yang dipilih:
+
+70% HiBob
+30% BambooHR
+
+Karakteristik:
+
+* Clean
+* Modern
+* Card Based
+* Banyak White Space
+* Soft Color
+* Human Centric
+* Dashboard Ringkas
+* Fokus pada People Experience
+
+Bukan gaya ERP lama yang penuh tabel.
+
+==================================================
+
+KESIMPULAN
+
+APPIKASI HRIS akan dibangun sebagai People Management Platform berbasis:
+
+Employee Profile Center
+↓
+Organization Structure
+↓
+Position Management
+↓
+Job Profile
+↓
+KPI & Performance
+↓
+Talent Management
+↓
+Succession Planning
+
+dengan pendekatan modern ala HiBob dan BambooHR serta arsitektur enterprise yang siap berkembang tanpa redesign database besar di masa depan.
