@@ -2,7 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
 from app.models.employee import Employee
-from app.models.kpi import KpiAspectScore, KpiAssessment
+from app.models.kpi import KpiAspectScore, KpiAssessment, KpiQualScore
 from app.schemas.kpi import AssessmentCreate, AssessmentUpdate
 
 
@@ -44,6 +44,15 @@ def create_assessment(db: Session, payload: AssessmentCreate) -> KpiAssessment:
         assessment.aspects.append(
             KpiAspectScore(aspect=asp.aspect, score=asp.score, target=asp.target)
         )
+    for q in payload.qual_scores:
+        assessment.qual_scores.append(
+            KpiQualScore(
+                category=q.category,
+                parameter=q.parameter,
+                manager_score=q.manager_score,
+                hrd_score=q.hrd_score,
+            )
+        )
     db.add(assessment)
     db.commit()
     db.refresh(assessment)
@@ -55,6 +64,7 @@ def update_assessment(
 ) -> KpiAssessment:
     data = payload.model_dump(exclude_unset=True)
     new_aspects = data.pop("aspects", None)
+    new_qual_scores = data.pop("qual_scores", None)
     for key, value in data.items():
         setattr(assessment, key, value)
     if new_aspects is not None:
@@ -67,6 +77,25 @@ def update_assessment(
                     target=asp.get("target", 80.0),
                 )
             )
+    if new_qual_scores is not None:
+        assessment.qual_scores.clear()
+        for q in new_qual_scores:
+            assessment.qual_scores.append(
+                KpiQualScore(
+                    category=q["category"],
+                    parameter=q["parameter"],
+                    manager_score=q.get("manager_score", 0.0),
+                    hrd_score=q.get("hrd_score", 0.0),
+                )
+            )
+    db.add(assessment)
+    db.commit()
+    db.refresh(assessment)
+    return assessment
+
+
+def set_workflow_status(db: Session, assessment: KpiAssessment, status: str) -> KpiAssessment:
+    assessment.status = status
     db.add(assessment)
     db.commit()
     db.refresh(assessment)

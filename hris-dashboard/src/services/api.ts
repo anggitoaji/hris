@@ -83,6 +83,14 @@ export async function updateKpiAssessment(id: number, data: Record<string, unkno
   return sendJSON<KpiAssessment>(`/kpi/assessments/${id}`, "PATCH", data);
 }
 
+export async function updateKpiAssessmentStatus(id: number, status: string): Promise<KpiAssessment> {
+  return sendJSON<KpiAssessment>(`/kpi/assessments/${id}/status`, "PATCH", { status });
+}
+
+export async function fetchKpiAssessment(id: number): Promise<KpiAssessment> {
+  return getJSON<KpiAssessment>(`/kpi/assessments/${id}`);
+}
+
 export interface Division {
   id: number;
   name: string;
@@ -112,8 +120,11 @@ export async function deleteEmployee(id: number): Promise<unknown> {
   return sendJSON<unknown>(`/employees/${id}`, "DELETE");
 }
 
-export async function fetchKpiAssessments(period?: string): Promise<KpiAssessment[]> {
-  const q = period ? `?period=${encodeURIComponent(period)}` : "";
+export async function fetchKpiAssessments(period?: string, employeeId?: number): Promise<KpiAssessment[]> {
+  const params = new URLSearchParams();
+  if (period) params.set("period", period);
+  if (employeeId) params.set("employee_id", String(employeeId));
+  const q = params.toString() ? `?${params.toString()}` : "";
   const data = await getJSON<{ total: number; items: KpiAssessment[] }>(`/kpi/assessments${q}`);
   return data.items;
 }

@@ -19,6 +19,8 @@ import MeetingPage from "./pages/MeetingPage";
 import ActionItemsPage from "./pages/ActionItemsPage";
 import KpiPerusahaanPage from "./pages/KpiPerusahaanPage";
 import KpiDivisiPage from "./pages/KpiDivisiPage";
+import KpiAssessmentFormPage from "./pages/KpiAssessmentFormPage";
+import MyKpiDashboardPage from "./pages/MyKpiDashboardPage";
 import LoginPage from "./pages/LoginPage";
 import UserManagementPage from "./pages/UserManagementPage";
 import ChangePasswordPage from "./pages/ChangePasswordPage";
@@ -161,6 +163,10 @@ export default function App() {
           {route === "kpi.perusahaan" && <KpiPerusahaanPage />}
 
           {route === "kpi.divisi" && <KpiDivisiPage />}
+
+          {route === "kpi.assessment" && <KpiAssessmentFormPage />}
+
+          {route === "kpi.myself" && <MyKpiDashboardPage employeeId={user.employee_id} />}
 
           {route === "users.manage" && <UserManagementPage />}
 

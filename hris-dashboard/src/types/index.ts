@@ -116,14 +116,38 @@ export interface KpiAspect {
   target: number;
 }
 
+export type QualCategory = "competency" | "behavior";
+
+export interface KpiQualScore {
+  id: number;
+  category: QualCategory;
+  parameter: string;
+  manager_score: number; // skala 1-5
+  hrd_score: number; // skala 1-5
+  final: number; // rata-rata manager+hrd
+}
+
+export type KpiWorkflowStatus = "draft" | "hrd_review" | "final_approved";
+
 export interface KpiAssessment {
   id: number;
   employee_id: number;
   period: string;
   needs_coaching: boolean;
+  notes?: string | null;
+  workflow_status: KpiWorkflowStatus;
   aspects: KpiAspect[];
+  qual_scores: KpiQualScore[];
   employee_nama: string | null;
   employee_department: string | null;
+  employee_position?: string | null;
   overall_score: number;
+  overall_target?: number;
+  delta?: number;
   status: "Excellent" | "Good" | "Below" | "Poor";
+  kpi_jabatan_score: number;
+  competency_score: number;
+  behavior_score: number;
+  final_score: number;
+  grade: "A+" | "A" | "B+" | "B" | "C+" | "C" | "D" | "";
 }

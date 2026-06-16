@@ -36,7 +36,9 @@ const MENU: Item[] = [
     ] },
 
   { key: "kpi", label: "KPI & Performance", Icon: BarChart3, group: "Utama", built: true,
-    roles: ["Direksi", "HR", "Manager", "Finance", "NOC"], sub: [
+    roles: ["Direksi", "HR", "Manager", "Finance", "NOC", "Karyawan"], sub: [
+      { label: "My KPI", roles: ["Karyawan"], built: true },
+      { label: "Form Penilaian KPI", roles: ["Manager", "HR"], built: true },
       { label: "KPI Perusahaan", roles: ["Direksi", "Finance"], built: true },
       { label: "KPI Divisi", roles: ["Direksi", "HR", "Manager", "Finance"], built: true },
       { label: "KPI Pelanggan (SLA/Uptime)", roles: ["Direksi", "NOC"] },
@@ -169,6 +171,8 @@ function routeFor(moduleKey: string, sub?: Sub): string {
   if (moduleKey === "meeting" && sub && sub.label === "Action Item") return "meeting.actions";
   if (moduleKey === "kpi" && sub && sub.label === "KPI Perusahaan") return "kpi.perusahaan";
   if (moduleKey === "kpi" && sub && sub.label === "KPI Divisi") return "kpi.divisi";
+  if (moduleKey === "kpi" && sub && sub.label === "My KPI") return "kpi.myself";
+  if (moduleKey === "kpi" && sub && sub.label === "Form Penilaian KPI") return "kpi.assessment";
   if (moduleKey === "pengaturan" && sub && sub.label === "User Management") return "users.manage";
   if (moduleKey === "pengaturan" && sub && sub.label === "Ganti Password") return "settings.password";
   return "soon:" + (sub ? sub.label : moduleKey);
