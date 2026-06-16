@@ -1170,21 +1170,20 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
     }
   }
 
-  const COLS = 10;
+  const COLS = 9;
   function Row({ e }: { e: Employee }) {
     return (
       <tr onClick={() => setSel(e)} className="border-b border-slate-50 hover:bg-slate-50 cursor-pointer">
         <td className="py-2 px-1">
           <Avatar name={e.nama} src={e.photo_url ? photoUrl(e.id) : undefined} size={44} />
         </td>
-        <td className="py-2 px-2 text-slate-500">{e.nik}</td>
+        <td className="py-2 pl-2 pr-4 text-slate-500">{e.nik}</td>
         <td className="py-2 px-2 font-medium text-slate-800">{e.nama}</td>
         <td className="py-2 px-2 text-slate-600">{e.department}</td>
         <td className="py-2 px-2 text-slate-600">{e.position}</td>
         <td className="py-2 px-2 text-slate-600 truncate">{e.email || "-"}</td>
         <td className="py-2 px-2 text-slate-600">{e.phone || "-"}</td>
         <td className="py-2 px-2 text-slate-600 truncate">{e.work_location || "-"}</td>
-        <td className="py-2 px-2 text-right text-slate-700 pr-4">{e.kpi_score.toFixed(1)}</td>
         <td className="py-2 px-2 text-slate-500 truncate">{e.catatan || "-"}</td>
       </tr>
     );
@@ -1249,27 +1248,25 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
             <table className="w-full text-sm table-fixed">
               <colgroup>
                 <col style={{ width: "4%" }} />
-                <col style={{ width: "7%" }} />
-                <col style={{ width: "11%" }} />
+                <col style={{ width: "8%" }} />
+                <col style={{ width: "16%" }} />
                 <col style={{ width: "9%" }} />
                 <col style={{ width: "10%" }} />
                 <col style={{ width: "17%" }} />
                 <col style={{ width: "10%" }} />
                 <col style={{ width: "11%" }} />
-                <col style={{ width: "5%" }} />
-                <col style={{ width: "17%" }} />
+                <col style={{ width: "15%" }} />
               </colgroup>
               <thead>
                 <tr className="text-left text-slate-500 border-b border-slate-100">
                   <th className="py-2 px-1"></th>
-                  <th className="py-2 px-2 font-bold">NIK</th>
+                  <th className="py-2 pl-2 pr-4 font-bold">NIK</th>
                   <th className="py-2 px-2 font-bold">Nama</th>
                   <th className="py-2 px-2 font-bold">Divisi</th>
                   <th className="py-2 px-2 font-bold">Jabatan</th>
                   <th className="py-2 px-2 font-bold">Email</th>
                   <th className="py-2 px-2 font-bold">No HP</th>
                   <th className="py-2 px-2 font-bold">Lokasi Kerja</th>
-                  <th className="py-2 px-2 font-bold text-right pr-4">KPI</th>
                   <th className="py-2 px-2 font-bold">Catatan</th>
                 </tr>
               </thead>
