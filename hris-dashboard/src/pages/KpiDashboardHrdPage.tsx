@@ -2,9 +2,21 @@ import { useEffect, useMemo, useState } from "react";
 import { Loader2, AlertTriangle, Users, TrendingUp, ShieldAlert, Award, Lock } from "lucide-react";
 import {
   fetchKpiAssessments, fetchKpiCompliance, fetchKpiPeriodMeta, setKpiPeriodDeadline, closeKpiPeriod,
-  type ComplianceRow, type KpiPeriodMeta,
+  fetchEmployees, type ComplianceRow, type KpiPeriodMeta,
 } from "../services/api";
-import type { KpiAssessment } from "../types";
+import type { KpiAssessment, Employee } from "../types";
+
+const MIN_TENURE_YEARS = 1;
+
+// Syarat promosi (spec bagian L): KPI >= 85, kompetensi memenuhi standar, masa kerja cukup.
+// Catatan: syarat "tidak memiliki SP aktif" belum dicek di sini karena butuh fetch per-karyawan
+// ke modul disiplin (terlalu berat untuk daftar besar) - cek manual via tab Sanksi di profil karyawan.
+function isPromotionEligible(kpi: number, competency: number, joinDate: string | null): boolean {
+  if (kpi < 85 || competency < 70) return false;
+  if (!joinDate) return false;
+  const years = (Date.now() - new Date(joinDate).getTime()) / (365.25 * 86400000);
+  return years >= MIN_TENURE_YEARS;
+}
 
 const STATUS_COLOR: Record<string, string> = {
   Excellent: "bg-emerald-100 text-emerald-700",
@@ -40,6 +52,7 @@ export default function KpiDashboardHrdPage() {
   const [periodMeta, setPeriodMeta] = useState<KpiPeriodMeta | null>(null);
   const [deadlineInput, setDeadlineInput] = useState("");
   const [busy, setBusy] = useState(false);
+  const [employees, setEmployees] = useState<Employee[]>([]);
 
   useEffect(() => {
     setLoading(true);
@@ -48,7 +61,9 @@ export default function KpiDashboardHrdPage() {
       setPeriods(Array.from(new Set(all.map((r) => r.period))).sort().reverse());
       setErr(null);
     }).catch((e) => setErr(e instanceof Error ? e.message : "Gagal memuat data")).finally(() => setLoading(false));
+    fetchEmployees().then(setEmployees).catch(() => {});
   }, []);
+  const joinDateById = useMemo(() => new Map(employees.map((e) => [e.id, e.join_date])), [employees]);
 
   const activePeriod = period || periods[0] || "";
 
@@ -252,19 +267,30 @@ export default function KpiDashboardHrdPage() {
                   <th className="py-2 px-2 font-bold">Grade</th>
                   <th className="py-2 px-2 font-bold">Status KPI</th>
                   <th className="py-2 px-2 font-bold">Talent</th>
+                  <th className="py-2 px-2 font-bold">Promosi</th>
                 </tr></thead>
                 <tbody>
-                  {talentRows.sort((a, b) => b.r.final_score - a.r.final_score).map(({ r, talent }) => (
-                    <tr key={r.id} className="border-b border-slate-50">
-                      <td className="py-2 px-2 text-slate-700 font-medium">{r.employee_nama}</td>
-                      <td className="py-2 px-2 text-slate-600">{r.employee_department}</td>
-                      <td className="py-2 px-2 text-right font-semibold text-slate-800">{r.final_score.toFixed(1)}</td>
-                      <td className="py-2 px-2 text-slate-600">{r.grade}</td>
-                      <td className="py-2 px-2"><span className={`text-xs px-2 py-0.5 rounded-full ${STATUS_COLOR[r.status] ?? "bg-slate-100 text-slate-600"}`}>{r.status}</span></td>
-                      <td className="py-2 px-2"><span className={`text-xs px-2 py-0.5 rounded-full ${TALENT_COLOR[talent] ?? "bg-slate-100 text-slate-600"}`}>{talent}</span></td>
-                    </tr>
-                  ))}
-                  {talentRows.length === 0 && <tr><td colSpan={6} className="text-center text-slate-400 py-6">Belum ada data.</td></tr>}
+                  {talentRows.sort((a, b) => b.r.final_score - a.r.final_score).map(({ r, talent }) => {
+                    const eligible = isPromotionEligible(r.final_score, r.competency_score, joinDateById.get(r.employee_id) ?? null);
+                    return (
+                      <tr key={r.id} className="border-b border-slate-50">
+                        <td className="py-2 px-2 text-slate-700 font-medium">{r.employee_nama}</td>
+                        <td className="py-2 px-2 text-slate-600">{r.employee_department}</td>
+                        <td className="py-2 px-2 text-right font-semibold text-slate-800">{r.final_score.toFixed(1)}</td>
+                        <td className="py-2 px-2 text-slate-600">{r.grade}</td>
+                        <td className="py-2 px-2"><span className={`text-xs px-2 py-0.5 rounded-full ${STATUS_COLOR[r.status] ?? "bg-slate-100 text-slate-600"}`}>{r.status}</span></td>
+                        <td className="py-2 px-2"><span className={`text-xs px-2 py-0.5 rounded-full ${TALENT_COLOR[talent] ?? "bg-slate-100 text-slate-600"}`}>{talent}</span></td>
+                        <td className="py-2 px-2">
+                          {eligible ? (
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">Eligible</span>
+                          ) : (
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">-</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {talentRows.length === 0 && <tr><td colSpan={7} className="text-center text-slate-400 py-6">Belum ada data.</td></tr>}
                 </tbody>
               </table>
             </div>

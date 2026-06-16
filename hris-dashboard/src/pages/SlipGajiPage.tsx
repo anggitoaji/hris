@@ -2,14 +2,20 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Search, X, Loader2, Plus, Trash2, FileText, Save, Download } from "lucide-react";
 import {
   fetchPayslips, fetchPayrollSummary, createPayslip, updatePayslip, deletePayslip,
-  fetchSalaryTemplate, saveSalaryTemplate, fetchEmployees,
+  fetchSalaryTemplate, saveSalaryTemplate, fetchEmployees, fetchKpiAssessments,
   type Payslip, type PayslipItem, type PayrollSummary,
 } from "../services/api";
-import type { Employee } from "../types";
+import type { Employee, KpiAssessment } from "../types";
 
 const STATUS_COLOR: Record<string, string> = {
   Draft: "bg-slate-100 text-slate-600",
   Final: "bg-emerald-100 text-emerald-700",
+};
+
+// Saran persentase bonus berdasar grade KPI terakhir (final approved) - bukan formula resmi,
+// hanya bantuan acuan; nominal akhir tetap ditentukan Finance/Direksi secara manual.
+const GRADE_BONUS_PCT: Record<string, number> = {
+  "A+": 0.15, A: 0.12, "B+": 0.10, B: 0.07, "C+": 0.05, C: 0.03, D: 0,
 };
 
 function rupiah(n: number): string {
@@ -68,6 +74,7 @@ export default function SlipGajiPage() {
   const [saving, setSaving] = useState(false);
   const [formErr, setFormErr] = useState<string | null>(null);
   const [tplBusy, setTplBusy] = useState(false);
+  const [kpiSuggest, setKpiSuggest] = useState<KpiAssessment | null>(null);
 
   async function load() {
     setLoading(true);
@@ -120,12 +127,32 @@ export default function SlipGajiPage() {
 
   async function onPickEmployee(id: string) {
     setF((p) => ({ ...p, employeeId: id }));
+    setKpiSuggest(null);
     if (id && f.items.length === 0) {
       try {
         const tpl = await fetchSalaryTemplate(Number(id));
         if (tpl.length) setF((p) => ({ ...p, items: tpl.map((t) => ({ kind: t.kind, label: t.label, amount: String(t.amount) })) }));
       } catch { /* abaikan */ }
     }
+    if (id) {
+      try {
+        const assessments = await fetchKpiAssessments(undefined, Number(id));
+        const finals = assessments.filter((a) => a.workflow_status === "final_approved" && !a.compliance_override);
+        const latest = finals.sort((a, b) => b.period.localeCompare(a.period))[0] ?? null;
+        setKpiSuggest(latest);
+      } catch { /* abaikan */ }
+    }
+  }
+
+  function addKpiBonusItem() {
+    if (!kpiSuggest) return;
+    const pct = GRADE_BONUS_PCT[kpiSuggest.grade] ?? 0;
+    const earningTotal = f.items.filter((i) => i.kind === "earning").reduce((a, i) => a + (Number(i.amount) || 0), 0);
+    const amount = Math.round(earningTotal * pct);
+    setF((p) => ({
+      ...p,
+      items: [...p.items, { kind: "earning", label: `Bonus KPI (Grade ${kpiSuggest.grade}, ${kpiSuggest.period})`, amount: String(amount) }],
+    }));
   }
 
   async function loadTemplate() {
@@ -333,6 +360,17 @@ export default function SlipGajiPage() {
                 </button>
                 {tplBusy && <Loader2 size={14} className="animate-spin text-slate-400" />}
               </div>
+
+              {/* Saran bonus dari KPI terakhir (informasional, bukan kalkulasi otomatis resmi) */}
+              {kpiSuggest && (
+                <div className="flex items-center justify-between gap-3 flex-wrap bg-sky-50/50 border border-sky-100 rounded-xl p-3 text-sm">
+                  <div className="text-slate-600">
+                    KPI terakhir ({kpiSuggest.period}): <span className="font-semibold text-slate-800">Grade {kpiSuggest.grade}</span>
+                    {" "}({kpiSuggest.final_score.toFixed(1)}) - saran bonus {((GRADE_BONUS_PCT[kpiSuggest.grade] ?? 0) * 100).toFixed(0)}% dari total pendapatan.
+                  </div>
+                  <button onClick={addKpiBonusItem} className="text-sky-600 hover:text-sky-700 font-medium shrink-0">+ Tambah sebagai item Bonus KPI</button>
+                </div>
+              )}
 
               {/* Komponen */}
               <ItemSection title="Pendapatan" kind="earning" items={f.items}

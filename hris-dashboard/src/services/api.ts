@@ -584,6 +584,28 @@ export async function cabutSanksi(id: number, catatan_hrd: string): Promise<Sank
 }
 export function sanksiLampiranUrl(id: number): string { return `${BASE}/disciplinary/${id}/lampiran${authToken ? "?token=" + encodeURIComponent(authToken) : ""}`; }
 
+// ===================== Reward Management =====================
+export interface RewardRecord {
+  id: number;
+  employee_id: number;
+  jenis_reward: string;
+  period: string | null;
+  tanggal: string;
+  deskripsi: string | null;
+  given_by_username: string;
+  given_by_role: string;
+  created_at: string;
+}
+export const JENIS_REWARD_OPTS = [
+  "Employee of The Semester", "Best Attendance", "Best Performance",
+  "Innovation Award", "Leadership Award", "Special Achievement Award",
+];
+export async function fetchRewards(eid: number): Promise<RewardRecord[]> { return getJSON(`/rewards?employee_id=${eid}`); }
+export async function createReward(d: {
+  employee_id: number; jenis_reward: string; period?: string; tanggal: string; deskripsi?: string;
+}): Promise<RewardRecord> { return sendJSON("/rewards", "POST", d); }
+export async function deleteReward(id: number): Promise<unknown> { return sendJSON(`/rewards/${id}`, "DELETE"); }
+
 // ===================== Audit Trail =====================
 export interface AuditLogRecord {
   id: number;

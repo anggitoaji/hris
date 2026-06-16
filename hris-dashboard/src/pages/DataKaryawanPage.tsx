@@ -11,6 +11,7 @@ import {
   fetchDocuments, uploadDocument, docPreviewUrl, docDownloadUrl, deleteDocument, type DocumentRecord,
   fetchSanksi, createSanksi, cabutSanksi, sanksiLampiranUrl, type SanksiRecord,
   JENIS_SANKSI_OPTS, KATEGORI_PELANGGARAN_OPTS,
+  fetchRewards, createReward, deleteReward, type RewardRecord, JENIS_REWARD_OPTS,
   fetchAuditLogs, type AuditLogRecord,
   photoUrl, uploadPhoto,
 } from "../services/api";
@@ -90,6 +91,7 @@ const PROFILE_TABS: { key: string; label: string }[] = [
   { key: "keluarga", label: "Keluarga" },
   { key: "training", label: "Training" },
   { key: "dokumen", label: "Dokumen" },
+  { key: "reward", label: "Reward" },
   { key: "sanksi", label: "Sanksi" },
   { key: "audit", label: "Audit Log" },
 ];
@@ -649,6 +651,118 @@ function DocumentsTab({ employeeId }: { employeeId: number }) {
   );
 }
 
+const rewardBlank = { jenis_reward: JENIS_REWARD_OPTS[0], period: "", tanggal: "", deskripsi: "" };
+
+function RewardTab({ employeeId, role }: { employeeId: number; role: string }) {
+  const [rows, setRows] = useState<RewardRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showAdd, setShowAdd] = useState(false);
+  const [form, setForm] = useState(rewardBlank);
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  const canCreate = role === "Manager" || role === "Supervisor" || role === "HR" || role === "Super Admin";
+  const canDelete = role === "HR" || role === "Super Admin";
+
+  async function load() { setLoading(true); try { setRows(await fetchRewards(employeeId)); } catch {} setLoading(false); }
+  useEffect(() => { load(); }, [employeeId]);
+
+  function openAdd() { setForm(rewardBlank); setErr(null); setShowAdd(true); }
+
+  async function save() {
+    if (!form.tanggal) { setErr("Tanggal wajib diisi."); return; }
+    setSaving(true); setErr(null);
+    try {
+      await createReward({
+        employee_id: employeeId, jenis_reward: form.jenis_reward,
+        period: form.period.trim() || undefined, tanggal: form.tanggal,
+        deskripsi: form.deskripsi.trim() || undefined,
+      });
+      setShowAdd(false);
+      await load();
+    } catch (e) { setErr(e instanceof Error ? e.message : "Gagal menyimpan."); }
+    setSaving(false);
+  }
+
+  async function remove(id: number) {
+    if (!window.confirm("Hapus reward ini?")) return;
+    try { await deleteReward(id); await load(); } catch (e) { setErr(e instanceof Error ? e.message : "Gagal menghapus."); }
+  }
+
+  const ic = "w-full px-2 py-1.5 text-sm border border-slate-200 rounded-lg outline-none focus:border-sky-300";
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-3">
+        <div className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Reward / Penghargaan</div>
+        {canCreate && !showAdd && (
+          <button onClick={openAdd} className="flex items-center gap-1 text-sm text-sky-600 hover:text-sky-700">
+            <Plus size={15} /> Tambah Reward
+          </button>
+        )}
+      </div>
+
+      {showAdd && (
+        <div className="bg-sky-50/50 border border-sky-100 rounded-xl p-4 mb-4">
+          <div className="grid grid-cols-2 gap-3 mb-3">
+            <div>
+              <label className="text-[11px] text-slate-500 font-medium block mb-1">Jenis Reward</label>
+              <select className={ic} value={form.jenis_reward} onChange={(ev) => setForm({ ...form, jenis_reward: ev.target.value })}>
+                {JENIS_REWARD_OPTS.map((o) => <option key={o}>{o}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-[11px] text-slate-500 font-medium block mb-1">Periode (opsional)</label>
+              <input className={ic} value={form.period} placeholder="mis. 2026 Semester 1" onChange={(ev) => setForm({ ...form, period: ev.target.value })} />
+            </div>
+            <div>
+              <label className="text-[11px] text-slate-500 font-medium block mb-1">Tanggal</label>
+              <input type="date" className={ic} value={form.tanggal} onChange={(ev) => setForm({ ...form, tanggal: ev.target.value })} />
+            </div>
+            <div className="col-span-2">
+              <label className="text-[11px] text-slate-500 font-medium block mb-1">Keterangan</label>
+              <textarea className={ic} rows={2} value={form.deskripsi} onChange={(ev) => setForm({ ...form, deskripsi: ev.target.value })} />
+            </div>
+          </div>
+          {err && <div className="text-sm text-red-600 mb-2">{err}</div>}
+          <div className="flex items-center gap-2">
+            <button onClick={save} disabled={saving} className="px-4 py-2 text-sm rounded-lg bg-sky-600 text-white hover:bg-sky-700 disabled:opacity-60 flex items-center gap-2">
+              {saving && <Loader2 size={14} className="animate-spin" />} Simpan
+            </button>
+            <button onClick={() => setShowAdd(false)} className="text-sm text-slate-400 hover:text-slate-600">Batal</button>
+          </div>
+        </div>
+      )}
+
+      {!showAdd && err && <div className="text-sm text-red-600 mb-2">{err}</div>}
+
+      {loading ? (
+        <div className="flex items-center gap-2 text-slate-400 text-sm py-6 justify-center"><Loader2 size={16} className="animate-spin" /> Memuat...</div>
+      ) : rows.length === 0 ? (
+        <div className="text-center text-slate-400 py-8">Belum ada reward.</div>
+      ) : (
+        <div className="flex flex-col gap-2">
+          {rows.map((r) => (
+            <div key={r.id} className="bg-white border border-slate-100 rounded-lg px-4 py-3 flex items-start justify-between gap-3">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                  <span className="text-sm font-semibold text-slate-800">{r.jenis_reward}</span>
+                  {r.period && <span className="text-[11px] text-slate-400">{r.period}</span>}
+                </div>
+                {r.deskripsi && <div className="text-sm text-slate-600">{r.deskripsi}</div>}
+                <div className="text-[11px] text-slate-400 mt-1">{r.tanggal} - diberikan oleh {r.given_by_username} ({r.given_by_role})</div>
+              </div>
+              {canDelete && (
+                <button onClick={() => remove(r.id)} className="text-slate-300 hover:text-red-500 shrink-0"><Trash2 size={15} /></button>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 const SANKSI_STATUS_COLOR: Record<string, string> = {
   Aktif: "bg-red-100 text-red-700",
   Expired: "bg-slate-100 text-slate-500",
@@ -1053,6 +1167,8 @@ function EmployeeProfile({ e, role }: { e: Employee; role: string }) {
         {tab === "training" && <TrainingTab employeeId={e.id} />}
 
         {tab === "dokumen" && <DocumentsTab employeeId={e.id} />}
+
+        {tab === "reward" && <RewardTab employeeId={e.id} role={role} />}
 
         {tab === "sanksi" && <SanksiTab employeeId={e.id} role={role} />}
 

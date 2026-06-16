@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Loader2, AlertTriangle, Award, ShieldCheck, CheckCircle2, Circle } from "lucide-react";
-import { fetchKpiAssessments, fetchSanksiSummary, type SanksiSummary } from "../services/api";
+import { fetchKpiAssessments, fetchSanksiSummary, fetchRewards, type SanksiSummary, type RewardRecord } from "../services/api";
 import type { KpiAssessment, KpiWorkflowStatus } from "../types";
 
 const DISIPLIN_COLOR: Record<string, string> = {
@@ -38,6 +38,7 @@ export default function MyKpiDashboardPage({ employeeId }: { employeeId: number 
   const [err, setErr] = useState<string | null>(null);
   const [period, setPeriod] = useState("");
   const [disiplin, setDisiplin] = useState<SanksiSummary | null>(null);
+  const [rewards, setRewards] = useState<RewardRecord[]>([]);
 
   useEffect(() => {
     if (!employeeId) { setLoading(false); return; }
@@ -47,6 +48,7 @@ export default function MyKpiDashboardPage({ employeeId }: { employeeId: number 
       .catch((e) => setErr(e instanceof Error ? e.message : "Gagal memuat data"))
       .finally(() => setLoading(false));
     fetchSanksiSummary(employeeId).then(setDisiplin).catch(() => setDisiplin(null));
+    fetchRewards(employeeId).then(setRewards).catch(() => setRewards([]));
   }, [employeeId]);
 
   const periods = useMemo(() => Array.from(new Set(rows.map((r) => r.period))).sort().reverse(), [rows]);
@@ -184,13 +186,24 @@ export default function MyKpiDashboardPage({ employeeId }: { employeeId: number 
             </div>
           </div>
 
-          {/* Reward & Disiplin (placeholder, modul belum tersedia) */}
+          {/* Reward & Disiplin */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4">
               <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">
                 <Award size={14} /> Reward
               </div>
-              <div className="text-sm text-slate-400">Belum ada data reward. Modul Reward Management segera tersedia.</div>
+              {rewards.length === 0 ? (
+                <div className="text-sm text-slate-400">Belum ada reward.</div>
+              ) : (
+                <div className="flex flex-col gap-1.5">
+                  {rewards.map((r) => (
+                    <div key={r.id} className="flex items-center justify-between gap-2 text-sm">
+                      <span className="text-slate-700">{r.jenis_reward}</span>
+                      <span className="text-[11px] text-slate-400">{r.period ?? r.tanggal}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
             <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4">
               <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">
