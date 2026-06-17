@@ -177,7 +177,7 @@ def preview_talent(
 
     # Ambil semua karyawan aktif
     emps = db.execute(text(
-        "SELECT id, nama, department, position, join_date FROM employees WHERE is_active = 1"
+        "SELECT id, nama, department, position, join_date FROM employees WHERE is_active = TRUE"
     )).fetchall()
 
     # Ambil semua KPI final_approved untuk periode ini
@@ -266,7 +266,7 @@ def save_talent_reviews(
     from sqlalchemy import text
 
     emps = db.execute(text(
-        "SELECT id, join_date FROM employees WHERE is_active = 1"
+        "SELECT id, join_date FROM employees WHERE is_active = TRUE"
     )).fetchall()
 
     kpi_rows = db.execute(text(
