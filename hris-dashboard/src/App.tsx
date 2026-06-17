@@ -27,6 +27,9 @@ import UserManagementPage from "./pages/UserManagementPage";
 import ChangePasswordPage from "./pages/ChangePasswordPage";
 import OrgChartPage from "./pages/OrgChartPage";
 import OrgDesignerPage from "./pages/OrgDesignerPage";
+import PositionManagementPage from "./pages/PositionManagementPage";
+import JobProfilePage from "./pages/JobProfilePage";
+import TalentManagementPage from "./pages/TalentManagementPage";
 import {
   fetchMe, setAuthToken, getAuthToken, setOnUnauthorized,
   type AuthUser, type LoginResult,
@@ -170,6 +173,10 @@ export default function App() {
           {route === "kpi.dashboard_hrd" && <KpiDashboardHrdPage />}
 
           {route === "kpi.myself" && <MyKpiDashboardPage employeeId={user.employee_id} />}
+
+          {route === "karyawan.positions" && <PositionManagementPage />}
+          {route === "karyawan.jobprofile" && <JobProfilePage />}
+          {route === "kpi.talent" && <TalentManagementPage />}
 
           {route === "users.manage" && <UserManagementPage />}
 

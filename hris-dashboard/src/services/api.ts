@@ -2,6 +2,8 @@ import type {
   Employee, EmployeeListResponse, KpiAssessment,
 } from "../types";
 
+export type { KpiAssessment };
+
 // =====================================================================
 //  API CLIENT untuk backend FastAPI.
 //  Modul Karyawan & KPI sudah jalan.
@@ -661,3 +663,125 @@ export async function fetchOrgEdges(key: string): Promise<OrgEdgeRecord[]> { ret
 export async function createOrgEdge(d: Record<string, unknown>): Promise<OrgEdgeRecord> { return sendJSON("/orgchart/edges", "POST", d); }
 export async function updateOrgEdge(id: number, d: Record<string, unknown>): Promise<OrgEdgeRecord> { return sendJSON(`/orgchart/edges/${id}`, "PATCH", d); }
 export async function deleteOrgEdge(id: number): Promise<unknown> { return sendJSON(`/orgchart/edges/${id}`, "DELETE"); }
+
+
+// ===================== Job Profile =====================
+export interface JobProfile {
+  id: number;
+  kode: string;
+  nama: string;
+  level: string;
+  department: string;
+  tujuan_jabatan: string | null;
+  tugas: string | null;
+  tanggung_jawab: string | null;
+  wewenang: string | null;
+  persyaratan_pendidikan: string | null;
+  persyaratan_pengalaman: string | null;
+  persyaratan_keahlian: string | null;
+  kompetensi: string | null;
+  kpi_template: string | null;
+  training_mandatory: string | null;
+  training_recommended: string | null;
+  career_path_naik: string | null;
+  career_path_turun: string | null;
+  created_at: string;
+  updated_at: string;
+}
+export const JOB_LEVELS = ["Staff", "Supervisor", "Manager", "Direksi"];
+export async function fetchJobProfiles(department?: string, level?: string): Promise<JobProfile[]> {
+  const p = new URLSearchParams();
+  if (department) p.set("department", department);
+  if (level) p.set("level", level);
+  const qs = p.toString() ? `?${p.toString()}` : "";
+  return getJSON<JobProfile[]>(`/job-profiles${qs}`);
+}
+export async function fetchJobProfile(id: number): Promise<JobProfile> {
+  return getJSON<JobProfile>(`/job-profiles/${id}`);
+}
+export async function createJobProfile(d: Record<string, unknown>): Promise<JobProfile> {
+  return sendJSON<JobProfile>("/job-profiles", "POST", d);
+}
+export async function updateJobProfile(id: number, d: Record<string, unknown>): Promise<JobProfile> {
+  return sendJSON<JobProfile>(`/job-profiles/${id}`, "PATCH", d);
+}
+export async function deleteJobProfile(id: number): Promise<unknown> {
+  return sendJSON(`/job-profiles/${id}`, "DELETE");
+}
+
+
+// ===================== Position Management =====================
+export interface PositionRecord {
+  id: number;
+  kode: string;
+  nama_jabatan: string;
+  department: string;
+  level: string;
+  status: string;       // Filled / Vacant / Planned
+  employee_id: number | null;
+  employee_nama: string | null;
+  job_profile_id: number | null;
+  job_profile_nama: string | null;
+  keterangan: string | null;
+  created_at: string;
+  updated_at: string;
+}
+export interface PositionSummary { Filled?: number; Vacant?: number; Planned?: number }
+export const POSITION_STATUSES = ["Filled", "Vacant", "Planned"];
+export async function fetchPositions(params?: { department?: string; status?: string; level?: string }): Promise<PositionRecord[]> {
+  const p = new URLSearchParams();
+  if (params?.department) p.set("department", params.department);
+  if (params?.status) p.set("status", params.status);
+  if (params?.level) p.set("level", params.level);
+  const qs = p.toString() ? `?${p.toString()}` : "";
+  return getJSON<PositionRecord[]>(`/positions${qs}`);
+}
+export async function fetchPositionSummary(): Promise<PositionSummary> {
+  return getJSON<PositionSummary>("/positions/summary");
+}
+export async function createPosition(d: Record<string, unknown>): Promise<PositionRecord> {
+  return sendJSON<PositionRecord>("/positions", "POST", d);
+}
+export async function updatePosition(id: number, d: Record<string, unknown>): Promise<PositionRecord> {
+  return sendJSON<PositionRecord>(`/positions/${id}`, "PATCH", d);
+}
+export async function deletePosition(id: number): Promise<unknown> {
+  return sendJSON(`/positions/${id}`, "DELETE");
+}
+
+
+// ===================== Talent Management =====================
+export interface TalentRow {
+  employee_id: number;
+  employee_nama: string | null;
+  employee_department: string | null;
+  employee_position: string | null;
+  employee_join_date: string | null;
+  period: string;
+  kpi_score: number;
+  competency_score: number;
+  discipline_score: number;
+  discipline_points?: number;
+  leadership_score: number | null;
+  final_label: string;
+  succession_category: string | null;
+  promotion_eligible: boolean;
+  notes: string | null;
+  reviewed_by?: string;
+  has_kpi?: boolean;
+}
+export const TALENT_LABELS = ["High Performer", "Future Leader", "Core Talent", "Need Development", "Under Performer"];
+export const SUCCESSION_CATEGORIES = ["Ready Now", "Ready <1 Tahun", "Ready 1-2 Tahun", "Not Ready"];
+
+export async function previewTalent(period: string): Promise<TalentRow[]> {
+  return getJSON<TalentRow[]>(`/talent/preview/${encodeURIComponent(period)}`);
+}
+export async function fetchTalentReviews(period: string): Promise<TalentRow[]> {
+  return getJSON<TalentRow[]>(`/talent/${encodeURIComponent(period)}`);
+}
+export async function saveTalentReviews(period: string): Promise<{ saved: number; period: string }> {
+  return sendJSON(`/talent/save/${encodeURIComponent(period)}`, "POST");
+}
+export async function updateTalentReview(period: string, employeeId: number, d: Record<string, unknown>): Promise<TalentRow> {
+  return sendJSON<TalentRow>(`/talent/${encodeURIComponent(period)}/${employeeId}`, "PATCH", d);
+}

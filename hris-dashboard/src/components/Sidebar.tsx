@@ -21,6 +21,8 @@ const MENU: Item[] = [
     roles: ["Direksi", "HR", "Manager", "Supervisor", "Karyawan"], sub: [
       { label: "Data Karyawan", roles: ["Direksi", "HR", "Manager", "Supervisor"], built: true },
       { label: "Kehadiran & Absensi", roles: ["HR", "Manager", "Supervisor", "Karyawan"], built: true },
+      { label: "Position Management", roles: ["Direksi", "HR"], built: true },
+      { label: "Job Profile", roles: ["Direksi", "HR", "Manager"], built: true },
       { label: "Cuti & Izin", roles: ["HR", "Manager", "Supervisor", "Karyawan"] },
       { label: "KPI Karyawan", roles: ["Direksi", "HR", "Manager", "Supervisor", "Karyawan"], built: true },
       { label: "Rekrutmen", roles: ["HR"] },
@@ -42,6 +44,7 @@ const MENU: Item[] = [
       { label: "KPI Perusahaan", roles: ["Direksi", "Finance"], built: true },
       { label: "KPI Divisi", roles: ["Direksi", "HR", "Manager", "Supervisor", "Finance"], built: true },
       { label: "Dashboard HRD", roles: ["HR"], built: true },
+      { label: "Talent Management", roles: ["Direksi", "HR"], built: true },
       { label: "KPI Pelanggan (SLA/Uptime)", roles: ["Direksi", "NOC"] },
       { label: "Dashboard Eksekutif", roles: ["Direksi"] },
     ] },
@@ -166,6 +169,9 @@ function routeFor(moduleKey: string, sub?: Sub): string {
   if (moduleKey === "karyawan" && sub && sub.label === "Data Karyawan") return "karyawan.data";
   if (moduleKey === "karyawan" && sub && sub.label === "KPI Karyawan") return "kpi.karyawan";
   if (moduleKey === "karyawan" && sub && sub.label === "Kehadiran & Absensi") return "kehadiran.absensi";
+  if (moduleKey === "karyawan" && sub && sub.label === "Position Management") return "karyawan.positions";
+  if (moduleKey === "karyawan" && sub && sub.label === "Job Profile") return "karyawan.jobprofile";
+  if (moduleKey === "kpi" && sub && sub.label === "Talent Management") return "kpi.talent";
   if (moduleKey === "keuangan" && sub && sub.label === "Slip Gaji") return "payroll.slip";
   if (moduleKey === "meeting" && sub && sub.label === "Meeting Internal") return "meeting.internal";
   if (moduleKey === "meeting" && sub && sub.label === "Meeting Pelanggan") return "meeting.pelanggan";
