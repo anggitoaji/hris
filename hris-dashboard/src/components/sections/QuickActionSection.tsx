@@ -8,12 +8,12 @@ interface QuickAction { label: string; Icon: LucideIcon; color: string; bg: stri
 
 // Placeholder — fitur final belum ditentukan; ganti label & ikon di sini.
 const QUICK_ACTIONS: QuickAction[] = [
-  { label: "XXXXXX", Icon: UserPlus,     color: "#16a34a", bg: "#dcfce7" },
-  { label: "XXXXXX", Icon: FilePlus,     color: "#2563eb", bg: "#dbeafe" },
-  { label: "XXXXXX", Icon: BarChart3,    color: "#f59e0b", bg: "#fef3c7" },
-  { label: "XXXXXX", Icon: Clock,        color: "#7c3aed", bg: "#ede9fe" },
-  { label: "XXXXXX", Icon: CalendarPlus, color: "#dc2626", bg: "#fee2e2" },
-  { label: "XXXXXX", Icon: FileText,     color: "#0891b2", bg: "#cffafe" },
+  { label: "XXXXXX", Icon: UserPlus,     color: "#0284c7", bg: "#e0f2fe" },
+  { label: "XXXXXX", Icon: FilePlus,     color: "#7c3aed", bg: "#ede9fe" },
+  { label: "XXXXXX", Icon: BarChart3,    color: "#059669", bg: "#d1fae5" },
+  { label: "XXXXXX", Icon: Clock,        color: "#d97706", bg: "#fef3c7" },
+  { label: "XXXXXX", Icon: CalendarPlus, color: "#db2777", bg: "#fce7f3" },
+  { label: "XXXXXX", Icon: FileText,     color: "#0d9488", bg: "#ccfbf1" },
 ];
 
 export default function QuickActionSection() {
