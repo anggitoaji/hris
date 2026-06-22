@@ -25,6 +25,10 @@ class Settings(BaseSettings):
     # Origin frontend yang diizinkan (pisah dengan koma untuk banyak origin).
     # 3000 = Next.js, 5173 = Vite/React (dashboard). 127.0.0.1 ikut diizinkan
     # karena sebagian browser memakai itu, bukan localhost.
+    # URL Ollama lokal. Ganti di .env saat produksi jika Ollama di server lain.
+    # Contoh produksi: OLLAMA_BASE_URL=http://192.168.1.100:11434
+    OLLAMA_BASE_URL: str = "http://localhost:11434"
+
     CORS_ORIGINS: str = (
         "http://localhost:3000,"
         "http://localhost:5173,"

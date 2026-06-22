@@ -30,6 +30,8 @@ import OrgDesignerPage from "./pages/OrgDesignerPage";
 import PositionManagementPage from "./pages/PositionManagementPage";
 import JobProfilePage from "./pages/JobProfilePage";
 import TalentManagementPage from "./pages/TalentManagementPage";
+import AiEnginePage from "./pages/AiEnginePage";
+import SettingsPage from "./pages/SettingsPage";
 import {
   fetchMe, setAuthToken, getAuthToken, setOnUnauthorized,
   type AuthUser, type LoginResult,
@@ -177,10 +179,13 @@ export default function App() {
           {route === "karyawan.positions" && <PositionManagementPage />}
           {route === "karyawan.jobprofile" && <JobProfilePage />}
           {route === "kpi.talent" && <TalentManagementPage />}
+          {route === "kpi.ai" && <AiEnginePage />}
 
           {route === "users.manage" && <UserManagementPage />}
 
           {route === "settings.password" && <ChangePasswordPage />}
+
+          {route === "settings.main" && <SettingsPage onNavigate={setRoute} />}
 
           {route === "orgchart.overview"  && <OrgChartPage divisi="overview" role={role} />}
           {route === "orgchart.itvpn"     && <OrgDesignerPage divisi="itvpn"    role={role} />}

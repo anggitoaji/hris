@@ -181,7 +181,7 @@ def create_job_profile(
     db.add(jp)
     db.commit()
     db.refresh(jp)
-    log_audit(db, user.id, "job_profiles", jp.id, "CREATE", None, payload.model_dump(), get_client_ip(request))
+    log_audit(db, user_id=user.id, username=user.username, action="CREATE", entity_type="job_profiles", entity_id=jp.id, new_data=payload.model_dump(), ip_address=get_client_ip(request))
     return _to_out(jp)
 
 
@@ -201,7 +201,7 @@ def update_job_profile(
         setattr(jp, k, v)
     db.commit()
     db.refresh(jp)
-    log_audit(db, user.id, "job_profiles", jp.id, "UPDATE", before, _to_out(jp), get_client_ip(request))
+    log_audit(db, user_id=user.id, username=user.username, action="UPDATE", entity_type="job_profiles", entity_id=jp.id, old_data=before, new_data=_to_out(jp), ip_address=get_client_ip(request))
     return _to_out(jp)
 
 
@@ -218,4 +218,4 @@ def delete_job_profile(
     before = _to_out(jp)
     db.delete(jp)
     db.commit()
-    log_audit(db, user.id, "job_profiles", jp_id, "DELETE", before, None, get_client_ip(request))
+    log_audit(db, user_id=user.id, username=user.username, action="DELETE", entity_type="job_profiles", entity_id=jp_id, old_data=before, ip_address=get_client_ip(request))

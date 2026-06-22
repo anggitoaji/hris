@@ -22,7 +22,7 @@ const MENU: Item[] = [
       { label: "Data Karyawan", roles: ["Direksi", "HR", "Manager", "Supervisor"], built: true },
       { label: "Kehadiran & Absensi", roles: ["HR", "Manager", "Supervisor", "Karyawan"], built: true },
       { label: "Position Management", roles: ["Direksi", "HR"], built: true },
-      { label: "Job Profile", roles: ["Direksi", "HR", "Manager"], built: true },
+      { label: "Job Desk", roles: ["Direksi", "HR", "Manager"], built: true },
       { label: "Cuti & Izin", roles: ["HR", "Manager", "Supervisor", "Karyawan"] },
       { label: "KPI Karyawan", roles: ["Direksi", "HR", "Manager", "Supervisor", "Karyawan"], built: true },
       { label: "Rekrutmen", roles: ["HR"] },
@@ -45,6 +45,7 @@ const MENU: Item[] = [
       { label: "KPI Divisi", roles: ["Direksi", "HR", "Manager", "Supervisor", "Finance"], built: true },
       { label: "Dashboard HRD", roles: ["HR"], built: true },
       { label: "Talent Management", roles: ["Direksi", "HR"], built: true },
+      { label: "AI HR Engine", roles: ["Direksi", "HR", "Manager"], built: true },
       { label: "KPI Pelanggan (SLA/Uptime)", roles: ["Direksi", "NOC"] },
       { label: "Dashboard Eksekutif", roles: ["Direksi"] },
     ] },
@@ -119,6 +120,7 @@ const MENU: Item[] = [
     roles: ["Super Admin", "Direksi", "HR", "Manager", "Supervisor", "Finance", "NOC", "Karyawan"], sub: [
       { label: "Ganti Password", roles: ["Super Admin", "Direksi", "HR", "Manager", "Supervisor", "Finance", "NOC", "Karyawan"], built: true },
       { label: "User Management", roles: [], built: true },
+      { label: "Pengaturan Sistem", roles: ["Super Admin"], built: true },
       { label: "Role & Permission", roles: [] },
       { label: "Workflow Approval", roles: [] },
       { label: "Notifikasi", roles: [] },
@@ -170,8 +172,9 @@ function routeFor(moduleKey: string, sub?: Sub): string {
   if (moduleKey === "karyawan" && sub && sub.label === "KPI Karyawan") return "kpi.karyawan";
   if (moduleKey === "karyawan" && sub && sub.label === "Kehadiran & Absensi") return "kehadiran.absensi";
   if (moduleKey === "karyawan" && sub && sub.label === "Position Management") return "karyawan.positions";
-  if (moduleKey === "karyawan" && sub && sub.label === "Job Profile") return "karyawan.jobprofile";
+  if (moduleKey === "karyawan" && sub && sub.label === "Job Desk") return "karyawan.jobprofile";
   if (moduleKey === "kpi" && sub && sub.label === "Talent Management") return "kpi.talent";
+  if (moduleKey === "kpi" && sub && sub.label === "AI HR Engine") return "kpi.ai";
   if (moduleKey === "keuangan" && sub && sub.label === "Slip Gaji") return "payroll.slip";
   if (moduleKey === "meeting" && sub && sub.label === "Meeting Internal") return "meeting.internal";
   if (moduleKey === "meeting" && sub && sub.label === "Meeting Pelanggan") return "meeting.pelanggan";
@@ -183,6 +186,7 @@ function routeFor(moduleKey: string, sub?: Sub): string {
   if (moduleKey === "kpi" && sub && sub.label === "Dashboard HRD") return "kpi.dashboard_hrd";
   if (moduleKey === "pengaturan" && sub && sub.label === "User Management") return "users.manage";
   if (moduleKey === "pengaturan" && sub && sub.label === "Ganti Password") return "settings.password";
+  if (moduleKey === "pengaturan" && sub && sub.label === "Pengaturan Sistem") return "settings.main";
   return "soon:" + (sub ? sub.label : moduleKey);
 }
 

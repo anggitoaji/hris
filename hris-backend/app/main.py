@@ -19,11 +19,13 @@ from app.documents import router as documents_router
 from app.disciplinary import router as disciplinary_router
 from app.reward import router as reward_router
 from app.job_profile import router as job_profile_router
+from app.ai_engine import router as ai_router
 from app.position import router as position_router
 from app.talent import router as talent_router
 from app.photo_serve import router as photo_serve_router
 from app.audit import router as audit_router
 from app.org_chart import router as org_chart_router
+from app.app_settings import router as app_settings_router
 from app.auth import router as auth_router, ensure_default_admin, get_current_user, require_roles
 from app.core.config import settings
 from app.core.database import Base, engine
@@ -82,8 +84,12 @@ app.include_router(documents_router, prefix=settings.API_PREFIX)
 app.include_router(disciplinary_router, prefix=settings.API_PREFIX)
 # Reward Management: auth per-endpoint (create dibatasi role di dalam router)
 app.include_router(reward_router, prefix=settings.API_PREFIX)
+# App Settings (Super Admin only via require_roles() per-endpoint)
+app.include_router(app_settings_router, prefix=settings.API_PREFIX)
 # Job Profile, Position Management, Talent Management
 app.include_router(job_profile_router, prefix=settings.API_PREFIX, dependencies=login_required)
+# AI HR Engine
+app.include_router(ai_router, prefix=settings.API_PREFIX, dependencies=login_required)
 app.include_router(position_router, prefix=settings.API_PREFIX, dependencies=login_required)
 app.include_router(talent_router, prefix=settings.API_PREFIX, dependencies=login_required)
 # Auth: login terbuka; kelola user sudah dibatasi Super Admin di dalam router.

@@ -165,7 +165,7 @@ def create_position(
     db.add(pos)
     db.commit()
     db.refresh(pos)
-    log_audit(db, user.id, "positions", pos.id, "CREATE", None, payload.model_dump(), get_client_ip(request))
+    log_audit(db, user_id=user.id, username=user.username, action="CREATE", entity_type="positions", entity_id=pos.id, new_data=payload.model_dump(), ip_address=get_client_ip(request))
     return _to_out(pos, db)
 
 
@@ -193,7 +193,7 @@ def update_position(
         pos.status = "Vacant"
     db.commit()
     db.refresh(pos)
-    log_audit(db, user.id, "positions", pos.id, "UPDATE", before, _to_out(pos, db), get_client_ip(request))
+    log_audit(db, user_id=user.id, username=user.username, action="UPDATE", entity_type="positions", entity_id=pos.id, old_data=before, new_data=_to_out(pos, db), ip_address=get_client_ip(request))
     return _to_out(pos, db)
 
 
@@ -210,4 +210,4 @@ def delete_position(
     before = _to_out(pos, db)
     db.delete(pos)
     db.commit()
-    log_audit(db, user.id, "positions", pos_id, "DELETE", before, None, get_client_ip(request))
+    log_audit(db, user_id=user.id, username=user.username, action="DELETE", entity_type="positions", entity_id=pos_id, old_data=before, ip_address=get_client_ip(request))

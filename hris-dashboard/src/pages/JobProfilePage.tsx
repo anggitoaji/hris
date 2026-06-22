@@ -121,7 +121,7 @@ export default function JobProfilePage() {
   }
 
   async function handleDelete(jp: JobProfile) {
-    if (!confirm(`Hapus Job Profile "${jp.nama}"?`)) return;
+    if (!confirm(`Hapus Job Desk "${jp.nama}"?`)) return;
     try {
       await deleteJobProfile(jp.id);
       setRows(r => r.filter(x => x.id !== jp.id));
@@ -143,12 +143,12 @@ export default function JobProfilePage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
-          <h1 className="text-lg font-bold text-slate-800">Job Profile</h1>
+          <h1 className="text-lg font-bold text-slate-800">Job Desk</h1>
           <p className="text-sm text-slate-400">Template jabatan — engine utama HRIS</p>
         </div>
         <button onClick={openNew}
           className="flex items-center gap-2 bg-sky-600 hover:bg-sky-700 text-white text-sm font-medium px-4 py-2 rounded-xl">
-          <Plus size={15} /> Tambah Job Profile
+          <Plus size={15} /> Tambah Job Desk
         </button>
       </div>
 
@@ -177,7 +177,7 @@ export default function JobProfilePage() {
       {!loading && !err && rows.length === 0 && (
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-10 text-center text-slate-400">
           <BookOpen size={28} className="mx-auto mb-2 text-slate-300" />
-          Belum ada Job Profile. Klik "Tambah" untuk mulai.
+          Belum ada Job Desk. Klik "Tambah" untuk mulai.
         </div>
       )}
 
@@ -273,7 +273,7 @@ export default function JobProfilePage() {
             <div className="px-4 pb-4">
               <button onClick={() => openEdit(selected)}
                 className="w-full text-center text-sm text-sky-600 hover:text-sky-800 py-2 border border-sky-100 rounded-xl hover:bg-sky-50">
-                Edit Job Profile
+                Edit Job Desk
               </button>
             </div>
           </div>
@@ -284,9 +284,9 @@ export default function JobProfilePage() {
       {drawer && (
         <div className="fixed inset-0 z-50 flex">
           <div className="flex-1 bg-black/30" onClick={closeDrawer} />
-          <div className="w-[640px] bg-white h-full flex flex-col shadow-2xl overflow-hidden">
+          <div className="w-[830px] bg-white h-full flex flex-col shadow-2xl overflow-hidden">
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-              <h2 className="font-semibold text-slate-800">{isNew ? "Tambah Job Profile" : "Edit Job Profile"}</h2>
+              <h2 className="font-semibold text-slate-800">{isNew ? "Tambah Job Desk" : "Edit Job Desk"}</h2>
               <button onClick={closeDrawer}><X size={18} className="text-slate-400" /></button>
             </div>
 

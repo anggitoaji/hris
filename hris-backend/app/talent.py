@@ -326,7 +326,7 @@ def save_talent_reviews(
         saved += 1
 
     db.commit()
-    log_audit(db, user.id, "talent_reviews", 0, "SAVE_PERIOD", None, {"period": period, "count": saved}, get_client_ip(request))
+    log_audit(db, user_id=user.id, username=user.username, action="CREATE", entity_type="talent_reviews", description=f"Finalisasi talent period {period}", new_data={"period": period, "count": saved}, ip_address=get_client_ip(request))
     return {"saved": saved, "period": period}
 
 
@@ -354,5 +354,5 @@ def update_talent_review(
     tr.reviewed_by = user.username
     db.commit()
     db.refresh(tr)
-    log_audit(db, user.id, "talent_reviews", tr.id, "UPDATE", before, _to_out(tr, db), get_client_ip(request))
+    log_audit(db, user_id=user.id, username=user.username, action="UPDATE", entity_type="talent_reviews", entity_id=tr.id, old_data=before, new_data=_to_out(tr, db), ip_address=get_client_ip(request))
     return _to_out(tr, db)

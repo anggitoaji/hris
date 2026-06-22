@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, Fragment, type ReactNode } from "react";
 import { Search, X, Loader2, Plus, Pencil, Building2, Trash2, Check, Upload, Download, Eye, FileText, Camera } from "lucide-react";
 import {
-  fetchEmployees, createEmployee, updateEmployee,
+  fetchEmployees, createEmployee, updateEmployee, deleteEmployee,
   fetchDivisions, createDivision, updateDivision, deleteDivision, type Division,
   fetchEducation, createEducation, updateEducation, deleteEducation, type EducationRecord,
   fetchCertifications, createCertification, updateCertification, deleteCertification, type CertificationRecord,
@@ -1477,10 +1477,22 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
     }
   }
 
-  const COLS = 9;
+  const COLS = 10;
+
+  async function handleDelete(e: Employee) {
+    if (!window.confirm(`Nonaktifkan karyawan "${e.nama}" (${e.nik})?\nData tidak dihapus permanen — status karyawan akan diubah menjadi nonaktif.`)) return;
+    try {
+      await deleteEmployee(e.id);
+      if (sel?.id === e.id) setSel(null);
+      await load();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Gagal menghapus karyawan.");
+    }
+  }
+
   function Row({ e }: { e: Employee }) {
     return (
-      <tr onClick={() => setSel(e)} className="border-b border-slate-50 hover:bg-slate-50 cursor-pointer">
+      <tr onClick={() => setSel(e)} className="border-b border-slate-50 hover:bg-slate-50 cursor-pointer group">
         <td className="py-2 px-1">
           <Avatar name={e.nama} src={e.photo_url ? photoUrl(e.id) : undefined} size={44} />
         </td>
@@ -1492,6 +1504,24 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
         <td className="py-2 px-2 text-slate-600">{e.phone || "-"}</td>
         <td className="py-2 px-2 text-slate-600 truncate">{e.work_location || "-"}</td>
         <td className="py-2 px-2 text-slate-500 truncate">{e.catatan || "-"}</td>
+        <td className="py-2 px-2" onClick={(ev) => ev.stopPropagation()}>
+          <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button onClick={() => setSel(e)} title="Lihat detail"
+              className="p-1.5 rounded-md hover:bg-sky-50 text-slate-400 hover:text-sky-600">
+              <Eye size={15} />
+            </button>
+            <button onClick={() => openEdit(e)} title="Edit karyawan"
+              className="p-1.5 rounded-md hover:bg-amber-50 text-slate-400 hover:text-amber-600">
+              <Pencil size={15} />
+            </button>
+            {role === "Super Admin" && (
+              <button onClick={() => handleDelete(e)} title="Nonaktifkan karyawan"
+                className="p-1.5 rounded-md hover:bg-red-50 text-slate-400 hover:text-red-600">
+                <Trash2 size={15} />
+              </button>
+            )}
+          </div>
+        </td>
       </tr>
     );
   }
@@ -1556,13 +1586,14 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
               <colgroup>
                 <col style={{ width: "4%" }} />
                 <col style={{ width: "8%" }} />
-                <col style={{ width: "16%" }} />
+                <col style={{ width: "15%" }} />
                 <col style={{ width: "9%" }} />
                 <col style={{ width: "10%" }} />
-                <col style={{ width: "17%" }} />
-                <col style={{ width: "10%" }} />
-                <col style={{ width: "11%" }} />
                 <col style={{ width: "15%" }} />
+                <col style={{ width: "9%" }} />
+                <col style={{ width: "10%" }} />
+                <col style={{ width: "12%" }} />
+                <col style={{ width: "8%" }} />
               </colgroup>
               <thead>
                 <tr className="text-left text-slate-500 border-b border-slate-100">
@@ -1575,6 +1606,7 @@ export default function DataKaryawanPage({ role }: { role: Role }) {
                   <th className="py-2 px-2 font-bold">No HP</th>
                   <th className="py-2 px-2 font-bold">Lokasi Kerja</th>
                   <th className="py-2 px-2 font-bold">Catatan</th>
+                  <th className="py-2 px-2"></th>
                 </tr>
               </thead>
               <tbody>

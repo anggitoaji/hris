@@ -785,3 +785,49 @@ export async function saveTalentReviews(period: string): Promise<{ saved: number
 export async function updateTalentReview(period: string, employeeId: number, d: Record<string, unknown>): Promise<TalentRow> {
   return sendJSON<TalentRow>(`/talent/${encodeURIComponent(period)}/${employeeId}`, "PATCH", d);
 }
+
+// ===================== App Settings =====================
+export async function fetchAppSettings(): Promise<Record<string, string>> {
+  return getJSON<Record<string, string>>("/app-settings");
+}
+export async function updateAppSettings(data: Record<string, string>): Promise<{ ok: boolean }> {
+  return sendJSON<{ ok: boolean }>("/app-settings", "PATCH", { data });
+}
+
+// ─── AI HR Engine ───
+export interface AiPromotionResult {
+  employee_id: number; employee_nama: string; department: string; position: string;
+  final_score: number; category: string; category_color: string; description: string;
+  kpi_period: string | null;
+  breakdown: { kpi_score: number; kpi_weight: number; competency_score: number; competency_weight: number; discipline_score: number; discipline_weight: number; tenure_score: number; tenure_months: number; tenure_weight: number };
+  discipline_points: number; gaps: string[]; promotion_eligible: boolean;
+}
+export interface AiSkillGapResult {
+  employee_id: number; position: string; department: string; has_job_profile: boolean;
+  kpi_period: string | null; risk_level: string;
+  competency_gaps: { competency: string; required: number; current: number | null; gap: number | null; status: string }[];
+  extra_competencies: { competency: string; current: number }[];
+  job_profile_training: { mandatory: string | null; recommended: string | null } | null;
+}
+export interface AiReviewResult {
+  employee_id: number; employee_nama: string; period: string;
+  performance_summary: string; performance_level: string;
+  kpi_score: number | null; competency_score: number | null; behavior_score: number | null;
+  talent_label: string | null; succession_category: string | null; promotion_eligible: boolean;
+  strengths: string[]; development_areas: string[]; recommendations: string[];
+  source: string;
+}
+export interface AiOllamaResult { employee_id: number; employee_nama: string; ai_response: string; model: string; source: string; period?: string | null; manager_notes?: string; }
+export interface AiSuccessionResult {
+  position_id: number; position_name: string; department: string; level: string;
+  candidates: { employee_id: number; nama: string; department: string; current_position: string; kpi_score: number; competency_score: number; discipline_score: number; tenure_months: number; succession_score: number; readiness: string; talent_label: string | null }[];
+}
+export interface OllamaStatus { online: boolean; models: string[] }
+
+export async function fetchOllamaStatus(): Promise<OllamaStatus> { return getJSON("/ai/ollama/status"); }
+export async function fetchAiPromotionReadiness(employeeId: number): Promise<AiPromotionResult> { return getJSON(`/ai/promotion-readiness/${employeeId}`); }
+export async function fetchAiSkillGap(employeeId: number): Promise<AiSkillGapResult> { return getJSON(`/ai/skill-gap/${employeeId}`); }
+export async function fetchAiReviewSummary(d: { employee_id: number; period: string; manager_notes: string }): Promise<AiReviewResult> { return sendJSON("/ai/review-summary", "POST", d); }
+export async function fetchAiSuccession(positionId: number): Promise<AiSuccessionResult> { return getJSON(`/ai/succession/${positionId}`); }
+export async function fetchAiOllamaPerformanceReview(d: { employee_id: number; period?: string; manager_notes?: string; model?: string }): Promise<AiOllamaResult> { return sendJSON("/ai/ollama/performance-review", "POST", d); }
+export async function fetchAiOllamaTraining(d: { employee_id: number; model?: string }): Promise<AiOllamaResult> { return sendJSON("/ai/ollama/training-recommendation", "POST", d); }

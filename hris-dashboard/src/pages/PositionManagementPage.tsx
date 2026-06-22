@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { Plus, Loader2, X, Briefcase, CheckCircle, AlertCircle, Clock } from "lucide-react";
 import {
   fetchPositions, fetchPositionSummary, createPosition, updatePosition, deletePosition,
-  fetchEmployees, fetchJobProfiles,
-  type PositionRecord, type PositionSummary, POSITION_STATUSES, JOB_LEVELS,
+  fetchEmployees, fetchJobProfiles, fetchDivisions,
+  type PositionRecord, type PositionSummary, type Division, POSITION_STATUSES, JOB_LEVELS,
 } from "../services/api";
 import type { Employee } from "../types";
 import type { JobProfile } from "../services/api";
@@ -27,6 +27,7 @@ export default function PositionManagementPage() {
   const [summary, setSummary] = useState<PositionSummary>({});
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [jobProfiles, setJobProfiles] = useState<JobProfile[]>([]);
+  const [divisions, setDivisions] = useState<Division[]>([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
 
@@ -60,6 +61,7 @@ export default function PositionManagementPage() {
   useEffect(() => {
     fetchEmployees().catch(() => []).then(e => setEmployees(e));
     fetchJobProfiles().catch(() => []).then(jp => setJobProfiles(jp));
+    fetchDivisions().catch(() => []).then(d => setDivisions(d));
   }, []);
 
   const departments = [...new Set(rows.map(r => r.department))].sort();
@@ -267,12 +269,13 @@ export default function PositionManagementPage() {
 
               <div>
                 <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide block mb-1">Departemen *</label>
-                <input value={drawer.department} onChange={e => setDrawer(d => d ? { ...d, department: e.target.value } : d)}
-                  list="dept-list-pos" placeholder="Pilih atau ketik departemen"
-                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-sky-300" />
-                <datalist id="dept-list-pos">
-                  {departments.map(d => <option key={d} value={d} />)}
-                </datalist>
+                <select value={drawer.department} onChange={e => setDrawer(d => d ? { ...d, department: e.target.value } : d)}
+                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-sky-300">
+                  <option value="">— Pilih Departemen —</option>
+                  {divisions.filter(d => d.is_active).map(d => (
+                    <option key={d.id} value={d.name}>{d.name}</option>
+                  ))}
+                </select>
               </div>
 
               <div>
